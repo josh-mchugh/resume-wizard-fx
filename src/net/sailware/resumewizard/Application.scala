@@ -3,15 +3,11 @@ package net.sailware.resumewizard
 import scalafx.Includes.*
 import scalafx.application.JFXApp3
 import scalafx.application.JFXApp3.PrimaryStage
-import scalafx.geometry.Pos
 import scalafx.geometry.VPos
-import scalafx.geometry.Insets
 import scalafx.scene.Scene
 import scalafx.scene.layout.AnchorPane
 import scalafx.scene.layout.BorderPane
 import scalafx.scene.layout.StackPane
-import scalafx.scene.layout.HBox
-import scalafx.scene.layout.VBox
 import scalafx.scene.text.{Font, FontWeight, Text}
 import scalafx.stage.Stage
 
@@ -52,10 +48,7 @@ class MainLayer extends BorderPane:
     val centerText = new Text("Resume Wizard Center"):
       textOrigin = VPos.Top
       font = Font.font(null, FontWeight.Bold, 18)
-    new HBox:
+    new StackPane:
       style = "--fx-border-color: red; -fx-border-width: 1; -fx-border-style: solid;"
-      alignment = Pos.CENTER
-      children = new VBox
-        alignment = Pos.CENTER
-        children = centerText
+      children = centerText
 
