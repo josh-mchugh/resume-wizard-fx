@@ -3,8 +3,10 @@ package net.sailware.resumewizard
 import scalafx.Includes.*
 import scalafx.application.JFXApp3
 import scalafx.application.JFXApp3.PrimaryStage
+import scalafx.event.ActionEvent
 import scalafx.geometry.VPos
 import scalafx.scene.Scene
+import scalafx.scene.control.Button
 import scalafx.scene.control.ScrollPane
 import scalafx.scene.control.ScrollPane.ScrollBarPolicy
 import scalafx.scene.layout.AnchorPane
@@ -47,9 +49,8 @@ class MainLayer extends BorderPane:
 
   // Create Center Content
   def centerContent =
-    val centerText = new Text("Resume Wizard Center"):
-      textOrigin = VPos.Top
-      font = Font.font(null, FontWeight.Bold, 18)
+    val button = new Button("Create Resume"):
+      onAction = (event: ActionEvent) => println("Hello from button action")
     new ScrollPane:
       vbarPolicy = ScrollBarPolicy.AS_NEEDED
       fitToHeight = true
@@ -57,4 +58,4 @@ class MainLayer extends BorderPane:
       fitToWidth = true
       content = new StackPane:
         style = "--fx-border-color: red; -fx-border-width: 1; -fx-border-style: solid;"
-        children = centerText
+        children = button
