@@ -11,6 +11,9 @@ import scalafx.scene.control.ScrollPane
 import scalafx.scene.control.ScrollPane.ScrollBarPolicy
 import scalafx.scene.layout.AnchorPane
 import scalafx.scene.layout.BorderPane
+import scalafx.scene.layout.HBox
+import scalafx.scene.layout.VBox
+import scalafx.scene.layout.Priority
 import scalafx.scene.layout.StackPane
 import scalafx.scene.text.{Font, FontWeight, Text}
 import scalafx.stage.Stage
@@ -49,13 +52,24 @@ class MainLayer extends BorderPane:
 
   // Create Center Content
   def centerContent =
+    val hbox = new HBox:
+      style = "-fx-border-color: purple; -fx-border-width: 1; -fx-border-style: solid;"
+      maxWidth = 250
+      
+
+    val stackPane = new StackPane:
+        style = "-fx-border-color: red; -fx-border-width: 1; -fx-border-style: solid;"
+
     val button = new Button("Create Resume"):
-      onAction = (event: ActionEvent) => println("Hello from button action")
-    new ScrollPane:
+      onAction = (event: ActionEvent) => stackPane.getChildren().add(hbox)
+
+    stackPane.children.add(button)
+
+    val scrollPanel = new ScrollPane:
       vbarPolicy = ScrollBarPolicy.AS_NEEDED
       fitToHeight = true
       hbarPolicy = ScrollBarPolicy.NEVER
       fitToWidth = true
-      content = new StackPane:
-        style = "--fx-border-color: red; -fx-border-width: 1; -fx-border-style: solid;"
-        children = button
+      content = stackPane
+
+    scrollPanel
