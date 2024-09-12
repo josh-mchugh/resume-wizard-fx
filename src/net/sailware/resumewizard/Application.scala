@@ -7,11 +7,12 @@ import scalafx.event.ActionEvent
 import scalafx.geometry.VPos
 import scalafx.scene.Scene
 import scalafx.scene.control.Button
+import scalafx.scene.control.Label
+import scalafx.scene.control.TextField
 import scalafx.scene.control.ScrollPane
 import scalafx.scene.control.ScrollPane.ScrollBarPolicy
 import scalafx.scene.layout.AnchorPane
 import scalafx.scene.layout.BorderPane
-import scalafx.scene.layout.HBox
 import scalafx.scene.layout.VBox
 import scalafx.scene.layout.Priority
 import scalafx.scene.layout.StackPane
@@ -40,7 +41,7 @@ class ApplicationWindow extends AnchorPane:
   children = body
 
 class MainLayer extends BorderPane:
-
+  style = "-fx-background-color: #fffcf9;"
   top = topContent
   center = centerContent
 
@@ -52,24 +53,35 @@ class MainLayer extends BorderPane:
 
   // Create Center Content
   def centerContent =
-    val hbox = new HBox:
-      style = "-fx-border-color: purple; -fx-border-width: 1; -fx-border-style: solid;"
-      maxWidth = 250
-      
-
-    val stackPane = new StackPane:
-        style = "-fx-border-color: red; -fx-border-width: 1; -fx-border-style: solid;"
-
-    val button = new Button("Create Resume"):
-      onAction = (event: ActionEvent) => stackPane.getChildren().add(hbox)
-
-    stackPane.children.add(button)
-
-    val scrollPanel = new ScrollPane:
+    new ScrollPane:
       vbarPolicy = ScrollBarPolicy.AS_NEEDED
       fitToHeight = true
       hbarPolicy = ScrollBarPolicy.NEVER
       fitToWidth = true
-      content = stackPane
+      content = createDashboardPane
 
-    scrollPanel
+  def createDashboardPane =
+    val stackPane = new StackPane:
+        style = "-fx-border-color: red; -fx-border-width: 1; -fx-border-style: solid;"
+
+    val button = new Button("Create Resume"):
+      onAction = (event: ActionEvent) => stackPane.getChildren().add(createResumePane)
+
+    stackPane.children.add(button)
+
+    stackPane
+
+  def createResumePane =
+    new VBox:
+      style = """
+              -fx-border-color: purple; 
+              -fx-border-width: 1; 
+              -fx-border-style: solid;
+              -fx-background-color: #ffffff;
+              """
+      maxWidth = 1020
+      children = List(
+        new Text("Create New Resume") { },
+        new Label("Resume Name") { },
+        new TextField { }
+      )
