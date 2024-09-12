@@ -1,7 +1,5 @@
 package net.sailware.resumewizard
 
-import atlantafx.base.theme.PrimerLight
-import javafx.application.Application
 import scalafx.Includes.*
 import scalafx.application.JFXApp3
 import scalafx.application.JFXApp3.PrimaryStage
@@ -18,13 +16,12 @@ import scalafx.scene.layout.BorderPane
 import scalafx.scene.layout.VBox
 import scalafx.scene.layout.Priority
 import scalafx.scene.layout.StackPane
-import scalafx.scene.text.{Font, FontWeight, Text}
+import scalafx.scene.text.{Font, FontWeight, Text, TextFlow}
 import scalafx.stage.Stage
 
 object Main extends JFXApp3:
 
   override def start(): Unit =
-    Application.setUserAgentStylesheet(new PrimerLight().getUserAgentStylesheet());
     stage = new PrimaryStage:
       scene = new Scene(1280, 768):
         root = new ApplicationWindow
@@ -84,7 +81,7 @@ class MainLayer extends BorderPane:
               """
       maxWidth = 1020
       children = List(
-        new Text("Create New Resume") { },
+        new Text("Create New Resume"),
         new Label("Resume Name") { },
         new TextField { }
       )
