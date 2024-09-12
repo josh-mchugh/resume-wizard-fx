@@ -82,6 +82,7 @@ class MainLayer extends BorderPane:
       maxWidth = 1020
       children = List(
         new Text("Create New Resume"),
+        new Button("Create Resume"),
         new Label("Resume Name") { },
         new TextField { }
       )
