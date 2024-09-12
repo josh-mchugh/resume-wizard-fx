@@ -1,5 +1,7 @@
 package net.sailware.resumewizard
 
+import atlantafx.base.theme.PrimerLight
+import javafx.application.Application
 import scalafx.Includes.*
 import scalafx.application.JFXApp3
 import scalafx.application.JFXApp3.PrimaryStage
@@ -19,9 +21,10 @@ import scalafx.scene.layout.StackPane
 import scalafx.scene.text.{Font, FontWeight, Text}
 import scalafx.stage.Stage
 
-object Application extends JFXApp3:
+object Main extends JFXApp3:
 
   override def start(): Unit =
+    Application.setUserAgentStylesheet(new PrimerLight().getUserAgentStylesheet());
     stage = new PrimaryStage:
       scene = new Scene(1280, 768):
         root = new ApplicationWindow
