@@ -24,26 +24,25 @@ object Main extends JFXApp3:
   override def start(): Unit =
     stage = new PrimaryStage:
       scene = new Scene(1280, 768):
-        root = new ApplicationWindow
+        root = createRootPane
 
-class ApplicationWindow extends AnchorPane:
-  // Create body Stack Pane with Main Layer
-  val body = new StackPane:
-    children = new MainLayer
+  def createRootPane =
+    new AnchorPane:
+      children = createRootStackPane
 
-  // Set body to anchor to ApplicationWindows edges
-  AnchorPane.setTopAnchor(body, 0.0)
-  AnchorPane.setLeftAnchor(body, 0.0)
-  AnchorPane.setBottomAnchor(body, 0.0)
-  AnchorPane.setRightAnchor(body, 0.0)
+  def createRootStackPane =
+    val result = new StackPane:
+      children = createMainLayer
+    AnchorPane.setTopAnchor(result, 0.0)
+    AnchorPane.setLeftAnchor(result, 0.0)
+    AnchorPane.setBottomAnchor(result, 0.0)
+    AnchorPane.setRightAnchor(result, 0.0)
+    result
 
-  // Add body to children of the ApplicationWindow
-  children = body
-
-class MainLayer extends BorderPane:
-  style = "-fx-background-color: #fffcf9;"
-  top = topContent
-  center = centerContent
+  def createMainLayer =
+    new BorderPane:
+      top = topContent
+      center = centerContent
 
   // Create Top Content
   def topContent =
@@ -61,15 +60,13 @@ class MainLayer extends BorderPane:
       content = createDashboardPane
 
   def createDashboardPane =
-    val stackPane = new StackPane:
-      style = "-fx-padding: 20"
+    new StackPane:
+      style = "-fx-padding: 20;"
+      children = createResumeButton(this)
 
-    val button = new Button("Create Resume"):
+  def createResumeButton(stackPane: StackPane) =
+    new Button("Create Resume"):
       onAction = (event: ActionEvent) => stackPane.getChildren().add(createResumePane)
-
-    stackPane.children.add(button)
-
-    stackPane
 
   def createResumePane =
     new VBox(5):
@@ -90,3 +87,4 @@ class MainLayer extends BorderPane:
         new Label("Resume Name") { },
         new TextField { }
       )
+
