@@ -62,7 +62,7 @@ class MainLayer extends BorderPane:
 
   def createDashboardPane =
     val stackPane = new StackPane:
-        style = "-fx-border-color: red; -fx-border-width: 1; -fx-border-style: solid;"
+      style = "-fx-padding: 20"
 
     val button = new Button("Create Resume"):
       onAction = (event: ActionEvent) => stackPane.getChildren().add(createResumePane)
@@ -72,12 +72,16 @@ class MainLayer extends BorderPane:
     stackPane
 
   def createResumePane =
-    new VBox:
+    new VBox(5):
       style = """
-              -fx-border-color: purple; 
+              -fx-padding: 20;
+              -fx-background-color: #ffffff;
+              -fx-background-radius: 5;
+              -fx-border-color: rgba(0, 0, 0, 0.18); 
               -fx-border-width: 1; 
               -fx-border-style: solid;
-              -fx-background-color: #ffffff;
+              -fx-border-radius: 5;
+              -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.18), 10, 0, 0, 0);
               """
       maxWidth = 1020
       children = List(
