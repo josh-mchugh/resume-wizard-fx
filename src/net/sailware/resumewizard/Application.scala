@@ -15,58 +15,18 @@ import scalafx.scene.layout.AnchorPane
 import scalafx.scene.layout.BorderPane
 import scalafx.scene.layout.VBox
 import scalafx.scene.layout.Priority
+import scalafx.scene.layout.Region
 import scalafx.scene.layout.StackPane
 import scalafx.scene.text.{Font, FontWeight, Text, TextFlow}
 import scalafx.stage.Stage
+import javafx.util.Builder
 
 object Main extends JFXApp3:
 
   override def start(): Unit =
     stage = new PrimaryStage:
       scene = new Scene(1280, 768):
-        root = createRootPane
-
-  def createRootPane =
-    new AnchorPane:
-      children = createRootStackPane
-
-  def createRootStackPane =
-    val result = new StackPane:
-      children = createMainLayer
-    AnchorPane.setTopAnchor(result, 0.0)
-    AnchorPane.setLeftAnchor(result, 0.0)
-    AnchorPane.setBottomAnchor(result, 0.0)
-    AnchorPane.setRightAnchor(result, 0.0)
-    result
-
-  def createMainLayer =
-    new BorderPane:
-      top = topContent
-      center = centerContent
-
-  // Create Top Content
-  def topContent =
-    new Text("Resume Wizard Top"):
-      textOrigin = VPos.Top
-      font = Font.font(null, FontWeight.Bold, 18)
-
-  // Create Center Content
-  def centerContent =
-    new ScrollPane:
-      vbarPolicy = ScrollBarPolicy.AS_NEEDED
-      fitToHeight = true
-      hbarPolicy = ScrollBarPolicy.NEVER
-      fitToWidth = true
-      content = createDashboardPane
-
-  def createDashboardPane =
-    new StackPane:
-      style = "-fx-padding: 20;"
-      children = createResumeButton(this)
-
-  def createResumeButton(stackPane: StackPane) =
-    new Button("Create Resume"):
-      onAction = (event: ActionEvent) => stackPane.getChildren().add(createResumePane)
+        root = new MainController().view()
 
   def createResumePane =
     new VBox(5):
@@ -88,3 +48,77 @@ object Main extends JFXApp3:
         new TextField { }
       )
 
+
+/*
+  Main Components
+ */
+class MainModel { }
+
+class MainController:
+  val model = new MainModel()
+  val viewBuilder = new MainViewBuilder(model)
+
+  def view(): Region =
+    viewBuilder.build()
+
+class MainViewBuilder(val model: MainModel) extends Builder[Region]:
+
+  override def build(): Region =
+    createRootPane
+
+  def createRootPane =
+    new AnchorPane:
+      children = createRootStackPane
+
+  def createRootStackPane =
+    val result = new StackPane:
+      children = createMainLayer
+    AnchorPane.setTopAnchor(result, 0.0)
+    AnchorPane.setLeftAnchor(result, 0.0)
+    AnchorPane.setBottomAnchor(result, 0.0)
+    AnchorPane.setRightAnchor(result, 0.0)
+    result
+
+  def createMainLayer =
+    new BorderPane:
+      top = topContent
+      center = centerContent
+
+  def topContent =
+    new Text("Resume Wizard Top"):
+      textOrigin = VPos.Top
+      font = Font.font(null, FontWeight.Bold, 18)
+
+  def centerContent =
+    new ScrollPane:
+      vbarPolicy = ScrollBarPolicy.AS_NEEDED
+      fitToHeight = true
+      hbarPolicy = ScrollBarPolicy.NEVER
+      fitToWidth = true
+        content = new DashboardController().view()
+
+/*
+  Dashboard Components
+*/
+class DashboardModel { }
+
+class DashboardController:
+  val model = new DashboardModel
+  val viewBuilder = new DashboardViewBuilder(model) 
+
+  def view(): Region =
+    viewBuilder.build()
+
+class DashboardViewBuilder(val model: DashboardModel) extends Builder[Region]:
+
+  override def build(): Region =
+    createDashboardPane
+
+  def createDashboardPane =
+    new StackPane:
+      style = "-fx-padding: 20;"
+      children = createResumeButton(this)
+
+  def createResumeButton(stackPane: StackPane) =
+    new Button("Create Resume")
+//      onAction = (event: ActionEvent) => stackPane.getChildren().add(createResumePane)
