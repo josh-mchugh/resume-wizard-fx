@@ -1,8 +1,11 @@
 package net.sailware.resumewizard
 
+import org.greenrobot.eventbus.EventBus
+import org.greenrobot.eventbus.Subscribe
 import scalafx.Includes.*
 import scalafx.application.JFXApp3
 import scalafx.application.JFXApp3.PrimaryStage
+import scalafx.collections.ObservableBuffer
 import scalafx.event.ActionEvent
 import scalafx.geometry.VPos
 import scalafx.scene.Node
@@ -21,40 +24,57 @@ import scalafx.scene.layout.VBox
 import scalafx.scene.text.{Font, FontWeight, Text, TextFlow}
 import scalafx.stage.Stage
 import javafx.beans.property.BooleanProperty
+import javafx.beans.property.ObjectProperty
 import javafx.beans.property.SimpleBooleanProperty
+import javafx.beans.property.SimpleListProperty
+import javafx.beans.property.SimpleObjectProperty
+import javafx.collections.FXCollections;
 import javafx.util.Builder
 
 object Main extends JFXApp3:
 
   override def start(): Unit =
-    stage = new PrimaryStage:
+    stage = createStage()
+
+  private def createStage(): PrimaryStage =
+    val controller = new MainController()
+
+    EventBus.getDefault().register(controller)
+
+    new PrimaryStage:
+      onCloseRequest = () => EventBus.getDefault().unregister(controller)
       scene = new Scene(1280, 768):
-        root = new MainController().view()
+        root = controller.view()
 
 /*
   Main Components
  */
+case class State(val screen: String = "Dashboard")
+
 class MainModel:
-  val newResumeSelected = new SimpleBooleanProperty(false)
+  val state = new SimpleObjectProperty(new State())
 
 class MainController:
   val model = new MainModel()
-  val viewBuilder = new MainViewBuilder(
+  def viewBuilder = new MainViewBuilder(
     model,
-    new DashboardController(model.newResumeSelected).view(),
-    new NewResumeController().view()
+    List(
+      new DashboardController(model.state).view(),
+      new NewResumeController(model.state).view()
+    )
   )
 
   def view(): Region =
     viewBuilder.build()
 
+  @Subscribe
+  def onEvent(event: String): Unit =
+    model.state.update(new State("NewResume"))
+
 class MainViewBuilder(
   val model: MainModel,
-  val dashboardContent: Node,
-  val newResumeContent: Region
+  val screens: List[Node]
 ) extends Builder[Region]:
-
-  newResumeContent.visibleProperty <== model.newResumeSelected
 
   override def build(): Region =
     createRootPane
@@ -90,47 +110,44 @@ class MainViewBuilder(
       fitToWidth = true
       content = new StackPane:
         style = "-fx-padding: 20;"
-        children = List(
-          dashboardContent,
-          newResumeContent,
-        )  
+        children = screens
 
 /*
   Dashboard Components
 */
 class DashboardModel { }
 
-class DashboardController(val newResumeSelected: BooleanProperty):
+class DashboardController(val state: ObjectProperty[State]):
+  val func = () => EventBus.getDefault().post("Hello everyone!");
   val model = new DashboardModel
-  val viewBuilder = new DashboardViewBuilder(model, newResumeSelected) 
+  val viewBuilder = new DashboardViewBuilder(model, func) 
 
   def view(): Node =
     viewBuilder.build()
 
-class DashboardViewBuilder(
-  val model: DashboardModel,
-  val newResumeSelected: BooleanProperty
-) extends Builder[Node]:
+class DashboardViewBuilder(val model: DashboardModel, val func: () => Unit) extends Builder[Node]:
 
   override def build(): Node =
     createNewResumeButton
 
   private def createNewResumeButton =
     new Button("Create Resume"):
-      onAction = (event: ActionEvent) => newResumeSelected.setValue(true)
+      onAction = (event: ActionEvent) => func()
 
 /*
   New Resume Components
 */
 class NewResumeModel { }
 
-class NewResumeController:
+class NewResumeController(val state: ObjectProperty[State]):
 
   val model = new NewResumeModel()
   val viewBuilder = new NewResumeViewBuilder(model)
 
   def view(): Region =
-    viewBuilder.build()
+    val result = viewBuilder.build()
+    result.visibleProperty <== state.isEqualTo(new State("NewResume"))
+    result
 
 class NewResumeViewBuilder(val model: NewResumeModel) extends Builder[Region]:
 

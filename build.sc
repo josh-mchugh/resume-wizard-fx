@@ -16,6 +16,7 @@ object app extends RootModule with ScalaModule {
       ivy"org.openjfx:javafx-base:22.0.2",
       ivy"org.openjfx:javafx-controls:22.0.2",
       ivy"org.openjfx:javafx-web:22.0.2",
+      ivy"org.greenrobot:eventbus-java:3.3.1"
     )
   }
 }
