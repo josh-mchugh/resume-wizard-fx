@@ -5,10 +5,10 @@ import org.greenrobot.eventbus.Subscribe
 import scalafx.Includes.*
 import scalafx.application.JFXApp3
 import scalafx.application.JFXApp3.PrimaryStage
-import scalafx.collections.ObservableBuffer
 import scalafx.event.ActionEvent
 import scalafx.geometry.VPos
 import scalafx.scene.Node
+import scalafx.scene.Parent
 import scalafx.scene.Scene
 import scalafx.scene.control.Button
 import scalafx.scene.control.Label
@@ -23,60 +23,71 @@ import scalafx.scene.layout.StackPane
 import scalafx.scene.layout.VBox
 import scalafx.scene.text.{Font, FontWeight, Text, TextFlow}
 import scalafx.stage.Stage
-import javafx.beans.property.BooleanProperty
 import javafx.beans.property.ObjectProperty
-import javafx.beans.property.SimpleBooleanProperty
-import javafx.beans.property.SimpleListProperty
 import javafx.beans.property.SimpleObjectProperty
-import javafx.collections.FXCollections;
-import javafx.util.Builder
+
+enum Screen:
+  case Dashboard
+  case NewResume
+
+case class State(val screen: Screen = Screen.Dashboard)
 
 object Main extends JFXApp3:
 
+  val stateProp = new SimpleObjectProperty(new State())
+
+  EventBus.getDefault().register(this)
+
   override def start(): Unit =
-    stage = createStage()
-
-  private def createStage(): PrimaryStage =
-    val controller = new MainController()
-
-    EventBus.getDefault().register(controller)
-
-    new PrimaryStage:
-      onCloseRequest = () => EventBus.getDefault().unregister(controller)
+    stage = new PrimaryStage:
+      onCloseRequest = () => EventBus.getDefault().unregister(this)
       scene = new Scene(1280, 768):
-        root = controller.view()
+        root = new MainController(stateProp).view()
+
+  @Subscribe
+  def onEvent(screen: Screen): Unit =
+    stateProp.update(stateProp.value.copy(screen = screen))
+
+
+/*
+  Screen Components
+ */
+trait Controller[T]:
+  def view(): T
+
+object ScreenFactory:
+  def createScreen(screen: Screen): Node =
+    screen match
+      case Screen.Dashboard => new DashboardController().view()
+      case Screen.NewResume => new NewResumeController().view()
 
 /*
   Main Components
  */
-case class State(val screen: String = "Dashboard")
+class MainModel { }
 
-class MainModel:
-  val state = new SimpleObjectProperty(new State())
+class MainController(val state: ObjectProperty[State]) extends Controller[Parent]:
+  val presenter = new MainPresenterImpl(state)
 
-class MainController:
-  val model = new MainModel()
-  def viewBuilder = new MainViewBuilder(
-    model,
-    List(
-      new DashboardController(model.state).view(),
-      new NewResumeController(model.state).view()
-    )
-  )
+  override def view(): Parent =
+    presenter.view()
+
+trait MainPresenter {}
+trait MainView:
+  def view(): Region
+
+class MainPresenterImpl(val state: ObjectProperty[State]) extends MainPresenter:
+  val mainView = new MainViewImpl(this, state)
 
   def view(): Region =
-    viewBuilder.build()
+    mainView.view()
 
-  @Subscribe
-  def onEvent(event: String): Unit =
-    model.state.update(new State("NewResume"))
+class MainViewImpl(
+  val presenter: MainPresenter,
+  val state: ObjectProperty[State]
+) extends MainView:
 
-class MainViewBuilder(
-  val model: MainModel,
-  val screens: List[Node]
-) extends Builder[Region]:
-
-  override def build(): Region =
+  override def view(): Region =
     createRootPane
 
   private def createRootPane =
@@ -110,48 +121,69 @@ class MainViewBuilder(
       fitToWidth = true
       content = new StackPane:
         style = "-fx-padding: 20;"
-        children = screens
+        children = List(ScreenFactory.createScreen(Screen.Dashboard))
+        state.onChange ({
+           children = List(ScreenFactory.createScreen(state.value.screen))
+        })
 
 /*
   Dashboard Components
 */
-class DashboardModel { }
+trait DashboardPresenter:
+  def onNewResumeButtonAction(): Unit
+trait DashboardView:
+  def view(): Node
 
-class DashboardController(val state: ObjectProperty[State]):
-  val func = () => EventBus.getDefault().post("Hello everyone!");
-  val model = new DashboardModel
-  val viewBuilder = new DashboardViewBuilder(model, func) 
+class DashboardController extends Controller[Node]:
+  val dashboardPresenter = new DashboardPresenterImpl()
+
+  override def view(): Node =
+    dashboardPresenter.view()
+
+class DashboardPresenterImpl extends DashboardPresenter:
+  val dashboardView = new DashboardViewImpl(this)
 
   def view(): Node =
-    viewBuilder.build()
+    dashboardView.view()
 
-class DashboardViewBuilder(val model: DashboardModel, val func: () => Unit) extends Builder[Node]:
+  override def onNewResumeButtonAction(): Unit =
+    EventBus.getDefault().post(Screen.NewResume)
 
-  override def build(): Node =
+class DashboardViewImpl(
+  val presenter: DashboardPresenter
+) extends DashboardView:
+
+  override def view(): Node =
     createNewResumeButton
 
   private def createNewResumeButton =
     new Button("Create Resume"):
-      onAction = (event: ActionEvent) => func()
+      onAction = (event: ActionEvent) => presenter.onNewResumeButtonAction()
 
 /*
   New Resume Components
 */
-class NewResumeModel { }
+trait NewResumePresenter { }
+trait NewResumeView:
+  def view(): Region
 
-class NewResumeController(val state: ObjectProperty[State]):
+class NewResumeController extends Controller[Region]:
+  val newResumePresenter = new NewResumePresenterImpl()
 
-  val model = new NewResumeModel()
-  val viewBuilder = new NewResumeViewBuilder(model)
+  override def view(): Region =
+    newResumePresenter.view()
+
+class NewResumePresenterImpl extends NewResumePresenter:
+  val newResumeView = new NewResumeViewImpl(this)
 
   def view(): Region =
-    val result = viewBuilder.build()
-    result.visibleProperty <== state.isEqualTo(new State("NewResume"))
-    result
+    newResumeView.view()
 
-class NewResumeViewBuilder(val model: NewResumeModel) extends Builder[Region]:
+class NewResumeViewImpl(
+  val presenter: NewResumePresenter
+) extends NewResumeView:
 
-  override def build(): Region =
+  override def view(): Region =
     createNewResumePane
 
   private def createNewResumePane =
