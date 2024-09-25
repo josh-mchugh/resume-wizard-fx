@@ -26,11 +26,11 @@ import scalafx.stage.Stage
 import javafx.beans.property.ObjectProperty
 import javafx.beans.property.SimpleObjectProperty
 
-enum Screen:
+enum PageType:
   case Dashboard
   case NewResume
 
-case class State(val screen: Screen = Screen.Dashboard)
+case class State(val currentPageType: PageType = PageType.Dashboard)
 
 object Main extends JFXApp3:
 
@@ -45,8 +45,8 @@ object Main extends JFXApp3:
         root = new MainController(stateProp).view()
 
   @Subscribe
-  def onEvent(screen: Screen): Unit =
-    stateProp.update(stateProp.value.copy(screen = screen))
+  def onEvent(pageType: PageType): Unit =
+    stateProp.update(stateProp.value.copy(currentPageType = pageType))
 
 
 /*
@@ -55,11 +55,14 @@ object Main extends JFXApp3:
 trait Controller[T]:
   def view(): T
 
-object ScreenFactory:
-  def createScreen(screen: Screen): Node =
-    screen match
-      case Screen.Dashboard => new DashboardController().view()
-      case Screen.NewResume => new NewResumeController().view()
+object PageFactory:
+  def createPage(pageType: PageType): List[Node] =
+    List(createView(pageType))
+
+  private def createView(pageType: PageType): Node =
+    pageType match
+      case PageType.Dashboard => new DashboardController().view()
+      case PageType.NewResume => new NewResumeController().view()
 
 /*
   Main Components
@@ -121,9 +124,9 @@ class MainViewImpl(
       fitToWidth = true
       content = new StackPane:
         style = "-fx-padding: 20;"
-        children = List(ScreenFactory.createScreen(Screen.Dashboard))
+        children = PageFactory.createPage(PageType.Dashboard)
         state.onChange ({
-           children = List(ScreenFactory.createScreen(state.value.screen))
+           children = PageFactory.createPage(state.value.currentPageType)
         })
 
 /*
@@ -147,7 +150,7 @@ class DashboardPresenterImpl extends DashboardPresenter:
     dashboardView.view()
 
   override def onNewResumeButtonAction(): Unit =
-    EventBus.getDefault().post(Screen.NewResume)
+    EventBus.getDefault().post(PageType.NewResume)
 
 class DashboardViewImpl(
   val presenter: DashboardPresenter
