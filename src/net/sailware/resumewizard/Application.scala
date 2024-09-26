@@ -75,20 +75,17 @@ object PageFactory:
 class MainModel { }
 
 class MainController(val state: ObjectProperty[State]) extends Controller[Parent]:
-  val presenter = new MainPresenterImpl(state)
+  val mainPresenter = new MainPresenterImpl()
+  val mainView = new MainViewImpl(mainPresenter, state)
 
   override def view(): Parent =
-    presenter.view()
+    mainView.view()
 
 trait MainPresenter {}
 trait MainView:
   def view(): Region
 
-class MainPresenterImpl(val state: ObjectProperty[State]) extends MainPresenter:
-  val mainView = new MainViewImpl(this, state)
-
-  def view(): Region =
-    mainView.view()
+class MainPresenterImpl extends MainPresenter { }
 
 class MainViewImpl(
   val presenter: MainPresenter,
@@ -144,16 +141,12 @@ trait DashboardView:
 
 class DashboardController extends Controller[Node]:
   val dashboardPresenter = new DashboardPresenterImpl()
+  val dashboardView = new DashboardViewImpl(dashboardPresenter)
 
   override def view(): Node =
-    dashboardPresenter.view()
-
-class DashboardPresenterImpl extends DashboardPresenter:
-  val dashboardView = new DashboardViewImpl(this)
-
-  def view(): Node =
     dashboardView.view()
 
+class DashboardPresenterImpl extends DashboardPresenter:
   override def onNewResumeButtonAction(): Unit =
     EventBus.getDefault().post(PageType.NewResume)
 
@@ -177,15 +170,12 @@ trait NewResumeView:
 
 class NewResumeController extends Controller[Region]:
   val newResumePresenter = new NewResumePresenterImpl()
+  val newResumeView = new NewResumeViewImpl(newResumePresenter)
 
   override def view(): Region =
-    newResumePresenter.view()
-
-class NewResumePresenterImpl extends NewResumePresenter:
-  val newResumeView = new NewResumeViewImpl(this)
-
-  def view(): Region =
     newResumeView.view()
+
+class NewResumePresenterImpl extends NewResumePresenter { }
 
 class NewResumeViewImpl(
   val presenter: NewResumePresenter
