@@ -2,6 +2,7 @@ package net.sailware.resumewizard
 
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
+import org.slf4j.LoggerFactory
 import scalafx.Includes.*
 import scalafx.application.JFXApp3
 import scalafx.application.JFXApp3.PrimaryStage
@@ -34,6 +35,8 @@ case class State(val currentPageType: PageType = PageType.Dashboard)
 
 object Main extends JFXApp3:
 
+  val logger = LoggerFactory.getLogger(classOf[Main.type])
+
   val stateProp = new SimpleObjectProperty(new State())
 
   EventBus.getDefault().register(this)
@@ -45,8 +48,10 @@ object Main extends JFXApp3:
         root = new MainController(stateProp).view()
 
   @Subscribe
-  def onEvent(pageType: PageType): Unit =
-    stateProp.update(stateProp.value.copy(currentPageType = pageType))
+  def onPageTypeEvent(pageType: PageType): Unit =
+    val currentState = stateProp.value
+    logger.info("Updating current page type from: {} to: {}", currentState.currentPageType, pageType)
+    stateProp.update(currentState.copy(currentPageType = pageType))
 
 
 /*
