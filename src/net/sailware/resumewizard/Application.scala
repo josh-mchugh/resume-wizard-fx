@@ -6,6 +6,8 @@ import org.slf4j.LoggerFactory
 import scalafx.Includes.*
 import scalafx.application.JFXApp3
 import scalafx.application.JFXApp3.PrimaryStage
+import scalafx.beans.property.ObjectProperty
+import scalafx.beans.property.StringProperty
 import scalafx.event.ActionEvent
 import scalafx.geometry.VPos
 import scalafx.scene.Node
@@ -24,8 +26,6 @@ import scalafx.scene.layout.StackPane
 import scalafx.scene.layout.VBox
 import scalafx.scene.text.{Font, FontWeight, Text, TextFlow}
 import scalafx.stage.Stage
-import javafx.beans.property.ObjectProperty
-import javafx.beans.property.SimpleObjectProperty
 
 enum PageType:
   case Dashboard
@@ -37,7 +37,7 @@ object Main extends JFXApp3:
 
   val logger = LoggerFactory.getLogger(classOf[Main.type])
 
-  val stateProp = new SimpleObjectProperty(new State())
+  val stateProp = ObjectProperty(new State())
 
   EventBus.getDefault().register(this)
 
@@ -164,21 +164,36 @@ class DashboardViewImpl(
 /*
   New Resume Components
 */
-trait NewResumePresenter { }
+trait NewResumePresenter:
+  def onCreateForm(form: ObjectProperty[NewResumeForm]): FormResponse[NewResumeForm]
 trait NewResumeView:
   def view(): Region
 
 class NewResumeController extends Controller[Region]:
   val newResumePresenter = new NewResumePresenterImpl()
-  val newResumeView = new NewResumeViewImpl(newResumePresenter)
+  val newResumeView = new NewResumeViewImpl(newResumePresenter, ObjectProperty(new NewResumeForm()))
 
   override def view(): Region =
     newResumeView.view()
 
-class NewResumePresenterImpl extends NewResumePresenter { }
+class NewResumePresenterImpl() extends NewResumePresenter:
+  val logger = LoggerFactory.getLogger(classOf[NewResumePresenterImpl])
+
+  override def onCreateForm(form: ObjectProperty[NewResumeForm]): FormResponse[NewResumeForm] =
+    logger.info("create form: {}", form.value)
+    new FormResponse[NewResumeForm](form.value.copy(name = s"[Error] ${form.value.name}"), ResponseStatus.Error)
+
+case class NewResumeForm(val name: String = "")
+
+enum ResponseStatus:
+  case Success
+  case Error
+
+case class FormResponse[T](val value: T, val status: ResponseStatus)
 
 class NewResumeViewImpl(
-  val presenter: NewResumePresenter
+  val presenter: NewResumePresenter,
+  val form: ObjectProperty[NewResumeForm]
 ) extends NewResumeView:
 
   override def view(): Region =
@@ -199,7 +214,18 @@ class NewResumeViewImpl(
       maxWidth = 1020
       children = List(
         new Text("Create New Resume"),
-        new Button("Create Resume"),
+        new Button("Create Resume") {
+          onAction = (event: ActionEvent) =>
+            val formResponse = presenter.onCreateForm(form)
+            formResponse.status match
+              case ResponseStatus.Success => EventBus.getDefault().post(PageType.Dashboard)
+              case ResponseStatus.Error => form.update(formResponse.value)
+        },
         new Label("Resume Name") { },
-        new TextField { }
+        new TextField {
+          text = form.value.name
+          text.onChange {
+            (source, oldValue, newValue) => form.update(form.value.copy(name = newValue))
+          }
+        }
       )
