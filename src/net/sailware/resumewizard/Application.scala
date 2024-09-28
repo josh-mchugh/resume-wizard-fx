@@ -53,7 +53,6 @@ object Main extends JFXApp3:
     logger.info("Updating current page type from: {} to: {}", currentState.currentPageType, pageType)
     stateProp.update(currentState.copy(currentPageType = pageType))
 
-
 /*
   Screen Components
  */
@@ -165,35 +164,31 @@ class DashboardViewImpl(
   New Resume Components
 */
 trait NewResumePresenter:
-  def onCreateForm(form: ObjectProperty[NewResumeForm]): FormResponse[NewResumeForm]
+  def onCreateForm(): Unit
 trait NewResumeView:
   def view(): Region
 
 class NewResumeController extends Controller[Region]:
-  val newResumePresenter = new NewResumePresenterImpl()
-  val newResumeView = new NewResumeViewImpl(newResumePresenter, ObjectProperty(new NewResumeForm()))
+  val model = new NewResumeModel()
+  val newResumePresenter = new NewResumePresenterImpl(model)
+  val newResumeView = new NewResumeViewImpl(newResumePresenter, model)
 
   override def view(): Region =
     newResumeView.view()
 
-class NewResumePresenterImpl() extends NewResumePresenter:
+class NewResumePresenterImpl(val model: NewResumeModel) extends NewResumePresenter:
   val logger = LoggerFactory.getLogger(classOf[NewResumePresenterImpl])
 
-  override def onCreateForm(form: ObjectProperty[NewResumeForm]): FormResponse[NewResumeForm] =
-    logger.info("create form: {}", form.value)
-    new FormResponse[NewResumeForm](form.value.copy(name = s"[Error] ${form.value.name}"), ResponseStatus.Error)
+  override def onCreateForm(): Unit =
+    EventBus.getDefault().post(PageType.Dashboard)
 
-case class NewResumeForm(val name: String = "")
-
-enum ResponseStatus:
-  case Success
-  case Error
-
-case class FormResponse[T](val value: T, val status: ResponseStatus)
+case class NewResumeModel(
+  val name: StringProperty = StringProperty("")
+)
 
 class NewResumeViewImpl(
   val presenter: NewResumePresenter,
-  val form: ObjectProperty[NewResumeForm]
+  val model: NewResumeModel
 ) extends NewResumeView:
 
   override def view(): Region =
@@ -215,17 +210,11 @@ class NewResumeViewImpl(
       children = List(
         new Text("Create New Resume"),
         new Button("Create Resume") {
-          onAction = (event: ActionEvent) =>
-            val formResponse = presenter.onCreateForm(form)
-            formResponse.status match
-              case ResponseStatus.Success => EventBus.getDefault().post(PageType.Dashboard)
-              case ResponseStatus.Error => form.update(formResponse.value)
+          disable <== model.name.isEmpty()
+          onAction = (event: ActionEvent) => presenter.onCreateForm()
         },
         new Label("Resume Name") { },
         new TextField {
-          text = form.value.name
-          text.onChange {
-            (source, oldValue, newValue) => form.update(form.value.copy(name = newValue))
-          }
+          text <==> model.name
         }
       )
