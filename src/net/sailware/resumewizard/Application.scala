@@ -15,6 +15,7 @@ import scalafx.scene.Parent
 import scalafx.scene.Scene
 import scalafx.scene.control.Button
 import scalafx.scene.control.Label
+import scalafx.scene.control.TextArea
 import scalafx.scene.control.TextField
 import scalafx.scene.control.ScrollPane
 import scalafx.scene.control.ScrollPane.ScrollBarPolicy
@@ -30,6 +31,7 @@ import scalafx.stage.Stage
 enum PageType:
   case Dashboard
   case NewResume
+  case Wizard
 
 case class State(val currentPageType: PageType = PageType.Dashboard)
 
@@ -67,6 +69,7 @@ object PageFactory:
     pageType match
       case PageType.Dashboard => new DashboardController().view()
       case PageType.NewResume => new NewResumeController().view()
+      case PageType.Wizard => new WizardController().view()
 
 /*
   Main Components
@@ -180,7 +183,7 @@ class NewResumePresenterImpl(val model: NewResumeModel) extends NewResumePresent
   val logger = LoggerFactory.getLogger(classOf[NewResumePresenterImpl])
 
   override def onCreateForm(): Unit =
-    EventBus.getDefault().post(PageType.Dashboard)
+    EventBus.getDefault().post(PageType.Wizard)
 
 case class NewResumeModel(
   val name: StringProperty = StringProperty("")
@@ -216,5 +219,73 @@ class NewResumeViewImpl(
         new Label("Resume Name") { },
         new TextField {
           text <==> model.name
+        }
+      )
+/*
+  Wizard Components
+*/
+trait WizardPresenter:
+  def onContinue(): Unit
+trait WizardView:
+  def view(): Region
+
+case class WizardModel(
+  val name: StringProperty = StringProperty(""),
+  val title: StringProperty = StringProperty(""),
+  val summary: StringProperty = StringProperty(""),
+)
+
+class WizardController() extends Controller[Region]:
+  val model = new WizardModel()
+  val wizardPresenter = new WizardPresenterImpl(model)
+  val wizardView = new WizardViewImpl(wizardPresenter, model)
+
+  def view(): Region =
+    wizardView.view()  
+
+class WizardPresenterImpl(val model: WizardModel) extends WizardPresenter:
+  val logger = LoggerFactory.getLogger(classOf[WizardPresenterImpl])
+
+  override def onContinue(): Unit =
+    logger.info("wizard continue clicked")
+
+class WizardViewImpl(
+  val presenter: WizardPresenter,
+  val model: WizardModel
+) extends WizardView:
+
+  override def view(): Region =
+    createWizard
+
+  private def createWizard =
+    new VBox(5):
+      style = """
+              -fx-padding: 20;
+              -fx-background-color: #ffffff;
+              -fx-background-radius: 5;
+              -fx-border-color: rgba(0, 0, 0, 0.18); 
+              -fx-border-width: 1; 
+              -fx-border-style: solid;
+              -fx-border-radius: 5;
+              -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.18), 10, 0, 0, 0);
+              """
+      maxWidth = 1020
+      children = List(
+        new Text("Personal Details"),
+        new Button("Continue") {
+          onAction = (event: ActionEvent) => presenter.onContinue()
+        },
+        new Label("Your name"),
+        new TextField {
+          text <==> model.name
+        },
+        new Label("Your Current Title"),
+        new TextField {
+          text <==> model.title
+        },
+        new Label("Summary of your current career position"),
+        new TextArea {
+          prefRowCount = 3
+          text <==> model.summary
         }
       )
