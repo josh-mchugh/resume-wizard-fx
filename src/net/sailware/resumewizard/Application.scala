@@ -198,19 +198,7 @@ class NewResumeViewImpl(
     createNewResumePane
 
   private def createNewResumePane =
-    new VBox(5):
-      style = """
-              -fx-padding: 20;
-              -fx-background-color: #ffffff;
-              -fx-background-radius: 5;
-              -fx-border-color: rgba(0, 0, 0, 0.18); 
-              -fx-border-width: 1; 
-              -fx-border-style: solid;
-              -fx-border-radius: 5;
-              -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.18), 10, 0, 0, 0);
-              """
-      maxWidth = 1020
-      children = List(
+    val childNodes = List(
         new Text("Create New Resume"),
         new Button("Create Resume") {
           disable <== model.name.isEmpty()
@@ -220,7 +208,10 @@ class NewResumeViewImpl(
         new TextField {
           text <==> model.name
         }
-      )
+    )
+
+    ComponentUtil.createContentPage(childNodes)
+
 /*
   Wizard Components
 */
@@ -258,19 +249,7 @@ class WizardViewImpl(
     createWizard
 
   private def createWizard =
-    new VBox(5):
-      style = """
-              -fx-padding: 20;
-              -fx-background-color: #ffffff;
-              -fx-background-radius: 5;
-              -fx-border-color: rgba(0, 0, 0, 0.18); 
-              -fx-border-width: 1; 
-              -fx-border-style: solid;
-              -fx-border-radius: 5;
-              -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.18), 10, 0, 0, 0);
-              """
-      maxWidth = 1020
-      children = List(
+    val childNodes = List(
         new Text("Personal Details"),
         new Button("Continue") {
           onAction = (event: ActionEvent) => presenter.onContinue()
@@ -288,4 +267,26 @@ class WizardViewImpl(
           prefRowCount = 3
           text <==> model.summary
         }
-      )
+    )
+
+    ComponentUtil.createContentPage(childNodes)
+
+/*
+  Component Util
+*/
+object ComponentUtil:
+
+  def createContentPage(childNodes: List[Node]): VBox =
+    new VBox(5):
+      style = """
+              -fx-padding: 20;
+              -fx-background-color: #ffffff;
+              -fx-background-radius: 5;
+              -fx-border-color: rgba(0, 0, 0, 0.18); 
+              -fx-border-width: 1; 
+              -fx-border-style: solid;
+              -fx-border-radius: 5;
+              -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.18), 10, 0, 0, 0);
+              """
+      maxWidth = 1020
+      children = childNodes
