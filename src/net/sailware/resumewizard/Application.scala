@@ -31,7 +31,7 @@ import scalafx.stage.Stage
 enum PageType:
   case Dashboard
   case NewResume
-  case Wizard
+  case PersonalDetails
 
 case class State(val currentPageType: PageType = PageType.Dashboard)
 
@@ -69,7 +69,7 @@ object PageFactory:
     pageType match
       case PageType.Dashboard => new DashboardController().view()
       case PageType.NewResume => new NewResumeController().view()
-      case PageType.Wizard => new WizardController().view()
+      case PageType.PersonalDetails => new PersonalDetailsController().view()
 
 /*
   Main Components
@@ -183,7 +183,7 @@ class NewResumePresenterImpl(val model: NewResumeModel) extends NewResumePresent
   val logger = LoggerFactory.getLogger(classOf[NewResumePresenterImpl])
 
   override def onCreateForm(): Unit =
-    EventBus.getDefault().post(PageType.Wizard)
+    EventBus.getDefault().post(PageType.PersonalDetails)
 
 case class NewResumeModel(
   val name: StringProperty = StringProperty("")
@@ -213,42 +213,42 @@ class NewResumeViewImpl(
     ComponentUtil.createContentPage(childNodes)
 
 /*
-  Wizard Components
+  Personal Details
 */
-trait WizardPresenter:
+trait PersonalDetailsPresenter:
   def onContinue(): Unit
-trait WizardView:
+trait PersonalDetailsView:
   def view(): Region
 
-case class WizardModel(
+case class PersonalDetailsModel(
   val name: StringProperty = StringProperty(""),
   val title: StringProperty = StringProperty(""),
   val summary: StringProperty = StringProperty(""),
 )
 
-class WizardController() extends Controller[Region]:
-  val model = new WizardModel()
-  val wizardPresenter = new WizardPresenterImpl(model)
-  val wizardView = new WizardViewImpl(wizardPresenter, model)
+class PersonalDetailsController() extends Controller[Region]:
+  val model = new PersonalDetailsModel()
+  val wizardPresenter = new PersonalDetailsPresenterImpl(model)
+  val wizardView = new PersonalDetailsViewImpl(wizardPresenter, model)
 
   def view(): Region =
     wizardView.view()  
 
-class WizardPresenterImpl(val model: WizardModel) extends WizardPresenter:
-  val logger = LoggerFactory.getLogger(classOf[WizardPresenterImpl])
+class PersonalDetailsPresenterImpl(val model: PersonalDetailsModel) extends PersonalDetailsPresenter:
+  val logger = LoggerFactory.getLogger(classOf[PersonalDetailsPresenterImpl])
 
   override def onContinue(): Unit =
     logger.info("wizard continue clicked")
 
-class WizardViewImpl(
-  val presenter: WizardPresenter,
-  val model: WizardModel
-) extends WizardView:
+class PersonalDetailsViewImpl(
+  val presenter: PersonalDetailsPresenter,
+  val model: PersonalDetailsModel
+) extends PersonalDetailsView:
 
   override def view(): Region =
-    createWizard
+    createPersonalDetails
 
-  private def createWizard =
+  private def createPersonalDetails =
     val childNodes = List(
         new Text("Personal Details"),
         new Button("Continue") {
