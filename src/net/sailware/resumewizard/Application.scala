@@ -32,6 +32,7 @@ enum PageType:
   case Dashboard
   case NewResume
   case PersonalDetails
+  case ContactDetails
 
 case class State(val currentPageType: PageType = PageType.Dashboard)
 
@@ -70,6 +71,7 @@ object PageFactory:
       case PageType.Dashboard => new DashboardController().view()
       case PageType.NewResume => new NewResumeController().view()
       case PageType.PersonalDetails => new PersonalDetailsController().view()
+      case PageType.ContactDetails => new ContactDetailsController().view()
 
 /*
   Main Components
@@ -198,7 +200,7 @@ class NewResumeViewImpl(
     createNewResumePane
 
   private def createNewResumePane =
-    val childNodes = List(
+    val content = List(
         new Text("Create New Resume"),
         new Button("Create Resume") {
           disable <== model.name.isEmpty()
@@ -210,7 +212,7 @@ class NewResumeViewImpl(
         }
     )
 
-    ComponentUtil.createContentPage(childNodes)
+    ComponentUtil.createContentPage(content)
 
 /*
   Personal Details
@@ -238,7 +240,7 @@ class PersonalDetailsPresenterImpl(val model: PersonalDetailsModel) extends Pers
   val logger = LoggerFactory.getLogger(classOf[PersonalDetailsPresenterImpl])
 
   override def onContinue(): Unit =
-    logger.info("wizard continue clicked")
+    EventBus.getDefault().post(PageType.ContactDetails)
 
 class PersonalDetailsViewImpl(
   val presenter: PersonalDetailsPresenter,
@@ -249,7 +251,7 @@ class PersonalDetailsViewImpl(
     createPersonalDetails
 
   private def createPersonalDetails =
-    val childNodes = List(
+    val content = List(
         new Text("Personal Details"),
         new Button("Continue") {
           onAction = (event: ActionEvent) => presenter.onContinue()
@@ -269,14 +271,70 @@ class PersonalDetailsViewImpl(
         }
     )
 
-    ComponentUtil.createContentPage(childNodes)
+    ComponentUtil.createContentPage(content)
+
+/*
+  Contact Details
+*/
+case class ContactDetailsModel(
+  val phone: StringProperty = StringProperty(""),
+  val email: StringProperty = StringProperty(""),
+  val location: StringProperty = StringProperty("")
+)
+
+trait ContactDetailsPresenter:
+  def onContinue(): Unit
+trait ContactDetailsView:
+  def view(): Region
+
+class ContactDetailsController() extends Controller[Region]:
+  val model = new ContactDetailsModel()
+  val contactDetailsPresenter = new ContactDetailsPresenterImpl(model)
+  val contactDetailsView = new ContactDetailsViewImpl(contactDetailsPresenter, model)
+
+  override def view(): Region =
+    contactDetailsView.view()
+
+class ContactDetailsPresenterImpl(
+  val model: ContactDetailsModel
+) extends ContactDetailsPresenter:
+  val logger = LoggerFactory.getLogger(classOf[ContactDetailsPresenterImpl])
+
+  override def onContinue(): Unit =
+    logger.info("On continued clicked...")
+
+class ContactDetailsViewImpl(
+  val presenter: ContactDetailsPresenter,
+  val model: ContactDetailsModel
+) extends ContactDetailsView:
+  override def view(): Region =
+    val content = List(
+        new Text("Contact Details"),
+        new Button("Continue") {
+          onAction = (event: ActionEvent) => presenter.onContinue()
+        },
+        new Label("Your phone number"),
+        new TextField {
+          text <==> model.phone
+        },
+        new Label("Your email address"),
+        new TextField {
+          text <==> model.email
+        },
+        new Label("Your location"),
+        new TextField {
+          text <==> model.location
+        }
+    )
+
+    ComponentUtil.createContentPage(content)
 
 /*
   Component Util
 */
 object ComponentUtil:
 
-  def createContentPage(childNodes: List[Node]): VBox =
+  def createContentPage(content: List[Node]): VBox =
     new VBox(5):
       style = """
               -fx-padding: 20;
@@ -289,4 +347,4 @@ object ComponentUtil:
               -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.18), 10, 0, 0, 0);
               """
       maxWidth = 1020
-      children = childNodes
+      children = content
