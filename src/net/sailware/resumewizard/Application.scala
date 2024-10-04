@@ -36,6 +36,7 @@ enum PageType:
   case PersonalDetails
   case ContactDetails
   case Socials
+  case Experiences
 
 case class State(val currentPageType: PageType = PageType.Dashboard)
 
@@ -76,6 +77,7 @@ object PageFactory:
       case PageType.PersonalDetails => new PersonalDetailsController().view()
       case PageType.ContactDetails => new ContactDetailsController().view()
       case PageType.Socials => new SocialsController().view()
+      case PageType.Experiences => new ExperiencesController().view()
 
 /*
   Main Components
@@ -363,7 +365,7 @@ class SocialsPresenterImpl(val model: SocialsModel) extends SocialsPresenter:
   val logger = LoggerFactory.getLogger(classOf[SocialsPresenterImpl])
 
   override def onContinue(): Unit =
-    logger.info("on continue clicked...")
+    EventBus.getDefault().post(PageType.Experiences)
 
 class SocialsViewImpl(val presenter: SocialsPresenter, val model: SocialsModel) extends SocialsView:
   override def view(): Region =
@@ -396,6 +398,90 @@ class SocialsViewImpl(val presenter: SocialsPresenter, val model: SocialsModel) 
         text <==> social.url
       }
     )
+/*
+  Experiences
+*/
+case class ExperienceModel(
+  val title: StringProperty = StringProperty(""),
+  val organization: StringProperty = StringProperty(""),
+  val duration: StringProperty = StringProperty(""),
+  val location: StringProperty = StringProperty(""),
+  val description: StringProperty = StringProperty(""),
+  val skills: StringProperty = StringProperty("")
+)
+
+case class ExperiencesModel(
+  val experiences: ObservableBuffer[ExperienceModel] = ObservableBuffer(new ExperienceModel())
+)
+
+trait ExperiencesPresenter:
+  def onContinue(): Unit
+trait ExperiencesView:
+  def view(): Region
+
+class ExperiencesController() extends Controller[Region]:
+  val model = new ExperiencesModel()
+  val experiencesPresenter = new ExperiencesPresenterImpl(model)
+  val experiencesView = new ExperiencesViewImpl(experiencesPresenter, model)
+
+  override def view(): Region =
+    experiencesView.view()
+
+class ExperiencesPresenterImpl(val model: ExperiencesModel) extends ExperiencesPresenter:
+  val logger = LoggerFactory.getLogger(classOf[ExperiencesPresenterImpl])
+
+  override def onContinue(): Unit =
+    logger.info("on continue pressed...")
+
+class ExperiencesViewImpl(val presenter: ExperiencesPresenter, val model: ExperiencesModel) extends ExperiencesView:
+
+  override def view(): Region =
+    val content = List(
+      new Text("Experiences"),
+      new Button("Continue") {
+        onAction = (event: ActionEvent) => presenter.onContinue()
+      },
+      new VBox {
+        children = model.experiences.map(experience => createExperienceSection(experience)).flatten
+        model.experiences.onInvalidate { (newValue) =>
+          children = model.experiences.map(experience => createExperienceSection(experience)).flatten
+        }
+      },
+      new Button("Add Experience") {
+        onAction = (event: ActionEvent) => model.experiences += new ExperienceModel()
+      },
+    )
+
+    ComponentUtil.createContentPage(content)  
+
+  private def createExperienceSection(experience: ExperienceModel): List[Node] =
+    List(
+      new Label("Title"),
+      new TextField {
+        text <==> experience.title
+      },
+      new Label("Organization Name"),
+      new TextField {
+        text <==> experience.organization
+      },
+      new Label("Duration"),
+      new TextField {
+        text <==> experience.duration
+      },
+      new Label("Location"),
+      new TextField {
+        text <==> experience.location
+      },
+      new Label("Description"),
+      new TextField {
+        text <==> experience.description
+      },
+      new Label("Skills"),
+      new TextField {
+        text <==> experience.skills
+      },
+    )
+
 /*
   Component Util
 */
