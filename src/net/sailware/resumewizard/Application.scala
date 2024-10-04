@@ -6,6 +6,8 @@ import org.slf4j.LoggerFactory
 import scalafx.Includes.*
 import scalafx.application.JFXApp3
 import scalafx.application.JFXApp3.PrimaryStage
+import scalafx.collections.ObservableBuffer
+import scalafx.beans.property.BooleanProperty
 import scalafx.beans.property.ObjectProperty
 import scalafx.beans.property.StringProperty
 import scalafx.event.ActionEvent
@@ -33,6 +35,7 @@ enum PageType:
   case NewResume
   case PersonalDetails
   case ContactDetails
+  case Socials
 
 case class State(val currentPageType: PageType = PageType.Dashboard)
 
@@ -72,6 +75,7 @@ object PageFactory:
       case PageType.NewResume => new NewResumeController().view()
       case PageType.PersonalDetails => new PersonalDetailsController().view()
       case PageType.ContactDetails => new ContactDetailsController().view()
+      case PageType.Socials => new SocialsController().view()
 
 /*
   Main Components
@@ -167,7 +171,12 @@ class DashboardViewImpl(
 
 /*
   New Resume Components
-*/
+ */
+case class NewResumeModel(
+  val name: StringProperty = StringProperty("")
+):
+  val createBtnEnabled = name.isEmpty
+
 trait NewResumePresenter:
   def onCreateForm(): Unit
 trait NewResumeView:
@@ -187,10 +196,6 @@ class NewResumePresenterImpl(val model: NewResumeModel) extends NewResumePresent
   override def onCreateForm(): Unit =
     EventBus.getDefault().post(PageType.PersonalDetails)
 
-case class NewResumeModel(
-  val name: StringProperty = StringProperty("")
-)
-
 class NewResumeViewImpl(
   val presenter: NewResumePresenter,
   val model: NewResumeModel
@@ -203,7 +208,7 @@ class NewResumeViewImpl(
     val content = List(
         new Text("Create New Resume"),
         new Button("Create Resume") {
-          disable <== model.name.isEmpty()
+          disable <== model.createBtnEnabled
           onAction = (event: ActionEvent) => presenter.onCreateForm()
         },
         new Label("Resume Name") { },
@@ -301,7 +306,7 @@ class ContactDetailsPresenterImpl(
   val logger = LoggerFactory.getLogger(classOf[ContactDetailsPresenterImpl])
 
   override def onContinue(): Unit =
-    logger.info("On continued clicked...")
+    EventBus.getDefault().post(PageType.Socials)
 
 class ContactDetailsViewImpl(
   val presenter: ContactDetailsPresenter,
@@ -329,6 +334,68 @@ class ContactDetailsViewImpl(
 
     ComponentUtil.createContentPage(content)
 
+/*
+  Socials
+*/
+case class SocialModel(
+  val name: StringProperty = StringProperty(""),
+  val url: StringProperty = StringProperty("")
+)
+
+case class SocialsModel(
+  val socials: ObservableBuffer[SocialModel] = ObservableBuffer(new SocialModel())
+)
+
+trait SocialsPresenter:
+  def onContinue(): Unit
+trait SocialsView:
+  def view(): Region
+
+class SocialsController() extends Controller[Region]:
+  val model = new SocialsModel()
+  val socialsPresenter = new SocialsPresenterImpl(model)
+  val socialsView = new SocialsViewImpl(socialsPresenter, model)
+
+  override def view(): Region =
+    socialsView.view()
+
+class SocialsPresenterImpl(val model: SocialsModel) extends SocialsPresenter:
+  val logger = LoggerFactory.getLogger(classOf[SocialsPresenterImpl])
+
+  override def onContinue(): Unit =
+    logger.info("on continue clicked...")
+
+class SocialsViewImpl(val presenter: SocialsPresenter, val model: SocialsModel) extends SocialsView:
+  override def view(): Region =
+    val content = List(
+        new Text("Socials"),
+        new Button("Continue") {
+          onAction = (event: ActionEvent) => presenter.onContinue()
+        },
+        new VBox {
+          children = model.socials.map(social => createSocialSection(social)).flatten
+          model.socials.onInvalidate { (newValue) =>
+            children = model.socials.map(social => createSocialSection(social)).flatten
+          }
+        },
+        new Button("Add Social") {
+          onAction = (event: ActionEvent) => model.socials += new SocialModel()
+        },
+    )
+
+    ComponentUtil.createContentPage(content)
+
+  private def createSocialSection(social: SocialModel): List[Node] =
+    List(
+      new Label("Social Name"),
+      new TextField {
+        text <==> social.name
+      },
+      new Label("Social URL"),
+      new TextField {
+        text <==> social.url
+      }
+    )
 /*
   Component Util
 */
