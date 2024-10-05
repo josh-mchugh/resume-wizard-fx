@@ -37,6 +37,7 @@ enum PageType:
   case ContactDetails
   case Socials
   case Experiences
+  case Certifications
 
 case class State(val currentPageType: PageType = PageType.Dashboard)
 
@@ -78,6 +79,7 @@ object PageFactory:
       case PageType.ContactDetails => new ContactDetailsController().view()
       case PageType.Socials => new SocialsController().view()
       case PageType.Experiences => new ExperiencesController().view()
+      case PageType.Certifications => new CertificationsController().view()
 
 /*
   Main Components
@@ -431,7 +433,7 @@ class ExperiencesPresenterImpl(val model: ExperiencesModel) extends ExperiencesP
   val logger = LoggerFactory.getLogger(classOf[ExperiencesPresenterImpl])
 
   override def onContinue(): Unit =
-    logger.info("on continue pressed...")
+    EventBus.getDefault().post(PageType.Certifications)
 
 class ExperiencesViewImpl(val presenter: ExperiencesPresenter, val model: ExperiencesModel) extends ExperiencesView:
 
@@ -481,7 +483,78 @@ class ExperiencesViewImpl(val presenter: ExperiencesPresenter, val model: Experi
         text <==> experience.skills
       },
     )
+/*
+  Certifications
+ */
+case class CertificationModel(
+  val title: StringProperty = StringProperty(""),
+  val organization: StringProperty = StringProperty(""),
+  val location: StringProperty = StringProperty(""),
+  val year: StringProperty = StringProperty(""),
+)
 
+case class CertificationsModel(
+  val certifications: ObservableBuffer[CertificationModel] = ObservableBuffer(new CertificationModel())
+)
+
+trait CertificationsPresenter:
+  def onContinue(): Unit
+trait CertificationsView:
+  def view(): Region
+
+class CertificationsController() extends Controller[Region]:
+  val model = new CertificationsModel()
+  val certificationsPresenter = new CertificationsPresenterImpl(model)
+  val certificationsView = new CertificationsViewImpl(certificationsPresenter, model)
+
+  override def view(): Region =
+    certificationsView.view()
+
+class CertificationsPresenterImpl(val model: CertificationsModel) extends CertificationsPresenter:
+  val logger = LoggerFactory.getLogger(classOf[CertificationsPresenterImpl])
+
+  override def onContinue(): Unit =
+    logger.info("on continue clicked...")
+
+class CertificationsViewImpl(val presenter: CertificationsPresenter, val model: CertificationsModel) extends CertificationsView:
+  override def view(): Region =
+    val content = List(
+      new Text("Certifications"),
+      new Button("Continue") {
+        onAction = (event: ActionEvent) => presenter.onContinue()
+      },
+      new VBox {
+        children = model.certifications.map(certification => createCertificationSection(certification)).flatten
+        model.certifications.onInvalidate { (newValue) =>
+          children = model.certifications.map(certification => createCertificationSection(certification)).flatten
+        }
+      },
+      new Button("Add Certification") {
+        onAction = (event: ActionEvent) => model.certifications += new CertificationModel()
+      },
+    )
+
+    ComponentUtil.createContentPage(content)  
+
+  private def createCertificationSection(certification: CertificationModel): List[Node] =
+    List(
+      new Label("Title"),
+      new TextField {
+        text <==> certification.title
+      },
+      new Label("Organization Name"),
+      new TextField {
+        text <==> certification.organization
+      },
+      new Label("Location"),
+      new TextField {
+        text <==> certification.location
+      },
+      new Label("Year"),
+      new TextField {
+        text <==> certification.year
+      },
+    )
 /*
   Component Util
 */
