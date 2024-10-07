@@ -53,6 +53,7 @@ object Main extends JFXApp3:
     stage = new PrimaryStage:
       onCloseRequest = () => EventBus.getDefault().unregister(this)
       scene = new Scene(1280, 768):
+        stylesheets = List("styles.css")
         root = new MainController(stateProp).view()
 
   @Subscribe
@@ -562,15 +563,6 @@ object ComponentUtil:
 
   def createContentPage(content: List[Node]): VBox =
     new VBox(5):
-      style = """
-              -fx-padding: 20;
-              -fx-background-color: #ffffff;
-              -fx-background-radius: 5;
-              -fx-border-color: rgba(0, 0, 0, 0.18); 
-              -fx-border-width: 1; 
-              -fx-border-style: solid;
-              -fx-border-radius: 5;
-              -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.18), 10, 0, 0, 0);
-              """
+      styleClass = List("page")
       maxWidth = 1020
       children = content
