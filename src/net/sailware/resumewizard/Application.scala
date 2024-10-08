@@ -11,6 +11,7 @@ import scalafx.beans.property.BooleanProperty
 import scalafx.beans.property.ObjectProperty
 import scalafx.beans.property.StringProperty
 import scalafx.event.ActionEvent
+import scalafx.geometry.Pos
 import scalafx.geometry.VPos
 import scalafx.scene.Node
 import scalafx.scene.Parent
@@ -23,11 +24,15 @@ import scalafx.scene.control.ScrollPane
 import scalafx.scene.control.ScrollPane.ScrollBarPolicy
 import scalafx.scene.layout.AnchorPane
 import scalafx.scene.layout.BorderPane
+import scalafx.scene.layout.HBox
 import scalafx.scene.layout.Priority
 import scalafx.scene.layout.Region
 import scalafx.scene.layout.StackPane
 import scalafx.scene.layout.VBox
-import scalafx.scene.text.{Font, FontWeight, Text, TextFlow}
+import scalafx.scene.text.Font
+import scalafx.scene.text.FontWeight
+import scalafx.scene.text.Text
+import scalafx.scene.text. TextFlow
 import scalafx.stage.Stage
 
 enum PageType:
@@ -211,11 +216,10 @@ class NewResumeViewImpl(
 
   private def createNewResumePane =
     val content = List(
-        new Text("Create New Resume"),
-        new Button("Create Resume") {
-          disable <== model.createBtnEnabled
-          onAction = (event: ActionEvent) => presenter.onCreateForm()
-        },
+        ComponentUtil.createPageHeader(
+          "Create New Resume",
+          createContinueButton()
+        ),
         new Label("Resume Name") { },
         new TextField {
           text <==> model.name
@@ -224,6 +228,17 @@ class NewResumeViewImpl(
 
     ComponentUtil.createContentPage(content)
 
+  private def createContinueButton(): List[HBox] =
+    val button = new Button("Create Resume"):
+      disable <== model.createBtnEnabled
+      onAction = (event: ActionEvent) => presenter.onCreateForm()
+    
+    List(
+      new HBox {
+        alignment = Pos.TopRight
+        children = button
+      }
+    )
 /*
   Personal Details
 */
@@ -262,10 +277,10 @@ class PersonalDetailsViewImpl(
 
   private def createPersonalDetails =
     val content = List(
-        new Text("Personal Details"),
-        new Button("Continue") {
-          onAction = (event: ActionEvent) => presenter.onContinue()
-        },
+        ComponentUtil.createPageHeader(
+          "Personal Details",
+          createContinueButton()
+        ),
         new Label("Your name"),
         new TextField {
           text <==> model.name
@@ -282,6 +297,16 @@ class PersonalDetailsViewImpl(
     )
 
     ComponentUtil.createContentPage(content)
+
+  private def createContinueButton(): List[HBox] =
+    val button = new Button("Continue"):
+      onAction = (event: ActionEvent) => presenter.onContinue()
+
+    List(
+      new HBox:
+        alignment = Pos.TopRight
+        children = button
+    )
 
 /*
   Contact Details
@@ -319,10 +344,10 @@ class ContactDetailsViewImpl(
 ) extends ContactDetailsView:
   override def view(): Region =
     val content = List(
-        new Text("Contact Details"),
-        new Button("Continue") {
-          onAction = (event: ActionEvent) => presenter.onContinue()
-        },
+        ComponentUtil.createPageHeader(
+          "Contact Details",
+          createContinueButton()
+        ),
         new Label("Your phone number"),
         new TextField {
           text <==> model.phone
@@ -339,6 +364,15 @@ class ContactDetailsViewImpl(
 
     ComponentUtil.createContentPage(content)
 
+  private def createContinueButton(): List[HBox] =
+    val button = new Button("Continue"):
+      onAction = (event: ActionEvent) => presenter.onContinue()
+
+    List(
+      new HBox:
+        alignment = Pos.TopRight
+        children = button
+    )
 /*
   Socials
 */
@@ -373,10 +407,10 @@ class SocialsPresenterImpl(val model: SocialsModel) extends SocialsPresenter:
 class SocialsViewImpl(val presenter: SocialsPresenter, val model: SocialsModel) extends SocialsView:
   override def view(): Region =
     val content = List(
-        new Text("Socials"),
-        new Button("Continue") {
-          onAction = (event: ActionEvent) => presenter.onContinue()
-        },
+        ComponentUtil.createPageHeader(
+          "Socials",
+          createContinueButton()
+        ),
         new VBox {
           children = model.socials.map(social => createSocialSection(social)).flatten
           model.socials.onInvalidate { (newValue) =>
@@ -390,6 +424,16 @@ class SocialsViewImpl(val presenter: SocialsPresenter, val model: SocialsModel) 
 
     ComponentUtil.createContentPage(content)
 
+  private def createContinueButton(): List[Region] =
+    val button = new Button("Continue"):
+        onAction = (event: ActionEvent) => presenter.onContinue()
+
+    List(
+      new HBox:
+        alignment = Pos.TopRight
+        children = button
+    )
+
   private def createSocialSection(social: SocialModel): List[Node] =
     List(
       new Label("Social Name"),
@@ -401,6 +445,7 @@ class SocialsViewImpl(val presenter: SocialsPresenter, val model: SocialsModel) 
         text <==> social.url
       }
     )
+
 /*
   Experiences
 */
@@ -440,10 +485,10 @@ class ExperiencesViewImpl(val presenter: ExperiencesPresenter, val model: Experi
 
   override def view(): Region =
     val content = List(
-      new Text("Experiences"),
-      new Button("Continue") {
-        onAction = (event: ActionEvent) => presenter.onContinue()
-      },
+      ComponentUtil.createPageHeader(
+        "Experiences",
+        createContinueButton()
+      ),
       new VBox {
         children = model.experiences.map(experience => createExperienceSection(experience)).flatten
         model.experiences.onInvalidate { (newValue) =>
@@ -456,6 +501,16 @@ class ExperiencesViewImpl(val presenter: ExperiencesPresenter, val model: Experi
     )
 
     ComponentUtil.createContentPage(content)  
+
+  private def createContinueButton(): List[Region] =
+    val button = new Button("Continue"):
+      onAction = (event: ActionEvent) => presenter.onContinue()
+
+    List(
+      new HBox:
+        alignment = Pos.TopRight
+        children = button
+    )
 
   private def createExperienceSection(experience: ExperienceModel): List[Node] =
     List(
@@ -520,10 +575,10 @@ class CertificationsPresenterImpl(val model: CertificationsModel) extends Certif
 class CertificationsViewImpl(val presenter: CertificationsPresenter, val model: CertificationsModel) extends CertificationsView:
   override def view(): Region =
     val content = List(
-      new Text("Certifications"),
-      new Button("Continue") {
-        onAction = (event: ActionEvent) => presenter.onContinue()
-      },
+      ComponentUtil.createPageHeader(
+        "Certifications",
+        createContinueButton()
+      ),
       new VBox {
         children = model.certifications.map(certification => createCertificationSection(certification)).flatten
         model.certifications.onInvalidate { (newValue) =>
@@ -536,6 +591,16 @@ class CertificationsViewImpl(val presenter: CertificationsPresenter, val model: 
     )
 
     ComponentUtil.createContentPage(content)  
+
+  private def createContinueButton(): List[Region] =
+    val button = new Button("Continue"):
+      onAction = (event: ActionEvent) => presenter.onContinue()
+     
+    List(
+      new HBox:
+        alignment = Pos.TopRight
+        children = button
+    )
 
   private def createCertificationSection(certification: CertificationModel): List[Node] =
     List(
@@ -566,3 +631,14 @@ object ComponentUtil:
       styleClass = List("page")
       maxWidth = 1020
       children = content
+
+  def createPageHeader(title: String, content: List[Node]): VBox =
+    val titleBox = new HBox:
+      styleClass = List("page-header__content")
+      alignment = Pos.Center
+      children = new Text(title):
+        styleClass = List("header")
+    
+    new VBox:
+      styleClass = List("page-header")
+      children = titleBox :: content
