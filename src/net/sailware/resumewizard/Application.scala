@@ -35,6 +35,8 @@ import scalafx.scene.text.Text
 import scalafx.scene.text. TextFlow
 import scalafx.stage.Stage
 
+import net.sailware.resumewizard.view.dashboard.DashboardController
+
 enum PageType:
   case Dashboard
   case NewResume
@@ -151,36 +153,6 @@ class MainViewImpl(
         state.onChange ({
            children = pageFactory.createPage(state.value.currentPageType)
         })
-
-/*
-  Dashboard Components
-*/
-trait DashboardPresenter:
-  def onNewResumeButtonAction(): Unit
-trait DashboardView:
-  def view(): Node
-
-class DashboardController extends Controller[Node]:
-  val dashboardPresenter = new DashboardPresenterImpl()
-  val dashboardView = new DashboardViewImpl(dashboardPresenter)
-
-  override def view(): Node =
-    dashboardView.view()
-
-class DashboardPresenterImpl extends DashboardPresenter:
-  override def onNewResumeButtonAction(): Unit =
-    EventBus.getDefault().post(PageType.NewResume)
-
-class DashboardViewImpl(
-  val presenter: DashboardPresenter
-) extends DashboardView:
-
-  override def view(): Node =
-    createNewResumeButton
-
-  private def createNewResumeButton =
-    new Button("Create Resume"):
-      onAction = (event: ActionEvent) => presenter.onNewResumeButtonAction()
 
 /*
   New Resume Components
