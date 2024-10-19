@@ -73,14 +73,14 @@ object Main extends JFXApp3:
 trait Controller[T]:
   def view(): T
 
-object PageFactory:
+class PageFactory(val newResumeService: NewResumeService):
   def createPage(pageType: PageType): List[Node] =
     List(createView(pageType))
 
   private def createView(pageType: PageType): Node =
     pageType match
       case PageType.Dashboard => new DashboardController().view()
-      case PageType.NewResume => new NewResumeController().view()
+      case PageType.NewResume => new NewResumeController(newResumeService).view()
       case PageType.PersonalDetails => new PersonalDetailsController().view()
       case PageType.ContactDetails => new ContactDetailsController().view()
       case PageType.Socials => new SocialsController().view()
@@ -93,8 +93,10 @@ object PageFactory:
 class MainModel { }
 
 class MainController(val state: ObjectProperty[State]) extends Controller[Parent]:
+  val pageFactory = PageFactory(new NewResumeServiceImpl())
+
   val mainPresenter = new MainPresenterImpl()
-  val mainView = new MainViewImpl(mainPresenter, state)
+  val mainView = new MainViewImpl(mainPresenter, state, pageFactory)
 
   override def view(): Parent =
     mainView.view()
@@ -107,7 +109,8 @@ class MainPresenterImpl extends MainPresenter { }
 
 class MainViewImpl(
   val presenter: MainPresenter,
-  val state: ObjectProperty[State]
+  val state: ObjectProperty[State],
+  val pageFactory: PageFactory
 ) extends MainView:
 
   override def view(): Region =
@@ -144,9 +147,9 @@ class MainViewImpl(
       fitToWidth = true
       content = new StackPane:
         style = "-fx-padding: 20;"
-        children = PageFactory.createPage(PageType.Dashboard)
+        children = pageFactory.createPage(PageType.Dashboard)
         state.onChange ({
-           children = PageFactory.createPage(state.value.currentPageType)
+           children = pageFactory.createPage(state.value.currentPageType)
         })
 
 /*
@@ -192,18 +195,19 @@ trait NewResumePresenter:
 trait NewResumeView:
   def view(): Region
 
-class NewResumeController extends Controller[Region]:
+class NewResumeController(val newResumeService: NewResumeService) extends Controller[Region]:
   val model = new NewResumeModel()
-  val newResumePresenter = new NewResumePresenterImpl(model)
+  val newResumePresenter = new NewResumePresenterImpl(model, newResumeService)
   val newResumeView = new NewResumeViewImpl(newResumePresenter, model)
 
   override def view(): Region =
     newResumeView.view()
 
-class NewResumePresenterImpl(val model: NewResumeModel) extends NewResumePresenter:
+class NewResumePresenterImpl(val model: NewResumeModel, val resumeService: NewResumeService) extends NewResumePresenter:
   val logger = LoggerFactory.getLogger(classOf[NewResumePresenterImpl])
 
   override def onCreateForm(): Unit =
+    resumeService.createResume(model.name.value)
     EventBus.getDefault().post(PageType.PersonalDetails)
 
 class NewResumeViewImpl(
@@ -232,7 +236,7 @@ class NewResumeViewImpl(
     val button = new Button("Create Resume"):
       disable <== model.createBtnEnabled
       onAction = (event: ActionEvent) => presenter.onCreateForm()
-    
+
     List(
       new HBox {
         alignment = Pos.TopRight
@@ -259,7 +263,7 @@ class PersonalDetailsController() extends Controller[Region]:
   val wizardView = new PersonalDetailsViewImpl(wizardPresenter, model)
 
   def view(): Region =
-    wizardView.view()  
+    wizardView.view()
 
 class PersonalDetailsPresenterImpl(val model: PersonalDetailsModel) extends PersonalDetailsPresenter:
   val logger = LoggerFactory.getLogger(classOf[PersonalDetailsPresenterImpl])
@@ -500,7 +504,7 @@ class ExperiencesViewImpl(val presenter: ExperiencesPresenter, val model: Experi
       },
     )
 
-    ComponentUtil.createContentPage(content)  
+    ComponentUtil.createContentPage(content)
 
   private def createContinueButton(): List[Region] =
     val button = new Button("Continue"):
@@ -590,12 +594,12 @@ class CertificationsViewImpl(val presenter: CertificationsPresenter, val model: 
       },
     )
 
-    ComponentUtil.createContentPage(content)  
+    ComponentUtil.createContentPage(content)
 
   private def createContinueButton(): List[Region] =
     val button = new Button("Continue"):
       onAction = (event: ActionEvent) => presenter.onContinue()
-     
+
     List(
       new HBox:
         alignment = Pos.TopRight
@@ -638,7 +642,19 @@ object ComponentUtil:
       alignment = Pos.Center
       children = new Text(title):
         styleClass = List("header")
-    
+
     new VBox:
       styleClass = List("page-header")
       children = titleBox :: content
+
+/*
+  Resume Service
+*/
+trait NewResumeService:
+  def createResume(name: String): Unit
+
+class NewResumeServiceImpl() extends NewResumeService:
+  val logger = LoggerFactory.getLogger(classOf[NewResumeServiceImpl])
+
+  override def createResume(name: String): Unit =
+    logger.info("resume created: {}", name)
