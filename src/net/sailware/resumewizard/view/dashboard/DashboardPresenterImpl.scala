@@ -7,4 +7,4 @@ import org.greenrobot.eventbus.EventBus
 class DashboardPresenterImpl extends DashboardPresenter:
 
   override def onNewResumeButtonAction(): Unit =
-    EventBus.getDefault().post(PageType.NewResume)
+    EventBus.getDefault().post(PageType.CreateResume)

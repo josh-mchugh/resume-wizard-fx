@@ -36,10 +36,13 @@ import scalafx.scene.text. TextFlow
 import scalafx.stage.Stage
 
 import net.sailware.resumewizard.view.dashboard.DashboardController
+import net.sailware.resumewizard.view.resume.create.CreateResumeController
+import net.sailware.resumewizard.view.resume.create.service.CreateResumeService
+import net.sailware.resumewizard.view.resume.create.service.CreateResumeServiceImpl
 
 enum PageType:
   case Dashboard
-  case NewResume
+  case CreateResume
   case PersonalDetails
   case ContactDetails
   case Socials
@@ -75,14 +78,14 @@ object Main extends JFXApp3:
 trait Controller[T]:
   def view(): T
 
-class PageFactory(val newResumeService: NewResumeService):
+class PageFactory(val createResumeService: CreateResumeService):
   def createPage(pageType: PageType): List[Node] =
     List(createView(pageType))
 
   private def createView(pageType: PageType): Node =
     pageType match
       case PageType.Dashboard => new DashboardController().view()
-      case PageType.NewResume => new NewResumeController(newResumeService).view()
+      case PageType.CreateResume => new CreateResumeController(createResumeService).view()
       case PageType.PersonalDetails => new PersonalDetailsController().view()
       case PageType.ContactDetails => new ContactDetailsController().view()
       case PageType.Socials => new SocialsController().view()
@@ -95,7 +98,7 @@ class PageFactory(val newResumeService: NewResumeService):
 class MainModel { }
 
 class MainController(val state: ObjectProperty[State]) extends Controller[Parent]:
-  val pageFactory = PageFactory(new NewResumeServiceImpl())
+  val pageFactory = PageFactory(new CreateResumeServiceImpl())
 
   val mainPresenter = new MainPresenterImpl()
   val mainView = new MainViewImpl(mainPresenter, state, pageFactory)
@@ -154,67 +157,6 @@ class MainViewImpl(
            children = pageFactory.createPage(state.value.currentPageType)
         })
 
-/*
-  New Resume Components
- */
-case class NewResumeModel(
-  val name: StringProperty = StringProperty("")
-):
-  val createBtnEnabled = name.isEmpty
-
-trait NewResumePresenter:
-  def onCreateForm(): Unit
-trait NewResumeView:
-  def view(): Region
-
-class NewResumeController(val newResumeService: NewResumeService) extends Controller[Region]:
-  val model = new NewResumeModel()
-  val newResumePresenter = new NewResumePresenterImpl(model, newResumeService)
-  val newResumeView = new NewResumeViewImpl(newResumePresenter, model)
-
-  override def view(): Region =
-    newResumeView.view()
-
-class NewResumePresenterImpl(val model: NewResumeModel, val resumeService: NewResumeService) extends NewResumePresenter:
-  val logger = LoggerFactory.getLogger(classOf[NewResumePresenterImpl])
-
-  override def onCreateForm(): Unit =
-    resumeService.createResume(model.name.value)
-    EventBus.getDefault().post(PageType.PersonalDetails)
-
-class NewResumeViewImpl(
-  val presenter: NewResumePresenter,
-  val model: NewResumeModel
-) extends NewResumeView:
-
-  override def view(): Region =
-    createNewResumePane
-
-  private def createNewResumePane =
-    val content = List(
-        ComponentUtil.createPageHeader(
-          "Create New Resume",
-          createContinueButton()
-        ),
-        new Label("Resume Name") { },
-        new TextField {
-          text <==> model.name
-        }
-    )
-
-    ComponentUtil.createContentPage(content)
-
-  private def createContinueButton(): List[HBox] =
-    val button = new Button("Create Resume"):
-      disable <== model.createBtnEnabled
-      onAction = (event: ActionEvent) => presenter.onCreateForm()
-
-    List(
-      new HBox {
-        alignment = Pos.TopRight
-        children = button
-      }
-    )
 /*
   Personal Details
 */
@@ -618,15 +560,3 @@ object ComponentUtil:
     new VBox:
       styleClass = List("page-header")
       children = titleBox :: content
-
-/*
-  Resume Service
-*/
-trait NewResumeService:
-  def createResume(name: String): Unit
-
-class NewResumeServiceImpl() extends NewResumeService:
-  val logger = LoggerFactory.getLogger(classOf[NewResumeServiceImpl])
-
-  override def createResume(name: String): Unit =
-    logger.info("resume created: {}", name)
