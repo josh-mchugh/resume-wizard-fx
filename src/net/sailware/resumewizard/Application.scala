@@ -32,10 +32,11 @@ import scalafx.scene.layout.VBox
 import scalafx.scene.text.Font
 import scalafx.scene.text.FontWeight
 import scalafx.scene.text.Text
-import scalafx.scene.text. TextFlow
+import scalafx.scene.text.TextFlow
 import scalafx.stage.Stage
 
 import net.sailware.resumewizard.view.dashboard.DashboardController
+import net.sailware.resumewizard.view.main.MainController
 import net.sailware.resumewizard.view.resume.create.CreateResumeController
 import net.sailware.resumewizard.view.resume.create.service.CreateResumeService
 import net.sailware.resumewizard.view.resume.create.service.CreateResumeServiceImpl
@@ -91,71 +92,6 @@ class PageFactory(val createResumeService: CreateResumeService):
       case PageType.Socials => new SocialsController().view()
       case PageType.Experiences => new ExperiencesController().view()
       case PageType.Certifications => new CertificationsController().view()
-
-/*
-  Main Components
- */
-class MainModel { }
-
-class MainController(val state: ObjectProperty[State]) extends Controller[Parent]:
-  val pageFactory = PageFactory(new CreateResumeServiceImpl())
-
-  val mainPresenter = new MainPresenterImpl()
-  val mainView = new MainViewImpl(mainPresenter, state, pageFactory)
-
-  override def view(): Parent =
-    mainView.view()
-
-trait MainPresenter {}
-trait MainView:
-  def view(): Region
-
-class MainPresenterImpl extends MainPresenter { }
-
-class MainViewImpl(
-  val presenter: MainPresenter,
-  val state: ObjectProperty[State],
-  val pageFactory: PageFactory
-) extends MainView:
-
-  override def view(): Region =
-    createRootPane
-
-  private def createRootPane =
-    new AnchorPane:
-      children = createBasePane
-
-  private def createBasePane =
-    val result = new StackPane:
-      children = createBorderFramePane
-    AnchorPane.setTopAnchor(result, 0.0)
-    AnchorPane.setLeftAnchor(result, 0.0)
-    AnchorPane.setBottomAnchor(result, 0.0)
-    AnchorPane.setRightAnchor(result, 0.0)
-    result
-
-  private def createBorderFramePane =
-    new BorderPane:
-      top = createTopNavigation
-      center = createMainContent
-
-  private def createTopNavigation =
-    new Text("Resume Wizard Top"):
-      textOrigin = VPos.Top
-      font = Font.font(null, FontWeight.Bold, 18)
-
-  private def createMainContent =
-    new ScrollPane:
-      vbarPolicy = ScrollBarPolicy.AS_NEEDED
-      fitToHeight = true
-      hbarPolicy = ScrollBarPolicy.NEVER
-      fitToWidth = true
-      content = new StackPane:
-        style = "-fx-padding: 20;"
-        children = pageFactory.createPage(PageType.Dashboard)
-        state.onChange ({
-           children = pageFactory.createPage(state.value.currentPageType)
-        })
 
 /*
   Personal Details
