@@ -40,6 +40,7 @@ import net.sailware.resumewizard.view.main.MainController
 import net.sailware.resumewizard.view.resume.create.CreateResumeController
 import net.sailware.resumewizard.view.resume.create.service.CreateResumeService
 import net.sailware.resumewizard.view.resume.create.service.CreateResumeServiceImpl
+import net.sailware.resumewizard.view.resume.wizard.personal.PersonalDetailsController
 
 enum PageType:
   case Dashboard
@@ -92,75 +93,6 @@ class PageFactory(val createResumeService: CreateResumeService):
       case PageType.Socials => new SocialsController().view()
       case PageType.Experiences => new ExperiencesController().view()
       case PageType.Certifications => new CertificationsController().view()
-
-/*
-  Personal Details
-*/
-trait PersonalDetailsPresenter:
-  def onContinue(): Unit
-trait PersonalDetailsView:
-  def view(): Region
-
-case class PersonalDetailsModel(
-  val name: StringProperty = StringProperty(""),
-  val title: StringProperty = StringProperty(""),
-  val summary: StringProperty = StringProperty(""),
-)
-
-class PersonalDetailsController() extends Controller[Region]:
-  val model = new PersonalDetailsModel()
-  val wizardPresenter = new PersonalDetailsPresenterImpl(model)
-  val wizardView = new PersonalDetailsViewImpl(wizardPresenter, model)
-
-  def view(): Region =
-    wizardView.view()
-
-class PersonalDetailsPresenterImpl(val model: PersonalDetailsModel) extends PersonalDetailsPresenter:
-  val logger = LoggerFactory.getLogger(classOf[PersonalDetailsPresenterImpl])
-
-  override def onContinue(): Unit =
-    EventBus.getDefault().post(PageType.ContactDetails)
-
-class PersonalDetailsViewImpl(
-  val presenter: PersonalDetailsPresenter,
-  val model: PersonalDetailsModel
-) extends PersonalDetailsView:
-
-  override def view(): Region =
-    createPersonalDetails
-
-  private def createPersonalDetails =
-    val content = List(
-        ComponentUtil.createPageHeader(
-          "Personal Details",
-          createContinueButton()
-        ),
-        new Label("Your name"),
-        new TextField {
-          text <==> model.name
-        },
-        new Label("Your Current Title"),
-        new TextField {
-          text <==> model.title
-        },
-        new Label("Summary of your current career position"),
-        new TextArea {
-          prefRowCount = 3
-          text <==> model.summary
-        }
-    )
-
-    ComponentUtil.createContentPage(content)
-
-  private def createContinueButton(): List[HBox] =
-    val button = new Button("Continue"):
-      onAction = (event: ActionEvent) => presenter.onContinue()
-
-    List(
-      new HBox:
-        alignment = Pos.TopRight
-        children = button
-    )
 
 /*
   Contact Details
