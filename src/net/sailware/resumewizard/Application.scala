@@ -40,6 +40,7 @@ import net.sailware.resumewizard.view.main.MainController
 import net.sailware.resumewizard.view.resume.create.CreateResumeController
 import net.sailware.resumewizard.view.resume.create.service.CreateResumeService
 import net.sailware.resumewizard.view.resume.create.service.CreateResumeServiceImpl
+import net.sailware.resumewizard.view.resume.wizard.contact.ContactDetailsController
 import net.sailware.resumewizard.view.resume.wizard.personal.PersonalDetailsController
 
 enum PageType:
@@ -94,71 +95,6 @@ class PageFactory(val createResumeService: CreateResumeService):
       case PageType.Experiences => new ExperiencesController().view()
       case PageType.Certifications => new CertificationsController().view()
 
-/*
-  Contact Details
-*/
-case class ContactDetailsModel(
-  val phone: StringProperty = StringProperty(""),
-  val email: StringProperty = StringProperty(""),
-  val location: StringProperty = StringProperty("")
-)
-
-trait ContactDetailsPresenter:
-  def onContinue(): Unit
-trait ContactDetailsView:
-  def view(): Region
-
-class ContactDetailsController() extends Controller[Region]:
-  val model = new ContactDetailsModel()
-  val contactDetailsPresenter = new ContactDetailsPresenterImpl(model)
-  val contactDetailsView = new ContactDetailsViewImpl(contactDetailsPresenter, model)
-
-  override def view(): Region =
-    contactDetailsView.view()
-
-class ContactDetailsPresenterImpl(
-  val model: ContactDetailsModel
-) extends ContactDetailsPresenter:
-  val logger = LoggerFactory.getLogger(classOf[ContactDetailsPresenterImpl])
-
-  override def onContinue(): Unit =
-    EventBus.getDefault().post(PageType.Socials)
-
-class ContactDetailsViewImpl(
-  val presenter: ContactDetailsPresenter,
-  val model: ContactDetailsModel
-) extends ContactDetailsView:
-  override def view(): Region =
-    val content = List(
-        ComponentUtil.createPageHeader(
-          "Contact Details",
-          createContinueButton()
-        ),
-        new Label("Your phone number"),
-        new TextField {
-          text <==> model.phone
-        },
-        new Label("Your email address"),
-        new TextField {
-          text <==> model.email
-        },
-        new Label("Your location"),
-        new TextField {
-          text <==> model.location
-        }
-    )
-
-    ComponentUtil.createContentPage(content)
-
-  private def createContinueButton(): List[HBox] =
-    val button = new Button("Continue"):
-      onAction = (event: ActionEvent) => presenter.onContinue()
-
-    List(
-      new HBox:
-        alignment = Pos.TopRight
-        children = button
-    )
 /*
   Socials
 */
