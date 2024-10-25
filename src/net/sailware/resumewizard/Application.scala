@@ -41,6 +41,7 @@ import net.sailware.resumewizard.view.resume.create.CreateResumeController
 import net.sailware.resumewizard.view.resume.create.service.CreateResumeService
 import net.sailware.resumewizard.view.resume.create.service.CreateResumeServiceImpl
 import net.sailware.resumewizard.view.resume.wizard.contact.ContactDetailsController
+import net.sailware.resumewizard.view.resume.wizard.experience.ExperiencesController
 import net.sailware.resumewizard.view.resume.wizard.personal.PersonalDetailsController
 import net.sailware.resumewizard.view.resume.wizard.social.SocialsController
 
@@ -95,99 +96,7 @@ class PageFactory(val createResumeService: CreateResumeService):
       case PageType.Socials => new SocialsController().view()
       case PageType.Experiences => new ExperiencesController().view()
       case PageType.Certifications => new CertificationsController().view()
-/*
-  Experiences
-*/
-case class ExperienceModel(
-  val title: StringProperty = StringProperty(""),
-  val organization: StringProperty = StringProperty(""),
-  val duration: StringProperty = StringProperty(""),
-  val location: StringProperty = StringProperty(""),
-  val description: StringProperty = StringProperty(""),
-  val skills: StringProperty = StringProperty("")
-)
 
-case class ExperiencesModel(
-  val experiences: ObservableBuffer[ExperienceModel] = ObservableBuffer(new ExperienceModel())
-)
-
-trait ExperiencesPresenter:
-  def onContinue(): Unit
-trait ExperiencesView:
-  def view(): Region
-
-class ExperiencesController() extends Controller[Region]:
-  val model = new ExperiencesModel()
-  val experiencesPresenter = new ExperiencesPresenterImpl(model)
-  val experiencesView = new ExperiencesViewImpl(experiencesPresenter, model)
-
-  override def view(): Region =
-    experiencesView.view()
-
-class ExperiencesPresenterImpl(val model: ExperiencesModel) extends ExperiencesPresenter:
-  val logger = LoggerFactory.getLogger(classOf[ExperiencesPresenterImpl])
-
-  override def onContinue(): Unit =
-    EventBus.getDefault().post(PageType.Certifications)
-
-class ExperiencesViewImpl(val presenter: ExperiencesPresenter, val model: ExperiencesModel) extends ExperiencesView:
-
-  override def view(): Region =
-    val content = List(
-      ComponentUtil.createPageHeader(
-        "Experiences",
-        createContinueButton()
-      ),
-      new VBox {
-        children = model.experiences.map(experience => createExperienceSection(experience)).flatten
-        model.experiences.onInvalidate { (newValue) =>
-          children = model.experiences.map(experience => createExperienceSection(experience)).flatten
-        }
-      },
-      new Button("Add Experience") {
-        onAction = (event: ActionEvent) => model.experiences += new ExperienceModel()
-      },
-    )
-
-    ComponentUtil.createContentPage(content)
-
-  private def createContinueButton(): List[Region] =
-    val button = new Button("Continue"):
-      onAction = (event: ActionEvent) => presenter.onContinue()
-
-    List(
-      new HBox:
-        alignment = Pos.TopRight
-        children = button
-    )
-
-  private def createExperienceSection(experience: ExperienceModel): List[Node] =
-    List(
-      new Label("Title"),
-      new TextField {
-        text <==> experience.title
-      },
-      new Label("Organization Name"),
-      new TextField {
-        text <==> experience.organization
-      },
-      new Label("Duration"),
-      new TextField {
-        text <==> experience.duration
-      },
-      new Label("Location"),
-      new TextField {
-        text <==> experience.location
-      },
-      new Label("Description"),
-      new TextField {
-        text <==> experience.description
-      },
-      new Label("Skills"),
-      new TextField {
-        text <==> experience.skills
-      },
-    )
 /*
   Certifications
  */
