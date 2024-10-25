@@ -1,6 +1,6 @@
 package net.sailware.resumewizard.view.resume.wizard.social
 
-import net.sailware.resumewizard.ComponentUtil
+import net.sailware.resumewizard.view.util.ComponentUtil
 import scalafx.Includes.*
 import scalafx.geometry.Pos
 import scalafx.event.ActionEvent

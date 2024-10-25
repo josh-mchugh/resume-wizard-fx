@@ -97,25 +97,3 @@ class PageFactory(val createResumeService: CreateResumeService):
       case PageType.Socials => new SocialsController().view()
       case PageType.Experiences => new ExperiencesController().view()
       case PageType.Certifications => new CertificationsController().view()
-
-/*
-  Component Util
-*/
-object ComponentUtil:
-
-  def createContentPage(content: List[Node]): VBox =
-    new VBox(5):
-      styleClass = List("page")
-      maxWidth = 1020
-      children = content
-
-  def createPageHeader(title: String, content: List[Node]): VBox =
-    val titleBox = new HBox:
-      styleClass = List("page-header__content")
-      alignment = Pos.Center
-      children = new Text(title):
-        styleClass = List("header")
-
-    new VBox:
-      styleClass = List("page-header")
-      children = titleBox :: content
