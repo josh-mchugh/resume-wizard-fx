@@ -40,6 +40,7 @@ import net.sailware.resumewizard.view.main.MainController
 import net.sailware.resumewizard.view.resume.create.CreateResumeController
 import net.sailware.resumewizard.view.resume.create.service.CreateResumeService
 import net.sailware.resumewizard.view.resume.create.service.CreateResumeServiceImpl
+import net.sailware.resumewizard.view.resume.wizard.certification.CertificationsController
 import net.sailware.resumewizard.view.resume.wizard.contact.ContactDetailsController
 import net.sailware.resumewizard.view.resume.wizard.experience.ExperiencesController
 import net.sailware.resumewizard.view.resume.wizard.personal.PersonalDetailsController
@@ -97,88 +98,6 @@ class PageFactory(val createResumeService: CreateResumeService):
       case PageType.Experiences => new ExperiencesController().view()
       case PageType.Certifications => new CertificationsController().view()
 
-/*
-  Certifications
- */
-case class CertificationModel(
-  val title: StringProperty = StringProperty(""),
-  val organization: StringProperty = StringProperty(""),
-  val location: StringProperty = StringProperty(""),
-  val year: StringProperty = StringProperty(""),
-)
-
-case class CertificationsModel(
-  val certifications: ObservableBuffer[CertificationModel] = ObservableBuffer(new CertificationModel())
-)
-
-trait CertificationsPresenter:
-  def onContinue(): Unit
-trait CertificationsView:
-  def view(): Region
-
-class CertificationsController() extends Controller[Region]:
-  val model = new CertificationsModel()
-  val certificationsPresenter = new CertificationsPresenterImpl(model)
-  val certificationsView = new CertificationsViewImpl(certificationsPresenter, model)
-
-  override def view(): Region =
-    certificationsView.view()
-
-class CertificationsPresenterImpl(val model: CertificationsModel) extends CertificationsPresenter:
-  val logger = LoggerFactory.getLogger(classOf[CertificationsPresenterImpl])
-
-  override def onContinue(): Unit =
-    logger.info("on continue clicked...")
-
-class CertificationsViewImpl(val presenter: CertificationsPresenter, val model: CertificationsModel) extends CertificationsView:
-  override def view(): Region =
-    val content = List(
-      ComponentUtil.createPageHeader(
-        "Certifications",
-        createContinueButton()
-      ),
-      new VBox {
-        children = model.certifications.map(certification => createCertificationSection(certification)).flatten
-        model.certifications.onInvalidate { (newValue) =>
-          children = model.certifications.map(certification => createCertificationSection(certification)).flatten
-        }
-      },
-      new Button("Add Certification") {
-        onAction = (event: ActionEvent) => model.certifications += new CertificationModel()
-      },
-    )
-
-    ComponentUtil.createContentPage(content)
-
-  private def createContinueButton(): List[Region] =
-    val button = new Button("Continue"):
-      onAction = (event: ActionEvent) => presenter.onContinue()
-
-    List(
-      new HBox:
-        alignment = Pos.TopRight
-        children = button
-    )
-
-  private def createCertificationSection(certification: CertificationModel): List[Node] =
-    List(
-      new Label("Title"),
-      new TextField {
-        text <==> certification.title
-      },
-      new Label("Organization Name"),
-      new TextField {
-        text <==> certification.organization
-      },
-      new Label("Location"),
-      new TextField {
-        text <==> certification.location
-      },
-      new Label("Year"),
-      new TextField {
-        text <==> certification.year
-      },
-    )
 /*
   Component Util
 */
