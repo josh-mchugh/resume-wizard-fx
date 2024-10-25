@@ -1,4 +1,4 @@
-package net.sailware.resumewizard.view.util
+package net.sailware.resumewizard.view.core
 
 import scalafx.geometry.Pos
 import scalafx.scene.Node

@@ -1,6 +1,6 @@
 package net.sailware.resumewizard.view.resume.create
 
-import net.sailware.resumewizard.PageType
+import net.sailware.resumewizard.view.core.PageType
 import net.sailware.resumewizard.view.resume.create.service.CreateResumeService
 import org.greenrobot.eventbus.EventBus
 import org.slf4j.LoggerFactory

@@ -1,6 +1,6 @@
 package net.sailware.resumewizard.view.resume.wizard.experience
 
-import net.sailware.resumewizard.Controller
+import net.sailware.resumewizard.view.core.Controller
 import scalafx.scene.layout.Region
 
 class ExperiencesController() extends Controller[Region]:

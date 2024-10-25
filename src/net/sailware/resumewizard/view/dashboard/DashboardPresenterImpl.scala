@@ -1,6 +1,6 @@
 package net.sailware.resumewizard.view.dashboard
 
-import net.sailware.resumewizard.PageType
+import net.sailware.resumewizard.view.core.PageType
 
 import org.greenrobot.eventbus.EventBus
 

@@ -1,6 +1,6 @@
 package net.sailware.resumewizard.view.resume.wizard.certification
 
-import net.sailware.resumewizard.view.util.ComponentUtil
+import net.sailware.resumewizard.view.core.ComponentUtil
 import scalafx.Includes.*
 import scalafx.event.ActionEvent
 import scalafx.geometry.Pos

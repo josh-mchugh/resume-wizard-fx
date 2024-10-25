@@ -1,8 +1,8 @@
 package net.sailware.resumewizard.view.main
 
-import net.sailware.resumewizard.PageFactory
-import net.sailware.resumewizard.PageType
-import net.sailware.resumewizard.State
+import net.sailware.resumewizard.view.core.PageFactory
+import net.sailware.resumewizard.view.core.PageType
+import net.sailware.resumewizard.view.core.State
 import scalafx.beans.property.ObjectProperty
 import scalafx.geometry.VPos
 import scalafx.scene.control.ScrollPane

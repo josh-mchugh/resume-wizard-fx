@@ -1,6 +1,6 @@
 package net.sailware.resumewizard.view.resume.wizard.social
 
-import net.sailware.resumewizard.Controller
+import net.sailware.resumewizard.view.core.Controller
 import scalafx.scene.layout.Region
 
 class SocialsController() extends Controller[Region]:

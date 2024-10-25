@@ -1,8 +1,8 @@
 package net.sailware.resumewizard.view.main
 
-import net.sailware.resumewizard.Controller
-import net.sailware.resumewizard.PageFactory
-import net.sailware.resumewizard.State
+import net.sailware.resumewizard.view.core.Controller
+import net.sailware.resumewizard.view.core.PageFactory
+import net.sailware.resumewizard.view.core.State
 import net.sailware.resumewizard.view.resume.create.service.CreateResumeServiceImpl
 import scalafx.beans.property.ObjectProperty
 import scalafx.scene.Parent

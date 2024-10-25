@@ -1,6 +1,6 @@
 package net.sailware.resumewizard.view.resume.create
 
-import net.sailware.resumewizard.Controller
+import net.sailware.resumewizard.view.core.Controller
 import net.sailware.resumewizard.view.resume.create.service.CreateResumeService
 import scalafx.scene.layout.Region
 
