@@ -42,6 +42,7 @@ import net.sailware.resumewizard.view.resume.create.service.CreateResumeService
 import net.sailware.resumewizard.view.resume.create.service.CreateResumeServiceImpl
 import net.sailware.resumewizard.view.resume.wizard.contact.ContactDetailsController
 import net.sailware.resumewizard.view.resume.wizard.personal.PersonalDetailsController
+import net.sailware.resumewizard.view.resume.wizard.social.SocialsController
 
 enum PageType:
   case Dashboard
@@ -94,80 +95,6 @@ class PageFactory(val createResumeService: CreateResumeService):
       case PageType.Socials => new SocialsController().view()
       case PageType.Experiences => new ExperiencesController().view()
       case PageType.Certifications => new CertificationsController().view()
-
-/*
-  Socials
-*/
-case class SocialModel(
-  val name: StringProperty = StringProperty(""),
-  val url: StringProperty = StringProperty("")
-)
-
-case class SocialsModel(
-  val socials: ObservableBuffer[SocialModel] = ObservableBuffer(new SocialModel())
-)
-
-trait SocialsPresenter:
-  def onContinue(): Unit
-trait SocialsView:
-  def view(): Region
-
-class SocialsController() extends Controller[Region]:
-  val model = new SocialsModel()
-  val socialsPresenter = new SocialsPresenterImpl(model)
-  val socialsView = new SocialsViewImpl(socialsPresenter, model)
-
-  override def view(): Region =
-    socialsView.view()
-
-class SocialsPresenterImpl(val model: SocialsModel) extends SocialsPresenter:
-  val logger = LoggerFactory.getLogger(classOf[SocialsPresenterImpl])
-
-  override def onContinue(): Unit =
-    EventBus.getDefault().post(PageType.Experiences)
-
-class SocialsViewImpl(val presenter: SocialsPresenter, val model: SocialsModel) extends SocialsView:
-  override def view(): Region =
-    val content = List(
-        ComponentUtil.createPageHeader(
-          "Socials",
-          createContinueButton()
-        ),
-        new VBox {
-          children = model.socials.map(social => createSocialSection(social)).flatten
-          model.socials.onInvalidate { (newValue) =>
-            children = model.socials.map(social => createSocialSection(social)).flatten
-          }
-        },
-        new Button("Add Social") {
-          onAction = (event: ActionEvent) => model.socials += new SocialModel()
-        },
-    )
-
-    ComponentUtil.createContentPage(content)
-
-  private def createContinueButton(): List[Region] =
-    val button = new Button("Continue"):
-        onAction = (event: ActionEvent) => presenter.onContinue()
-
-    List(
-      new HBox:
-        alignment = Pos.TopRight
-        children = button
-    )
-
-  private def createSocialSection(social: SocialModel): List[Node] =
-    List(
-      new Label("Social Name"),
-      new TextField {
-        text <==> social.name
-      },
-      new Label("Social URL"),
-      new TextField {
-        text <==> social.url
-      }
-    )
-
 /*
   Experiences
 */
