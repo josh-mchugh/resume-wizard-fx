@@ -6,3 +6,7 @@ class ResumeServiceImpl extends ResumeService:
 
   override def handleCreateResume(name: String): Resume =
     resume.copy(name = name)
+
+  override def handlePersonalDetailsUpdate(name: String, title: String, summary: String): Resume =
+    val personalDetails = PersonalDetails(name, title, summary)
+    resume.copy(personalDetails = personalDetails)

@@ -9,8 +9,8 @@ import scalafx.beans.property.ObjectProperty
 import scalafx.scene.Parent
 
 class MainController(val state: ObjectProperty[State]) extends Controller[Parent]:
-  val resumeService = new ResumeServiceImpl()
-  val pageFactory = PageFactory(new CreateResumeServiceImpl(resumeService))
+
+  val pageFactory = PageFactory(new ResumeServiceImpl())
 
   val mainPresenter = new MainPresenterImpl()
   val mainView = new MainViewImpl(mainPresenter, state, pageFactory)
