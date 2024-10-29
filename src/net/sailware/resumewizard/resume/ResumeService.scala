@@ -5,3 +5,5 @@ trait ResumeService:
   def handleCreateResume(name: String): Resume
 
   def handlePersonalDetailsUpdate(name: String, title: String, summary: String): Resume
+
+  def handleContactDetailsUpdate(phone: String, email: String, location: String): Resume

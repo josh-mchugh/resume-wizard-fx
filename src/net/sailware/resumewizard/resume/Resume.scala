@@ -2,5 +2,6 @@ package net.sailware.resumewizard.resume
 
 case class Resume(
   val name: String = "",
-  val personalDetails: PersonalDetails = new PersonalDetails("", "", "")
+  val personalDetails: PersonalDetails = new PersonalDetails("", "", ""),
+  val contactDetails: ContactDetails = new ContactDetails("", "", "")
 )
