@@ -7,3 +7,5 @@ trait ResumeService:
   def handlePersonalDetailsUpdate(name: String, title: String, summary: String): Resume
 
   def handleContactDetailsUpdate(phone: String, email: String, location: String): Resume
+
+  def handleSocialsUpdate(socialTuples: List[(String, String)]): Resume
