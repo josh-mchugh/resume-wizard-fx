@@ -18,3 +18,9 @@ class ResumeServiceImpl extends ResumeService:
   override def handleSocialsUpdate(socialTuples: List[(String, String)]): Resume =
     val socials = socialTuples.map((name, url) => new Social(name, url))
     resume.copy(socials = socials)
+
+  override def handleExperiencesUpdate(experienceTuples: List[(String, String, String, String, String, String)]): Resume =
+    val experiences = experienceTuples.map((title, organization, duration, location, description, skills) =>
+      new Experience(title, organization, duration, location, description, skills)
+    )
+    resume.copy(experiences = experiences)

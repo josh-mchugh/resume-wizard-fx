@@ -9,7 +9,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 class SocialsServiceImpl(val resumeService: ResumeService) extends SocialsService:
 
-  val logger = LoggerFactory.getLogger(classOf[ResumeSocialsServiceImpl])
+  val logger = LoggerFactory.getLogger(classOf[SocialsServiceImpl])
 
   override def handleSocialsUpdate(socialTuples: List[(String, String)]): Unit =
     logger.info("socials: {}", socialTuples.mkString(", "))
