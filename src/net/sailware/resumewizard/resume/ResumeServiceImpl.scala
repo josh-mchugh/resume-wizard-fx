@@ -24,3 +24,9 @@ class ResumeServiceImpl extends ResumeService:
       new Experience(title, organization, duration, location, description, skills)
     )
     resume.copy(experiences = experiences)
+
+  override def handleCertificationsUpdate(certificationTuples: List[(String, String, String, String)]): Resume =
+    val certifications = certificationTuples.map((title, organization, duration, location) =>
+      new Certification(title, organization, duration, location)
+    )
+    resume.copy(certifications = certifications)

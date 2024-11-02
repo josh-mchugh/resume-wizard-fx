@@ -53,12 +53,12 @@ class CertificationsViewImpl(val presenter: CertificationsPresenter, val model: 
       new TextField {
         text <==> certification.organization
       },
+      new Label("Duration"),
+      new TextField {
+        text <==> certification.duration
+      },
       new Label("Location"),
       new TextField {
         text <==> certification.location
-      },
-      new Label("Year"),
-      new TextField {
-        text <==> certification.year
       },
     )

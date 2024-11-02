@@ -11,3 +11,5 @@ trait ResumeService:
   def handleSocialsUpdate(socialTuples: List[(String, String)]): Resume
 
   def handleExperiencesUpdate(experienceTuples: List[(String, String, String, String, String, String)]): Resume
+
+  def handleCertificationsUpdate(certificationsTuple: List[(String, String, String, String)]): Resume

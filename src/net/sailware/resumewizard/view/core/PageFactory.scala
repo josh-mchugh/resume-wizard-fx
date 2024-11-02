@@ -23,4 +23,4 @@ class PageFactory(val resumeService: ResumeService):
       case PageType.ContactDetails => new ContactDetailsController(resumeService).view()
       case PageType.Socials => new SocialsController(resumeService).view()
       case PageType.Experiences => new ExperiencesController(resumeService).view()
-      case PageType.Certifications => new CertificationsController().view()
+      case PageType.Certifications => new CertificationsController(resumeService).view()
