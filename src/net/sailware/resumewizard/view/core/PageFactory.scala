@@ -3,7 +3,7 @@ package net.sailware.resumewizard.view.core
 import net.sailware.resumewizard.resume.ResumeService
 import net.sailware.resumewizard.view.dashboard.DashboardController
 import net.sailware.resumewizard.view.resume.create.CreateResumeController
-import net.sailware.resumewizard.view.resume.create.service.CreateResumeService
+import net.sailware.resumewizard.view.resume.preview.PreviewController
 import net.sailware.resumewizard.view.resume.wizard.certification.CertificationsController
 import net.sailware.resumewizard.view.resume.wizard.contact.ContactDetailsController
 import net.sailware.resumewizard.view.resume.wizard.experience.ExperiencesController
@@ -24,3 +24,4 @@ class PageFactory(val resumeService: ResumeService):
       case PageType.Socials => new SocialsController(resumeService).view()
       case PageType.Experiences => new ExperiencesController(resumeService).view()
       case PageType.Certifications => new CertificationsController(resumeService).view()
+      case PageType.Preview => new PreviewController(resumeService).view()

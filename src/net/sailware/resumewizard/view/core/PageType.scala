@@ -8,3 +8,4 @@ enum PageType:
   case Socials
   case Experiences
   case Certifications
+  case Preview
