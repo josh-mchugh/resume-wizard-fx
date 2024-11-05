@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory
 import org.w3c.dom.Document
 import org.xhtmlrenderer.pdf.ITextRenderer
 import org.xhtmlrenderer.resource.XMLResource
+import scalatags.Text.all.*
 
 class PDFServiceImpl() extends PDFService:
 
@@ -16,15 +17,23 @@ class PDFServiceImpl() extends PDFService:
 
   override def generatePDF(resume: Resume): File =
     logger.info("Generating pdf...")
-    val html =  "<!DOCTYPE html><html><body><h1>My First Heading</h1><p>My first paragraph.</p></body></html>"
 
     val file = new File("resume.pdf")
     try {
       val fileOutputStream = new FileOutputStream(file)
-      val source = XMLResource.load(new StringReader(html)).getDocument()
+      val source = XMLResource.load(new StringReader(generateHTML(resume))).getDocument()
       renderer.createPDF(source, fileOutputStream)
     } catch {
       case t: Throwable => logger.error("error generating PDF", t)
     }
 
     file
+
+  private def generateHTML(resume: Resume): String =
+    html(
+      head(),
+      body(
+        h1("My First Heading"),
+        p("My first paragraph")
+      ),
+    ).render

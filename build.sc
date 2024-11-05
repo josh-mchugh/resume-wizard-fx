@@ -22,6 +22,7 @@ object app extends RootModule with ScalaModule {
       ivy"com.github.pcorless.icepdf:icepdf-core:7.2.1",
       ivy"com.github.pcorless.icepdf:icepdf-viewer:7.2.1",
       ivy"org.xhtmlrenderer:flying-saucer-pdf:9.10.2",
+      ivy"com.lihaoyi:scalatags_3:0.13.1"
     )
   }
 }
