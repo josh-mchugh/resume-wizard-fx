@@ -9,6 +9,7 @@ import org.icepdf.ri.common.SwingController;
 import org.icepdf.ri.common.SwingViewBuilder;
 import org.icepdf.ri.util.FontPropertiesManager;
 import org.icepdf.ri.util.ViewerPropertiesManager;
+import java.io.FileInputStream
 
 class PreviewViewImpl(val model : PreviewModel) extends PreviewView:
 
@@ -40,8 +41,11 @@ class PreviewViewImpl(val model : PreviewModel) extends PreviewView:
     val swingNode = new SwingNode()
     swingNode.setContent(viewerPanel)
 
-    SwingUtilities.invokeLater(() => {
-      swingController.openDocument(getClass.getResource("/helloworld.pdf").getPath)
-      viewerPanel.revalidate()
+    model.pdf.onChange((_, _, newValue) => {
+      SwingUtilities.invokeLater(() => {
+        swingController.openDocument(new FileInputStream(newValue), "resume pdf", null)
+        viewerPanel.revalidate()
+      })
     })
+
     swingNode

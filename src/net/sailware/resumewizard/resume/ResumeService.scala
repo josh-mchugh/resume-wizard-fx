@@ -2,6 +2,8 @@ package net.sailware.resumewizard.resume
 
 trait ResumeService:
 
+  def getResume(): Resume
+
   def handleCreateResume(name: String): Resume
 
   def handlePersonalDetailsUpdate(name: String, title: String, summary: String): Resume

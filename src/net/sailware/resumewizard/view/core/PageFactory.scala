@@ -1,5 +1,6 @@
 package net.sailware.resumewizard.view.core
 
+import net.sailware.resumewizard.pdf.PDFService
 import net.sailware.resumewizard.resume.ResumeService
 import net.sailware.resumewizard.view.dashboard.DashboardController
 import net.sailware.resumewizard.view.resume.create.CreateResumeController
@@ -11,7 +12,10 @@ import net.sailware.resumewizard.view.resume.wizard.personal.PersonalDetailsCont
 import net.sailware.resumewizard.view.resume.wizard.social.SocialsController
 import scalafx.scene.Node
 
-class PageFactory(val resumeService: ResumeService):
+class PageFactory(
+  val resumeService: ResumeService,
+  val pdfService: PDFService
+):
   def createPage(pageType: PageType): List[Node] =
     List(createView(pageType))
 
@@ -24,4 +28,4 @@ class PageFactory(val resumeService: ResumeService):
       case PageType.Socials => new SocialsController(resumeService).view()
       case PageType.Experiences => new ExperiencesController(resumeService).view()
       case PageType.Certifications => new CertificationsController(resumeService).view()
-      case PageType.Preview => new PreviewController(resumeService).view()
+      case PageType.Preview => new PreviewController(resumeService, pdfService).view()

@@ -4,6 +4,9 @@ class ResumeServiceImpl extends ResumeService:
 
   val resume: Resume = new Resume()
 
+  override def getResume(): Resume =
+    resume
+
   override def handleCreateResume(name: String): Resume =
     resume.copy(name = name)
 

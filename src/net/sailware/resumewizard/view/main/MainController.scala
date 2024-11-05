@@ -1,5 +1,6 @@
 package net.sailware.resumewizard.view.main
 
+import net.sailware.resumewizard.pdf.PDFServiceImpl
 import net.sailware.resumewizard.resume.ResumeServiceImpl
 import net.sailware.resumewizard.view.core.Controller
 import net.sailware.resumewizard.view.core.PageFactory
@@ -10,7 +11,7 @@ import scalafx.scene.Parent
 
 class MainController(val state: ObjectProperty[State]) extends Controller[Parent]:
 
-  val pageFactory = PageFactory(new ResumeServiceImpl())
+  val pageFactory = PageFactory(new ResumeServiceImpl(), new PDFServiceImpl())
 
   val mainPresenter = new MainPresenterImpl()
   val mainView = new MainViewImpl(mainPresenter, state, pageFactory)
