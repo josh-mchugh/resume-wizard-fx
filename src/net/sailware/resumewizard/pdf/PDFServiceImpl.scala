@@ -33,7 +33,12 @@ class PDFServiceImpl() extends PDFService:
     html(
       head(),
       body(
-        h1("My First Heading"),
-        p("My first paragraph")
+        if (resume.hasPersonalDetails())
+          div(
+            h1(resume.personalDetails.name),
+            p(resume.personalDetails.title),
+            p(resume.personalDetails.summary)
+          )
+        else div()
       ),
     ).render
