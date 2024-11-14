@@ -13,22 +13,22 @@ import scalafx.scene.layout.Region
 class ContactDetailsViewImpl(val presenter: ContactDetailsPresenter, val model: ContactDetailsModel) extends ContactDetailsView:
   override def view(): Region =
     val content = List(
-        ComponentUtil.createPageHeader(
-          "Contact Details",
-          createContinueButton()
-        ),
-        new Label("Your phone number"),
-        new TextField {
-          text <==> model.phone
-        },
-        new Label("Your email address"),
-        new TextField {
-          text <==> model.email
-        },
-        new Label("Your location"),
-        new TextField {
-          text <==> model.location
-        }
+      ComponentUtil.createPageHeader(
+        "Contact Details",
+        createContinueButton()
+      ),
+      new Label("Your phone number"),
+      new TextField {
+        text <==> model.phone
+      },
+      new Label("Your email address"),
+      new TextField {
+        text <==> model.email
+      },
+      new Label("Your location"),
+      new TextField {
+        text <==> model.location
+      }
     )
 
     ComponentUtil.createContentPage(content)

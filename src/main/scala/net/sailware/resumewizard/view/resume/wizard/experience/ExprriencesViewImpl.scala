@@ -28,7 +28,7 @@ class ExperiencesViewImpl(val presenter: ExperiencesPresenter, val model: Experi
       },
       new Button("Add Experience") {
         onAction = (event: ActionEvent) => model.experiences += new ExperienceModel()
-      },
+      }
     )
 
     ComponentUtil.createContentPage(content)
@@ -68,5 +68,5 @@ class ExperiencesViewImpl(val presenter: ExperiencesPresenter, val model: Experi
       new Label("Skills"),
       new TextField {
         text <==> experience.skills
-      },
+      }
     )

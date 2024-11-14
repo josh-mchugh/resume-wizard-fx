@@ -17,4 +17,4 @@ class SocialsServiceImpl(val resumeService: ResumeService) extends SocialsServic
       resumeService.handleSocialsUpdate(socialTuples)
     } onComplete:
       case Success(resume) => logger.info("new resume: {}", resume)
-      case Failure(t) => logger.error("it failed to create resume", t)
+      case Failure(t)      => logger.error("it failed to create resume", t)

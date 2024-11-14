@@ -17,4 +17,4 @@ class CreateResumeServiceImpl(val resumeService: ResumeService) extends CreateRe
       resumeService.handleCreateResume(name)
     } onComplete:
       case Success(resume) => logger.info("new resume: {}", resume)
-      case Failure(t) => logger.error("it failed to create resume", t)
+      case Failure(t)      => logger.error("it failed to create resume", t)

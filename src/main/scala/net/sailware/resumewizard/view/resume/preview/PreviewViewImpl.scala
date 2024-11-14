@@ -11,7 +11,7 @@ import org.icepdf.ri.util.FontPropertiesManager;
 import org.icepdf.ri.util.ViewerPropertiesManager;
 import java.io.FileInputStream
 
-class PreviewViewImpl(val model : PreviewModel) extends PreviewView:
+class PreviewViewImpl(val model: PreviewModel) extends PreviewView:
 
   override def view(): Node =
 
@@ -32,9 +32,11 @@ class PreviewViewImpl(val model : PreviewModel) extends PreviewView:
     properties.getPreferences().putBoolean(ViewerPropertiesManager.PROPERTY_SHOW_TOOLBAR_TOOL, false);
     properties.getPreferences().putBoolean(ViewerPropertiesManager.PROPERTY_SHOW_TOOLBAR_FORMS, false);
 
-    swingController.getDocumentViewController().setAnnotationCallback(
-      new org.icepdf.ri.common.MyAnnotationCallback(swingController.getDocumentViewController())
-    );
+    swingController
+      .getDocumentViewController()
+      .setAnnotationCallback(
+        new org.icepdf.ri.common.MyAnnotationCallback(swingController.getDocumentViewController())
+      );
 
     val factory = new SwingViewBuilder(swingController, properties)
     val viewerPanel = factory.buildViewerPanel()

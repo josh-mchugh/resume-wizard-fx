@@ -4,9 +4,7 @@ import net.sailware.resumewizard.view.core.Controller
 
 import scalafx.scene.Node
 
-/**
-  * DashboardController is the controller for the Dashboard page component.
-  * The controller handles the creation of the presenter and view.
+/** DashboardController is the controller for the Dashboard page component. The controller handles the creation of the presenter and view.
   *
   * Dashboard component allows for the user to manage their resumes.
   *
@@ -16,8 +14,7 @@ class DashboardController extends Controller[Node]:
   val dashboardPresenter = new DashboardPresenterImpl()
   val dashboardView = new DashboardViewImpl(dashboardPresenter)
 
-  /**
-    * Returns the Dashboard component view
+  /** Returns the Dashboard component view
     *
     * return dashboard view node
     */

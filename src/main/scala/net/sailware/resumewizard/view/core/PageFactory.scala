@@ -13,19 +13,19 @@ import net.sailware.resumewizard.view.resume.wizard.social.SocialsController
 import scalafx.scene.Node
 
 class PageFactory(
-  val resumeService: ResumeService,
-  val pdfService: PDFService
+    val resumeService: ResumeService,
+    val pdfService: PDFService
 ):
   def createPage(pageType: PageType): List[Node] =
     List(createView(pageType))
 
   private def createView(pageType: PageType): Node =
     pageType match
-      case PageType.Dashboard => new DashboardController().view()
-      case PageType.CreateResume => new CreateResumeController(resumeService).view()
+      case PageType.Dashboard       => new DashboardController().view()
+      case PageType.CreateResume    => new CreateResumeController(resumeService).view()
       case PageType.PersonalDetails => new PersonalDetailsController(resumeService).view()
-      case PageType.ContactDetails => new ContactDetailsController(resumeService).view()
-      case PageType.Socials => new SocialsController(resumeService).view()
-      case PageType.Experiences => new ExperiencesController(resumeService).view()
-      case PageType.Certifications => new CertificationsController(resumeService).view()
-      case PageType.Preview => new PreviewController(resumeService, pdfService).view()
+      case PageType.ContactDetails  => new ContactDetailsController(resumeService).view()
+      case PageType.Socials         => new SocialsController(resumeService).view()
+      case PageType.Experiences     => new ExperiencesController(resumeService).view()
+      case PageType.Certifications  => new CertificationsController(resumeService).view()
+      case PageType.Preview         => new PreviewController(resumeService, pdfService).view()

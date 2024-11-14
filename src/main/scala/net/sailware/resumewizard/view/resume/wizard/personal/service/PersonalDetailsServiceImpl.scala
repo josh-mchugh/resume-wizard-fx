@@ -17,4 +17,4 @@ class PersonalDetailsServiceImpl(val resumeService: ResumeService) extends Perso
       resumeService.handlePersonalDetailsUpdate(name, title, summary)
     } onComplete:
       case Success(resume) => logger.info("new resume: {}", resume)
-      case Failure(t) => logger.error("it failed to create resume", t)
+      case Failure(t)      => logger.error("it failed to create resume", t)

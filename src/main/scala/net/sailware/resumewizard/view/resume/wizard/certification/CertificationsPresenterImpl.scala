@@ -6,8 +6,8 @@ import org.greenrobot.eventbus.EventBus
 import org.slf4j.LoggerFactory
 
 class CertificationsPresenterImpl(
-  val model: CertificationsModel,
-  val service: CertificationsService
+    val model: CertificationsModel,
+    val service: CertificationsService
 ) extends CertificationsPresenter:
   val logger = LoggerFactory.getLogger(classOf[CertificationsPresenterImpl])
 

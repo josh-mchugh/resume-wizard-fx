@@ -6,8 +6,8 @@ import net.sailware.resumewizard.view.core.Controller
 import scalafx.scene.Node
 
 class PreviewController(
-  val resumeService: ResumeService,
-  val pdfService: PDFService
+    val resumeService: ResumeService,
+    val pdfService: PDFService
 ) extends Controller[Node]:
   val model = new PreviewModel()
   val previewPresenter = new PreviewPresenterImpl(model, resumeService, pdfService)

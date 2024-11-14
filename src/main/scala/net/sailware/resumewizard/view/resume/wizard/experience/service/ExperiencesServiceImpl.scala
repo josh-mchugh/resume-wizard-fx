@@ -17,4 +17,4 @@ class ExperiencesServiceImpl(val resumeService: ResumeService) extends Experienc
       resumeService.handleExperiencesUpdate(experienceTuples)
     } onComplete:
       case Success(resume) => logger.info("new resume: {}", resume)
-      case Failure(t) => logger.error("it failed to update resume", t)
+      case Failure(t)      => logger.error("it failed to update resume", t)

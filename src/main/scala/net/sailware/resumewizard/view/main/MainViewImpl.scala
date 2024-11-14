@@ -16,9 +16,9 @@ import scalafx.scene.text.FontWeight
 import scalafx.scene.text.Text
 
 class MainViewImpl(
-  val presenter: MainPresenter,
-  val state: ObjectProperty[State],
-  val pageFactory: PageFactory
+    val presenter: MainPresenter,
+    val state: ObjectProperty[State],
+    val pageFactory: PageFactory
 ) extends MainView:
 
   override def view(): Region =
@@ -56,6 +56,6 @@ class MainViewImpl(
       content = new StackPane:
         style = "-fx-padding: 20;"
         children = pageFactory.createPage(PageType.Dashboard)
-        state.onChange ({
-           children = pageFactory.createPage(state.value.currentPageType)
+        state.onChange({
+          children = pageFactory.createPage(state.value.currentPageType)
         })

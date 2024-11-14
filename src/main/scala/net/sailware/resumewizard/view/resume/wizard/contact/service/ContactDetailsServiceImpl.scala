@@ -17,4 +17,4 @@ class ContactDetailsServiceImpl(val resumeService: ResumeService) extends Contac
       resumeService.handleContactDetailsUpdate(phone, email, location)
     } onComplete:
       case Success(resume) => logger.info("new resume: {}", resume)
-      case Failure(t) => logger.error("it failed to create resume", t)
+      case Failure(t)      => logger.error("it failed to create resume", t)

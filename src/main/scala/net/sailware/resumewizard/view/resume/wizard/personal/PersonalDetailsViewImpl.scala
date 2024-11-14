@@ -12,8 +12,8 @@ import scalafx.scene.control.TextArea
 import scalafx.scene.control.TextField
 
 class PersonalDetailsViewImpl(
-  val presenter: PersonalDetailsPresenter,
-  val model: PersonalDetailsModel
+    val presenter: PersonalDetailsPresenter,
+    val model: PersonalDetailsModel
 ) extends PersonalDetailsView:
 
   override def view(): Region =
@@ -21,23 +21,23 @@ class PersonalDetailsViewImpl(
 
   private def createPersonalDetails =
     val content = List(
-        ComponentUtil.createPageHeader(
-          "Personal Details",
-          createContinueButton()
-        ),
-        new Label("Your name"),
-        new TextField {
-          text <==> model.name
-        },
-        new Label("Your Current Title"),
-        new TextField {
-          text <==> model.title
-        },
-        new Label("Summary of your current career position"),
-        new TextArea {
-          prefRowCount = 3
-          text <==> model.summary
-        }
+      ComponentUtil.createPageHeader(
+        "Personal Details",
+        createContinueButton()
+      ),
+      new Label("Your name"),
+      new TextField {
+        text <==> model.name
+      },
+      new Label("Your Current Title"),
+      new TextField {
+        text <==> model.title
+      },
+      new Label("Summary of your current career position"),
+      new TextArea {
+        prefRowCount = 3
+        text <==> model.summary
+      }
     )
 
     ComponentUtil.createContentPage(content)

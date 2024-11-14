@@ -16,26 +16,26 @@ class SocialsViewImpl(val presenter: SocialsPresenter, val model: SocialsModel) 
 
   override def view(): Region =
     val content = List(
-        ComponentUtil.createPageHeader(
-          "Socials",
-          createContinueButton()
-        ),
-        new VBox {
+      ComponentUtil.createPageHeader(
+        "Socials",
+        createContinueButton()
+      ),
+      new VBox {
+        children = model.socials.map(social => createSocialSection(social)).flatten
+        model.socials.onInvalidate { (newValue) =>
           children = model.socials.map(social => createSocialSection(social)).flatten
-          model.socials.onInvalidate { (newValue) =>
-            children = model.socials.map(social => createSocialSection(social)).flatten
-          }
-        },
-        new Button("Add Social") {
-          onAction = (event: ActionEvent) => model.socials += new SocialModel()
-        },
+        }
+      },
+      new Button("Add Social") {
+        onAction = (event: ActionEvent) => model.socials += new SocialModel()
+      }
     )
 
     ComponentUtil.createContentPage(content)
 
   private def createContinueButton(): List[Region] =
     val button = new Button("Continue"):
-        onAction = (event: ActionEvent) => presenter.onContinue()
+      onAction = (event: ActionEvent) => presenter.onContinue()
 
     List(
       new HBox:

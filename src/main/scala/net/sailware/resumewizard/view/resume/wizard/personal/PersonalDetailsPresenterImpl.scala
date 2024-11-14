@@ -6,8 +6,8 @@ import org.greenrobot.eventbus.EventBus
 import org.slf4j.LoggerFactory
 
 class PersonalDetailsPresenterImpl(
-  val model: PersonalDetailsModel,
-  val service: PersonalDetailsService
+    val model: PersonalDetailsModel,
+    val service: PersonalDetailsService
 ) extends PersonalDetailsPresenter:
 
   val logger = LoggerFactory.getLogger(classOf[PersonalDetailsPresenterImpl])

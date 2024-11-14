@@ -28,7 +28,7 @@ class CertificationsViewImpl(val presenter: CertificationsPresenter, val model: 
       },
       new Button("Add Certification") {
         onAction = (event: ActionEvent) => model.certifications += new CertificationModel()
-      },
+      }
     )
 
     ComponentUtil.createContentPage(content)
@@ -60,5 +60,5 @@ class CertificationsViewImpl(val presenter: CertificationsPresenter, val model: 
       new Label("Location"),
       new TextField {
         text <==> certification.location
-      },
+      }
     )

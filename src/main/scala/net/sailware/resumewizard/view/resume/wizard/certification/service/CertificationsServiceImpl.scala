@@ -17,4 +17,4 @@ class CertificationsServiceImpl(val resumeService: ResumeService) extends Certif
       resumeService.handleCertificationsUpdate(certifications)
     } onComplete:
       case Success(resume) => logger.info("new resume: {}", resume)
-      case Failure(t) => logger.error("it failed to update resume")
+      case Failure(t)      => logger.error("it failed to update resume")

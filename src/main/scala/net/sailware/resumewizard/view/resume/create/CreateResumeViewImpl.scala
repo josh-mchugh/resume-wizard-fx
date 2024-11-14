@@ -21,7 +21,7 @@ class CreateResumeViewImpl(val presenter: CreateResumePresenter, val model: Crea
         "Create New Resume",
         createContinueButton()
       ),
-      new Label("Resume Name") { },
+      new Label("Resume Name") {},
       new TextField {
         text <==> model.name
       }
