@@ -67,6 +67,11 @@
             <artifactId>scala3-library_3</artifactId>
             <version>3.5.2</version>
         </dependency>
+	<dependency>
+    	    <groupId>org.scala-lang</groupId>
+    	    <artifactId>scala3-compiler_3</artifactId>
+            <version>3.5.2</version>
+        </dependency>
         <dependency>
             <groupId>org.scalafx</groupId>
             <artifactId>scalafx_3</artifactId>
