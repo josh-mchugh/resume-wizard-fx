@@ -90,12 +90,13 @@
                 <artifactId>scala-maven-plugin</artifactId>
                 <version>4.9.2</version>
                 <configuration>
-	            <recompileMode>incremental</recompileMode>                
+	            <recompileMode>incremental</recompileMode>
                 </configuration>
                 <executions>
                     <execution>
                         <goals>
                             <goal>compile</goal>
+                            <goal>testCompile</goal>
                         </goals>
                     </execution>
                 </executions>
