@@ -5,7 +5,10 @@ import net.sailware.resumewizard.view.core.Controller
 import net.sailware.resumewizard.view.resume.wizard.experience.service.ExperiencesServiceImpl
 import scalafx.scene.layout.Region
 
-class ExperiencesController(val resumeService: ResumeService) extends Controller[Region]:
+class ExperiencesController(
+    val resumeService: ResumeService
+) extends Controller[Region]:
+
   val model = new ExperiencesModel()
   val experiencesPresenter = new ExperiencesPresenterImpl(model, new ExperiencesServiceImpl(resumeService))
   val experiencesView = new ExperiencesViewImpl(experiencesPresenter, model)

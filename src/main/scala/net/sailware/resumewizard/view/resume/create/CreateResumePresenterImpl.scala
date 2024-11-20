@@ -13,13 +13,13 @@ import scalafx.application.Platform
 
 class CreateResumePresenterImpl(
     val model: CreateResumeModel,
-    val createResumeService: CreateResumeService
+    val service: CreateResumeService
 ) extends CreateResumePresenter:
 
   val logger = LoggerFactory.getLogger(classOf[CreateResumePresenterImpl])
 
   override def onCreateForm(): Unit =
-    createResumeService
+    service
       .onCreateResume(OnCreateResumeRequest(model))
       .onComplete:
         case Success(response) =>

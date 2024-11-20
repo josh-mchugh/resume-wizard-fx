@@ -9,6 +9,7 @@ class CertificationsPresenterImpl(
     val model: CertificationsModel,
     val service: CertificationsService
 ) extends CertificationsPresenter:
+
   val logger = LoggerFactory.getLogger(classOf[CertificationsPresenterImpl])
 
   override def onContinue(): Unit =

@@ -9,6 +9,7 @@ class ContactDetailsPresenterImpl(
     val model: ContactDetailsModel,
     val service: ContactDetailsService
 ) extends ContactDetailsPresenter:
+
   val logger = LoggerFactory.getLogger(classOf[ContactDetailsPresenterImpl])
 
   override def onContinue(): Unit =
