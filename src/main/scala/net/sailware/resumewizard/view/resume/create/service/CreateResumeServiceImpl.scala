@@ -2,19 +2,20 @@ package net.sailware.resumewizard.view.resume.create.service
 
 import net.sailware.resumewizard.resume.Resume
 import net.sailware.resumewizard.resume.ResumeService
+import net.sailware.resumewizard.view.resume.create.service.model.OnCreateResumeRequest
+import net.sailware.resumewizard.view.resume.create.service.model.OnCreateResumeResponse
 import org.slf4j.LoggerFactory
-import scala.util.Failure
-import scala.util.Success
-import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
-class CreateResumeServiceImpl(val resumeService: ResumeService) extends CreateResumeService:
+class CreateResumeServiceImpl(
+    val service: ResumeService
+) extends CreateResumeService:
+
   val logger = LoggerFactory.getLogger(classOf[CreateResumeServiceImpl])
 
-  override def createResume(name: String): Unit =
-    logger.info("resume created: {}", name)
+  override def onCreateResume(request: OnCreateResumeRequest): Future[OnCreateResumeResponse] =
+    logger.info("resume created: {}", request.name)
     Future {
-      resumeService.handleCreateResume(name)
-    } onComplete:
-      case Success(resume) => logger.info("new resume: {}", resume)
-      case Failure(t)      => logger.error("it failed to create resume", t)
+      OnCreateResumeResponse(service.handleCreateResume(request.name))
+    }
