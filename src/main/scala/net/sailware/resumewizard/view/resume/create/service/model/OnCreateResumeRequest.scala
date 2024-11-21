@@ -12,4 +12,4 @@ object OnCreateResumeRequest:
     new OnCreateResumeRequest(name)
 
   def apply(model: CreateResumeModel) =
-    new OnCreateResumeRequest(model.name.value)
+    new OnCreateResumeRequest(model.name())

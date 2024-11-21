@@ -25,4 +25,4 @@ class CreateResumePresenterImpl(
         case Success(response) =>
           logger.info("new resume: {}", response.resume)
           Platform.runLater(() => EventBus.getDefault().post(PageType.PersonalDetails))
-        case Failure(t) => logger.error("it failed to create resume", t)
+        case Failure(t) => logger.error("Failed to create resume.", t)

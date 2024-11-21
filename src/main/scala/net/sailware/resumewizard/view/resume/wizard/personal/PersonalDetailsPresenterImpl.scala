@@ -25,4 +25,4 @@ class PersonalDetailsPresenterImpl(
         case Success(response) =>
           logger.info("resume: {}", response.resume)
           Platform.runLater(() => EventBus.getDefault().post(PageType.ContactDetails))
-        case Failure(t) => logger.error("Failed to continue resume wizard", t)
+        case Failure(t) => logger.error("Failed to continue resume wizard.", t)
