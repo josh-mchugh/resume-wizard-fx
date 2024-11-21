@@ -19,9 +19,8 @@ class SocialsPresenterImpl(
   val logger = LoggerFactory.getLogger(classOf[SocialsPresenterImpl])
 
   override def onContinue(): Unit =
-    val socials = model.socials.toList.map(social => (social.name(), social.url()))
     service
-      .onContinue(OnContinueRequest(socials))
+      .onContinue(OnContinueRequest(model))
       .onComplete:
         case Success(response) =>
           logger.info("resume: {}", response.resume)

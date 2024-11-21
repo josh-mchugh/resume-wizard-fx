@@ -27,7 +27,7 @@ class SocialsViewImpl(val presenter: SocialsPresenter, val model: SocialsModel) 
         }
       },
       new Button("Add Social") {
-        onAction = (event: ActionEvent) => model.socials += new SocialModel()
+        onAction = (event: ActionEvent) => model.socials += new SocialFormModel()
       }
     )
 
@@ -43,7 +43,7 @@ class SocialsViewImpl(val presenter: SocialsPresenter, val model: SocialsModel) 
         children = button
     )
 
-  private def createSocialSection(social: SocialModel): List[Node] =
+  private def createSocialSection(social: SocialFormModel): List[Node] =
     List(
       new Label("Social Name"),
       new TextField {
