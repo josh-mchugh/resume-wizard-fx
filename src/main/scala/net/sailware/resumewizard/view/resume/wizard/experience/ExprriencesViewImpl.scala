@@ -27,7 +27,7 @@ class ExperiencesViewImpl(val presenter: ExperiencesPresenter, val model: Experi
         }
       },
       new Button("Add Experience") {
-        onAction = (event: ActionEvent) => model.experiences += new ExperienceModel()
+        onAction = (event: ActionEvent) => model.experiences += new ExperienceFormModel()
       }
     )
 
@@ -43,7 +43,7 @@ class ExperiencesViewImpl(val presenter: ExperiencesPresenter, val model: Experi
         children = button
     )
 
-  private def createExperienceSection(experience: ExperienceModel): List[Node] =
+  private def createExperienceSection(experience: ExperienceFormModel): List[Node] =
     List(
       new Label("Title"),
       new TextField {
