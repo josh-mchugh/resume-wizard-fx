@@ -1,6 +1,5 @@
 package net.sailware.resumewizard.view.resume.wizard.experience.service.model
 
-import net.sailware.resumewizard.view.resume.wizard.experience.ExperienceForm
 import net.sailware.resumewizard.view.resume.wizard.experience.ExperiencesModel
 
 case class OnContinueRequest(

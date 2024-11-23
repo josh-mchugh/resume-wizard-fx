@@ -1,6 +1,5 @@
 package net.sailware.resumewizard.view.resume.wizard.social.service.model
 
-import net.sailware.resumewizard.view.resume.wizard.social.SocialForm
 import net.sailware.resumewizard.view.resume.wizard.social.SocialsModel
 
 case class OnContinueRequest(

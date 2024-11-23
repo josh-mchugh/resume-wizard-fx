@@ -23,6 +23,6 @@ class SocialsPresenterImpl(
       .onContinue(OnContinueRequest(model))
       .onComplete:
         case Success(response) =>
-          logger.info("resume: {}", response.resume)
+          logger.info("resume: '{}'", response.resume)
           Platform.runLater(() => EventBus.getDefault().post(PageType.Experiences))
         case Failure(t) => logger.error("Failed to continue resume wizard.", t)

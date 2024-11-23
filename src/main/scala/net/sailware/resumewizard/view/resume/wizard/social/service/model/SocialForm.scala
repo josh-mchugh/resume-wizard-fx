@@ -1,4 +1,6 @@
-package net.sailware.resumewizard.view.resume.wizard.social
+package net.sailware.resumewizard.view.resume.wizard.social.service.model
+
+import net.sailware.resumewizard.view.resume.wizard.social.SocialFormModel
 
 case class SocialForm(
     val name: String,
