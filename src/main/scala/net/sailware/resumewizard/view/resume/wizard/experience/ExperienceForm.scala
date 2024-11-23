@@ -1,12 +1,12 @@
 package net.sailware.resumewizard.view.resume.wizard.experience
 
 case class ExperienceForm(
-  val title: String,
-  val organization: String,
-  val duration: String,
-  val location: String,
-  val description: String,
-  val skills: String
+    val title: String,
+    val organization: String,
+    val duration: String,
+    val location: String,
+    val description: String,
+    val skills: String
 )
 
 object ExperienceForm:

@@ -27,7 +27,7 @@ class CertificationsViewImpl(val presenter: CertificationsPresenter, val model: 
         }
       },
       new Button("Add Certification") {
-        onAction = (event: ActionEvent) => model.certifications += new CertificationModel()
+        onAction = (event: ActionEvent) => model.certifications += new CertificationFormModel()
       }
     )
 
@@ -43,7 +43,7 @@ class CertificationsViewImpl(val presenter: CertificationsPresenter, val model: 
         children = button
     )
 
-  private def createCertificationSection(certification: CertificationModel): List[Node] =
+  private def createCertificationSection(certification: CertificationFormModel): List[Node] =
     List(
       new Label("Title"),
       new TextField {

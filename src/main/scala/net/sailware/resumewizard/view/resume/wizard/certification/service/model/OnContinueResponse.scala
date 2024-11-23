@@ -1,12 +1,12 @@
-package net.sailware.resumewizard.view.resume.wizard.experience.service.model
+package net.sailware.resumewizard.view.resume.wizard.certification.service.model
 
 import net.sailware.resumewizard.resume.Resume
 
 case class OnContinueResponse(
-    val resume: Resume
+    resume: Resume
 )
 
-object OnContinueResponse:
+object OnContiueResponse:
 
   def apply(resume: Resume): OnContinueResponse =
     new OnContinueResponse(resume)

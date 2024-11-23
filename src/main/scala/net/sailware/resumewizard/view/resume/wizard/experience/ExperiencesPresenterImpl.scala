@@ -25,4 +25,4 @@ class ExperiencesPresenterImpl(
         case Success(response) =>
           logger.info("resume: '{}'", response.resume)
           Platform.runLater(() => EventBus.getDefault().post(PageType.Certifications))
-        case Failure(t)      => logger.error("Failed to continue resume wizard.", t)
+        case Failure(t) => logger.error("Failed to continue resume wizard.", t)

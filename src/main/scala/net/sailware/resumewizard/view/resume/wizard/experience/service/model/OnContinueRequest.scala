@@ -4,7 +4,7 @@ import net.sailware.resumewizard.view.resume.wizard.experience.ExperienceForm
 import net.sailware.resumewizard.view.resume.wizard.experience.ExperiencesModel
 
 case class OnContinueRequest(
-  val experiences: List[ExperienceForm]
+    val experiences: List[ExperienceForm]
 ):
 
   def toTuple: List[(String, String, String, String, String, String)] =

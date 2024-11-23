@@ -1,20 +1,20 @@
 package net.sailware.resumewizard.view.resume.wizard.certification.service
 
 import net.sailware.resumewizard.resume.ResumeService
+import net.sailware.resumewizard.view.resume.wizard.certification.service.model.OnContinueRequest
+import net.sailware.resumewizard.view.resume.wizard.certification.service.model.OnContinueResponse
 import org.slf4j.LoggerFactory
-import scala.util.Failure
-import scala.util.Success
-import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
-class CertificationsServiceImpl(val resumeService: ResumeService) extends CertificationsService:
+class CertificationsServiceImpl(
+    val resumeService: ResumeService
+) extends CertificationsService:
 
   val logger = LoggerFactory.getLogger(classOf[CertificationsServiceImpl])
 
-  override def handleCertificationsUpdate(certifications: List[(String, String, String, String)]): Unit =
-    logger.info("certifications: ", certifications.mkString(", "))
+  override def onContinue(request: OnContinueRequest): Future[OnContinueResponse] =
+    logger.info("OnContinueRequest: '{}'", request)
     Future {
-      resumeService.handleCertificationsUpdate(certifications)
-    } onComplete:
-      case Success(resume) => logger.info("new resume: {}", resume)
-      case Failure(t)      => logger.error("it failed to update resume")
+      OnContinueResponse(resumeService.handleCertificationsUpdate(request.toTuple))
+    }
