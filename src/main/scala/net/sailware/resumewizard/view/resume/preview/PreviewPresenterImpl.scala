@@ -1,26 +1,24 @@
 package net.sailware.resumewizard.view.resume.preview
 
-import net.sailware.resumewizard.pdf.PDFService
-import net.sailware.resumewizard.resume.ResumeService
+import net.sailware.resumewizard.view.resume.preview.service.PreviewService
 import org.slf4j.LoggerFactory
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 import scala.util.Failure
 import scala.util.Success
-import scala.concurrent.Future
-import scala.concurrent.ExecutionContext.Implicits.global
+import scalafx.application.Platform
 
 class PreviewPresenterImpl(
     val model: PreviewModel,
-    val resumeService: ResumeService,
-    val pdfService: PDFService
+    val service: PreviewService
 ) extends PreviewPresenter:
 
   val logger = LoggerFactory.getLogger(classOf[PreviewPresenterImpl])
 
   def generateResumePDF(): Unit =
-    logger.info("generating pdf...")
-    Future {
-      Thread.sleep(1000)
-      pdfService.generatePDF(resumeService.getResume())
-    } onComplete:
-      case Success(file) => model.pdf.value = file
-      case Failure(t)    => logger.error("error generating PDF", t)
+    logger.info("Generating PDF...")
+    service
+      .generatePDF()
+      .onComplete:
+        case Success(response) => Platform.runLater(() => model.pdf.value = response.file)
+        case Failure(t)        => logger.error("Error generating PDF", t)

@@ -16,7 +16,6 @@ class PDFServiceImpl() extends PDFService:
   val renderer = new ITextRenderer()
 
   override def generatePDF(resume: Resume): File =
-    logger.info("Generating pdf...")
 
     val file = new File("resume.pdf")
     try {
