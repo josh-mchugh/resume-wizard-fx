@@ -1,10 +1,13 @@
 package net.sailware.resumewizard.resume
 
+import net.sailware.resumewizard.resume.model.CreateResumeRequest
+import net.sailware.resumewizard.resume.model.CreateResumeResponse
+
 trait ResumeService:
 
   def getResume(): Resume
 
-  def handleCreateResume(name: String): Resume
+  def handleCreateResume(request: CreateResumeRequest): CreateResumeResponse
 
   def handlePersonalDetailsUpdate(name: String, title: String, summary: String): Resume
 

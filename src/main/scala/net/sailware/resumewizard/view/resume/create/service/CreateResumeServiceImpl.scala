@@ -2,6 +2,7 @@ package net.sailware.resumewizard.view.resume.create.service
 
 import net.sailware.resumewizard.resume.Resume
 import net.sailware.resumewizard.resume.ResumeService
+import net.sailware.resumewizard.resume.model.CreateResumeRequest
 import net.sailware.resumewizard.view.resume.create.service.model.OnCreateResumeRequest
 import net.sailware.resumewizard.view.resume.create.service.model.OnCreateResumeResponse
 import org.slf4j.LoggerFactory
@@ -17,5 +18,6 @@ class CreateResumeServiceImpl(
   override def onCreateResume(request: OnCreateResumeRequest): Future[OnCreateResumeResponse] =
     logger.info("OnCreateResumeRequest: '{}'", request)
     Future {
-      OnCreateResumeResponse(service.handleCreateResume(request.name))
+      val response = service.handleCreateResume(CreateResumeRequest(request.name))
+      OnCreateResumeResponse(response.resume)
     }
