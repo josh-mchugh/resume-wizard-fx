@@ -17,6 +17,5 @@ class CreateResumeServiceImpl(
   override def onCreateResume(request: OnCreateResumeRequest): Future[OnCreateResumeResponse] =
     logger.info("OnCreateResumeRequest: '{}'", request)
     Future {
-      val response = service.handleCreateResume(request.toCreateResumeRequest)
-      OnCreateResumeResponse(response.resume)
+      OnCreateResumeResponse(service.handleCreateResume(request.toCreateResumeRequest))
     }

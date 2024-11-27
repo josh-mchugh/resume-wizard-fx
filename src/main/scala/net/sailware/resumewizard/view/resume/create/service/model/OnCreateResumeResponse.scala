@@ -1,6 +1,7 @@
 package net.sailware.resumewizard.view.resume.create.service.model
 
 import net.sailware.resumewizard.resume.Resume
+import net.sailware.resumewizard.resume.model.CreateResumeResponse
 
 case class OnCreateResumeResponse(
     val resume: Resume
@@ -8,5 +9,5 @@ case class OnCreateResumeResponse(
 
 object OnCreateResumeResponse:
 
-  def apply(resume: Resume): OnCreateResumeResponse =
-    new OnCreateResumeResponse(resume)
+  def apply(response: CreateResumeResponse): OnCreateResumeResponse =
+    new OnCreateResumeResponse(response.resume)

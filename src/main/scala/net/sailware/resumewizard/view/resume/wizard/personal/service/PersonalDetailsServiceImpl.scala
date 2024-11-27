@@ -16,6 +16,5 @@ class PersonalDetailsServiceImpl(val resumeService: ResumeService) extends Perso
   override def onPersonalDetailsSave(request: OnContinueRequest): Future[OnContinueResponse] =
     logger.info("OnContinueRequest '{}'", request)
     Future {
-      val response = resumeService.handlePersonalDetailsUpdate(request.toCreateResumePersonalRequest)
-      OnContinueResponse(response.resume)
+      OnContinueResponse(resumeService.handlePersonalDetailsUpdate(request.toCreateResumePersonalRequest))
     }
