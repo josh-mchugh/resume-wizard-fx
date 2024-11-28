@@ -1,5 +1,7 @@
 package net.sailware.resumewizard.resume
 
+import net.sailware.resumewizard.resume.model.CreateCertificationsRequest
+import net.sailware.resumewizard.resume.model.CreateCertificationsResponse
 import net.sailware.resumewizard.resume.model.CreateContactRequest
 import net.sailware.resumewizard.resume.model.CreateContactResponse
 import net.sailware.resumewizard.resume.model.CreateExperiencesRequest
@@ -25,4 +27,4 @@ trait ResumeService:
 
   def handleExperiencesUpdate(request: CreateExperiencesRequest): CreateExperiencesResponse
 
-  def handleCertificationsUpdate(certificationsTuple: List[(String, String, String, String)]): Resume
+  def handleCertificationsUpdate(request: CreateCertificationsRequest): CreateCertificationsResponse

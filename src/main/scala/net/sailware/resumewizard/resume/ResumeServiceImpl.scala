@@ -1,5 +1,7 @@
 package net.sailware.resumewizard.resume
 
+import net.sailware.resumewizard.resume.model.CreateCertificationsRequest
+import net.sailware.resumewizard.resume.model.CreateCertificationsResponse
 import net.sailware.resumewizard.resume.model.CreateContactRequest
 import net.sailware.resumewizard.resume.model.CreateContactResponse
 import net.sailware.resumewizard.resume.model.CreateExperiencesRequest
@@ -42,7 +44,7 @@ class ResumeServiceImpl extends ResumeService:
     resume = resume.copy(experiences = experiences)
     CreateExperiencesResponse(resume)
 
-  override def handleCertificationsUpdate(certificationTuples: List[(String, String, String, String)]): Resume =
-    val certifications = certificationTuples.map((title, organization, duration, location) => new Certification(title, organization, duration, location))
+  override def handleCertificationsUpdate(request: CreateCertificationsRequest): CreateCertificationsResponse =
+    val certifications = request.certifications.map(certification => new Certification(certification.title, certification.organization, certification.duration, certification.location))
     resume = resume.copy(certifications = certifications)
-    resume
+    CreateCertificationsResponse(resume)

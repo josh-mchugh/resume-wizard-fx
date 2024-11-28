@@ -16,5 +16,5 @@ class CertificationsServiceImpl(
   override def onContinue(request: OnContinueRequest): Future[OnContinueResponse] =
     logger.info("OnContinueRequest: '{}'", request)
     Future {
-      OnContinueResponse(resumeService.handleCertificationsUpdate(request.toTuple))
+      OnContinueResponse(resumeService.handleCertificationsUpdate(request.toCreateCertificationsRequest))
     }
