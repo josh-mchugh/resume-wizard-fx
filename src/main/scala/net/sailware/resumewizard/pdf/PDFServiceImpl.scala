@@ -3,6 +3,8 @@ package net.sailware.resumewizard.pdf
 import java.io.File
 import java.io.FileOutputStream
 import java.io.StringReader
+import net.sailware.resumewizard.pdf.model.GeneratePDFRequest
+import net.sailware.resumewizard.pdf.model.GeneratePDFResponse
 import net.sailware.resumewizard.resume.Resume
 import org.slf4j.LoggerFactory
 import org.w3c.dom.Document
@@ -15,18 +17,18 @@ class PDFServiceImpl() extends PDFService:
   val logger = LoggerFactory.getLogger(classOf[PDFServiceImpl])
   val renderer = new ITextRenderer()
 
-  override def generatePDF(resume: Resume): File =
+  override def generatePDF(request: GeneratePDFRequest): GeneratePDFResponse =
 
     val file = new File("resume.pdf")
     try {
       val fileOutputStream = new FileOutputStream(file)
-      val source = XMLResource.load(new StringReader(generateHTML(resume))).getDocument()
+      val source = XMLResource.load(new StringReader(generateHTML(request.resume))).getDocument()
       renderer.createPDF(source, fileOutputStream)
     } catch {
       case t: Throwable => logger.error("error generating PDF", t)
     }
 
-    file
+    GeneratePDFResponse(file)
 
   private def generateHTML(resume: Resume): String =
     html(

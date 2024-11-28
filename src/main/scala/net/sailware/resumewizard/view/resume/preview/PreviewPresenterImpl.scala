@@ -18,7 +18,7 @@ class PreviewPresenterImpl(
   def generateResumePDF(): Unit =
     logger.info("Generating PDF...")
     service
-      .generatePDF()
+      .generatePreview()
       .onComplete:
         case Success(response) => Platform.runLater(() => model.pdf.value = response.file)
         case Failure(t)        => logger.error("Error generating PDF", t)

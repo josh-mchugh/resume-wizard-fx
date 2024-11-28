@@ -1,8 +1,8 @@
 package net.sailware.resumewizard.pdf
 
-import java.io.File
-import net.sailware.resumewizard.resume.Resume
+import net.sailware.resumewizard.pdf.model.GeneratePDFRequest
+import net.sailware.resumewizard.pdf.model.GeneratePDFResponse
 
 trait PDFService:
 
-  def generatePDF(resume: Resume): File
+  def generatePDF(request: GeneratePDFRequest): GeneratePDFResponse
