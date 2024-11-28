@@ -1,6 +1,6 @@
 package net.sailware.resumewizard.view.resume.wizard.personal.service.model
 
-import net.sailware.resumewizard.resume.model.CreateResumePersonalRequest
+import net.sailware.resumewizard.resume.model.CreatePersonalRequest
 import net.sailware.resumewizard.view.resume.wizard.personal.PersonalDetailsModel
 
 case class OnContinueRequest(
@@ -9,8 +9,8 @@ case class OnContinueRequest(
     val summary: String
 ):
 
-  def toCreateResumePersonalRequest: CreateResumePersonalRequest =
-    CreateResumePersonalRequest(name, title, summary)
+  def toCreateResumePersonalRequest: CreatePersonalRequest =
+    CreatePersonalRequest(name, title, summary)
 
 object OnContinueRequest:
 

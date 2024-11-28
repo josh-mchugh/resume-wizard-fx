@@ -1,7 +1,7 @@
 package net.sailware.resumewizard.resume
 
-import net.sailware.resumewizard.resume.model.CreateResumePersonalRequest
-import net.sailware.resumewizard.resume.model.CreateResumePersonalResponse
+import net.sailware.resumewizard.resume.model.CreatePersonalRequest
+import net.sailware.resumewizard.resume.model.CreatePersonalResponse
 import net.sailware.resumewizard.resume.model.CreateResumeRequest
 import net.sailware.resumewizard.resume.model.CreateResumeResponse
 import net.sailware.resumewizard.resume.model.CreateSocialsRequest
@@ -18,10 +18,10 @@ class ResumeServiceImpl extends ResumeService:
     resume = resume.copy(name = request.name)
     CreateResumeResponse(resume)
 
-  override def handlePersonalDetailsUpdate(request: CreateResumePersonalRequest): CreateResumePersonalResponse =
+  override def handlePersonalDetailsUpdate(request: CreatePersonalRequest): CreatePersonalResponse =
     val personalDetails = PersonalDetails(request.name, request.title, request.summary)
     resume = resume.copy(personalDetails = personalDetails)
-    CreateResumePersonalResponse(resume)
+    CreatePersonalResponse(resume)
 
   override def handleContactDetailsUpdate(phone: String, email: String, location: String): Resume =
     val contactDetails = ContactDetails(phone, email, location)
