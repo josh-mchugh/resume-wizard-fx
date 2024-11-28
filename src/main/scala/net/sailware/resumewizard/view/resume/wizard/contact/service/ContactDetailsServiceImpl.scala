@@ -14,5 +14,5 @@ class ContactDetailsServiceImpl(val resumeService: ResumeService) extends Contac
   override def onContinue(request: OnContinueRequest): Future[OnContinueResponse] =
     logger.info("OnContinueRequest: '{}'", request)
     Future {
-      OnContinueResponse(resumeService.handleContactDetailsUpdate(request.phone, request.email, request.location))
+      OnContinueResponse(resumeService.handleContactDetailsUpdate(request.toCreateContactRequest))
     }

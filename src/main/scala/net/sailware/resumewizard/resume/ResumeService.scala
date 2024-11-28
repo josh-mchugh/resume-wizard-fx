@@ -1,5 +1,7 @@
 package net.sailware.resumewizard.resume
 
+import net.sailware.resumewizard.resume.model.CreateContactRequest
+import net.sailware.resumewizard.resume.model.CreateContactResponse
 import net.sailware.resumewizard.resume.model.CreatePersonalRequest
 import net.sailware.resumewizard.resume.model.CreatePersonalResponse
 import net.sailware.resumewizard.resume.model.CreateResumeRequest
@@ -15,7 +17,7 @@ trait ResumeService:
 
   def handlePersonalDetailsUpdate(request: CreatePersonalRequest): CreatePersonalResponse
 
-  def handleContactDetailsUpdate(phone: String, email: String, location: String): Resume
+  def handleContactDetailsUpdate(request: CreateContactRequest): CreateContactResponse
 
   def handleSocialsUpdate(request: CreateSocialsRequest): CreateSocialsResponse
 
