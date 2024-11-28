@@ -14,5 +14,5 @@ class ExperiencesServiceImpl(val resumeService: ResumeService) extends Experienc
   override def onContinue(request: OnContinueRequest): Future[OnContinueResponse] =
     logger.info("OnContinueRequest: '{}'", request)
     Future {
-      OnContinueResponse(resumeService.handleExperiencesUpdate(request.toTuple))
+      OnContinueResponse(resumeService.handleExperiencesUpdate(request.toCreateExperiencesRequest))
     }

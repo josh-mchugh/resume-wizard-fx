@@ -1,5 +1,6 @@
 package net.sailware.resumewizard.view.resume.wizard.experience.service.model
 
+import net.sailware.resumewizard.resume.model.CreateExperiencesResponse
 import net.sailware.resumewizard.resume.Resume
 
 case class OnContinueResponse(
@@ -8,5 +9,5 @@ case class OnContinueResponse(
 
 object OnContinueResponse:
 
-  def apply(resume: Resume): OnContinueResponse =
-    new OnContinueResponse(resume)
+  def apply(response: CreateExperiencesResponse): OnContinueResponse =
+    new OnContinueResponse(response.resume)
