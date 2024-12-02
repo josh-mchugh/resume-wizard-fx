@@ -32,9 +32,11 @@ class PDFServiceImpl() extends PDFService:
       val page = new PDPage(PDRectangle.A4)
       val contentStream = new PDPageContentStream(document, page)
 
+      addLeftBackground(contentStream, page)
+
       val myTable = Table.builder()
-        .addColumnsOfWidth(200, 200)
-        .padding(2)
+        .addColumnsOfWidth(page.getMediaBox().getWidth() * 0.3F, page.getMediaBox().getWidth() * 0.7F)
+        .padding(0)
         .addRow(Row.builder()
           .add(TextCell.builder().text("One One").borderWidth(4).borderColorLeft(Color.MAGENTA).backgroundColor(Color.WHITE).build())
           .add(TextCell.builder().text("One Two").borderWidth(0).backgroundColor(Color.YELLOW).build())
@@ -71,3 +73,15 @@ class PDFServiceImpl() extends PDFService:
     }
 
     GeneratePDFResponse(file)
+
+  private def addLeftBackground(contentStream: PDPageContentStream, page: PDPage): Unit =
+    contentStream.setNonStrokingColor(new Color(17, 33, 47))
+
+    contentStream.addRect(
+      0,
+      0,
+      page.getMediaBox().getWidth() * 0.347F,
+      page.getMediaBox().getHeight()
+    )
+
+    contentStream.fill()
