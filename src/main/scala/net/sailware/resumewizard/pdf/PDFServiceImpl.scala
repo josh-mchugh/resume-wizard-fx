@@ -32,13 +32,15 @@ class PDFServiceImpl() extends PDFService:
       val document = new PDDocument()
 
       val robotoRegular = PDType0Font.load(document, new File(getClass.getResource("/font/Roboto-Regular.ttf").getPath))
+      val robotoBold = PDType0Font.load(document, new File(getClass.getResource("/font/Roboto-Bold.ttf").getPath))
 
       val page = new PDPage(PDRectangle.A4)
 
       val contentStream = new PDPageContentStream(document, page)
 
       addLeftBackground(contentStream, page)
-      addResumeName(contentStream, document, page, robotoRegular)
+      addName(contentStream, document, page, robotoBold)
+      addTitle(contentStream, document, page, robotoRegular)
 
       contentStream.close()
 
@@ -65,12 +67,21 @@ class PDFServiceImpl() extends PDFService:
     contentStream.fill()
 
 
-  private def addResumeName(contentStream: PDPageContentStream, document: PDDocument, page: PDPage, font: PDFont): Unit =
+  private def addName(contentStream: PDPageContentStream, document: PDDocument, page: PDPage, font: PDFont): Unit =
 
     contentStream.beginText()
     contentStream.setNonStrokingColor(white)
     contentStream.setFont(font, 22.5F)
-    contentStream.newLineAtOffset(24, page.getMediaBox().getHeight() - 42)
-    contentStream.showText("Josh McHugh")
+    contentStream.newLineAtOffset(24F, page.getMediaBox().getHeight() - 42F)
+    contentStream.showText("John Doe")
     contentStream.endText()
-    contentStream.setCharacterSpacing(0)
+
+  private def addTitle(contentStream: PDPageContentStream, document: PDDocument, page: PDPage, font: PDFont): Unit =
+
+    contentStream.beginText()
+    contentStream.setNonStrokingColor(white)
+    contentStream.setFont(font, 10.5F)
+    contentStream.setCharacterSpacing(0.6F)
+    contentStream.newLineAtOffset(24F, page.getMediaBox().getHeight() - 42F - 22.5F)
+    contentStream.showText("Web and Graphics Designer")
+    contentStream.endText()
