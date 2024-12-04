@@ -8,6 +8,7 @@ import org.apache.pdfbox.pdmodel.PDDocument
 import org.apache.pdfbox.pdmodel.PDPage
 import org.apache.pdfbox.pdmodel.common.PDRectangle
 import org.apache.pdfbox.pdmodel.PDPageContentStream
+import org.apache.pdfbox.pdmodel.font.PDFont
 import org.apache.pdfbox.pdmodel.font.PDType0Font
 import org.apache.pdfbox.pdmodel.font.PDType1Font
 import org.apache.pdfbox.pdmodel.font.Standard14Fonts.FontName
@@ -19,17 +20,25 @@ class PDFServiceImpl() extends PDFService:
 
   val logger = LoggerFactory.getLogger(classOf[PDFServiceImpl])
 
+  val primary = new Color(17, 33, 47)
+  val white = new Color(255, 255, 255)
+
+
   override def generatePDF(request: GeneratePDFRequest): GeneratePDFResponse =
 
     val file = new File("resume.pdf")
     try {
+
       val document = new PDDocument()
+
+      val robotoRegular = PDType0Font.load(document, new File(getClass.getResource("/font/Roboto-Regular.ttf").getPath))
+
       val page = new PDPage(PDRectangle.A4)
 
       val contentStream = new PDPageContentStream(document, page)
 
       addLeftBackground(contentStream, page)
-      addResumeName(contentStream, document, page)
+      addResumeName(contentStream, document, page, robotoRegular)
 
       contentStream.close()
 
@@ -44,7 +53,7 @@ class PDFServiceImpl() extends PDFService:
 
   private def addLeftBackground(contentStream: PDPageContentStream, page: PDPage): Unit =
 
-    contentStream.setNonStrokingColor(new Color(17, 33, 47))
+    contentStream.setNonStrokingColor(primary)
 
     contentStream.addRect(
       0,
@@ -56,11 +65,11 @@ class PDFServiceImpl() extends PDFService:
     contentStream.fill()
 
 
-  private def addResumeName(contentStream: PDPageContentStream, document: PDDocument, page: PDPage): Unit =
+  private def addResumeName(contentStream: PDPageContentStream, document: PDDocument, page: PDPage, font: PDFont): Unit =
 
     contentStream.beginText()
-    contentStream.setNonStrokingColor(new Color(255, 255, 255))
-    contentStream.setFont(PDType0Font.load(document, new File(getClass.getResource("/font/Roboto-Regular.ttf").getPath)), 22.5F)
+    contentStream.setNonStrokingColor(white)
+    contentStream.setFont(font, 22.5F)
     contentStream.newLineAtOffset(24, page.getMediaBox().getHeight() - 42)
     contentStream.showText("Josh McHugh")
     contentStream.endText()
