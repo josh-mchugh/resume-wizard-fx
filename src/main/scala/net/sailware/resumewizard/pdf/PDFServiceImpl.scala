@@ -28,7 +28,6 @@ class PDFServiceImpl() extends PDFService:
 
     val file = new File("resume.pdf")
     try {
-
       val document = new PDDocument()
 
       val robotoRegular = PDType0Font.load(document, new File(getClass.getResource("/font/Roboto-Regular.ttf").getPath))
@@ -72,7 +71,7 @@ class PDFServiceImpl() extends PDFService:
     contentStream.beginText()
     contentStream.setNonStrokingColor(white)
     contentStream.setFont(font, 22.5F)
-    contentStream.newLineAtOffset(24F, page.getMediaBox().getHeight() - 42F)
+    contentStream.newLineAtOffset(24F, page.getMediaBox().getHeight() - 42F - getFontHeight(font, 22.5F))
     contentStream.showText("John Doe")
     contentStream.endText()
 
@@ -82,6 +81,9 @@ class PDFServiceImpl() extends PDFService:
     contentStream.setNonStrokingColor(white)
     contentStream.setFont(font, 10.5F)
     contentStream.setCharacterSpacing(0.6F)
-    contentStream.newLineAtOffset(24F, page.getMediaBox().getHeight() - 42F - 22.5F)
+    contentStream.newLineAtOffset(24F, page.getMediaBox().getHeight() - 42F - 16F - getFontHeight(font, 10.5F) - 6F)
     contentStream.showText("Web and Graphics Designer")
     contentStream.endText()
+
+  private def getFontHeight(font: PDFont, size: Float): Float =
+    font.getFontDescriptor().getCapHeight() * size / 1000F
