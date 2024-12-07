@@ -68,12 +68,26 @@ class PDFServiceImpl() extends PDFService:
 
   private def addName(contentStream: PDPageContentStream, document: PDDocument, page: PDPage, font: PDFont): Unit =
 
+    val topOffset = page.getMediaBox().getHeight() - 42F
+
     contentStream.beginText()
     contentStream.setNonStrokingColor(white)
     contentStream.setFont(font, 22.5F)
-    contentStream.newLineAtOffset(24F, page.getMediaBox().getHeight() - 42F - getFontHeight(font, 22.5F))
+    contentStream.newLineAtOffset(24, topOffset)
     contentStream.showText("John Doe")
     contentStream.endText()
+
+    contentStream.setStrokingColor(white);
+    contentStream.setLineWidth(1)
+    contentStream.moveTo(24F, topOffset)
+    contentStream.lineTo(150F, topOffset)
+    contentStream.closeAndStroke()
+
+    contentStream.setStrokingColor(white);
+    contentStream.setLineWidth(1)
+    contentStream.moveTo(24F, topOffset)
+    contentStream.lineTo(24F, topOffset + getFontHeight(font, 22.5F))
+    contentStream.closeAndStroke()
 
   private def addTitle(contentStream: PDPageContentStream, document: PDDocument, page: PDPage, font: PDFont): Unit =
 
@@ -81,9 +95,9 @@ class PDFServiceImpl() extends PDFService:
     contentStream.setNonStrokingColor(white)
     contentStream.setFont(font, 10.5F)
     contentStream.setCharacterSpacing(0.6F)
-    contentStream.newLineAtOffset(24F, page.getMediaBox().getHeight() - 42F - 16F - getFontHeight(font, 10.5F) - 6F)
+    contentStream.newLineAtOffset(24, page.getMediaBox().getHeight() - 42F - getFontHeight(font, 22.5F))
     contentStream.showText("Web and Graphics Designer")
     contentStream.endText()
 
   private def getFontHeight(font: PDFont, size: Float): Float =
-    font.getFontDescriptor().getCapHeight() * size / 1000F
+    font.getFontDescriptor().getCapHeight() * size / 1000F;
