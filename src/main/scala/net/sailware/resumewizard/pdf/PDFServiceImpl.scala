@@ -31,6 +31,7 @@ class PDFServiceImpl() extends PDFService:
       val document = new PDDocument()
 
       val robotoRegular = PDType0Font.load(document, new File(getClass.getResource("/font/Roboto-Regular.ttf").getPath))
+      val robotoMedium = PDType0Font.load(document, new File(getClass.getResource("/font/Roboto-Medium.ttf").getPath))
       val robotoBold = PDType0Font.load(document, new File(getClass.getResource("/font/Roboto-Bold.ttf").getPath))
 
       val page = new PDPage(PDRectangle.A4)
@@ -38,7 +39,7 @@ class PDFServiceImpl() extends PDFService:
       val contentStream = new PDPageContentStream(document, page)
 
       addLeftBackground(contentStream, page)
-      addName(contentStream, document, page, robotoBold)
+      addName(contentStream, document, page, robotoMedium)
       addTitle(contentStream, document, page, robotoRegular)
 
       contentStream.close()
@@ -68,7 +69,7 @@ class PDFServiceImpl() extends PDFService:
 
   private def addName(contentStream: PDPageContentStream, document: PDDocument, page: PDPage, font: PDFont): Unit =
 
-    val topOffset = page.getMediaBox().getHeight() - 42F
+    val topOffset = page.getMediaBox().getHeight() - 64.5F
 
     contentStream.beginText()
     contentStream.setNonStrokingColor(white)
@@ -77,17 +78,34 @@ class PDFServiceImpl() extends PDFService:
     contentStream.showText("John Doe")
     contentStream.endText()
 
+    // bottom border line stroke
+    contentStream.setStrokingColor(white);
+    contentStream.setLineWidth(1)
+    contentStream.moveTo(24F, topOffset + getFontHeight(font, 22.5F))
+    contentStream.lineTo(24F + getStringWidth("John Doe", font, 22.5F), topOffset + getFontHeight(font, 22.5F))
+    contentStream.closeAndStroke()
+
+    // right border line stroke
+    contentStream.setStrokingColor(white);
+    contentStream.setLineWidth(1)
+    contentStream.moveTo(24F + getStringWidth("John Doe", font, 22.5F), topOffset)
+    contentStream.lineTo(24F + getStringWidth("John Doe", font, 22.5F), topOffset + getFontHeight(font, 22.5F))
+    contentStream.closeAndStroke()
+
+    // bottom border line stroke
     contentStream.setStrokingColor(white);
     contentStream.setLineWidth(1)
     contentStream.moveTo(24F, topOffset)
-    contentStream.lineTo(150F, topOffset)
+    contentStream.lineTo(24F + getStringWidth("John Doe", font, 22.5F), topOffset)
     contentStream.closeAndStroke()
 
+    // left border line stroke
     contentStream.setStrokingColor(white);
     contentStream.setLineWidth(1)
     contentStream.moveTo(24F, topOffset)
     contentStream.lineTo(24F, topOffset + getFontHeight(font, 22.5F))
     contentStream.closeAndStroke()
+
 
   private def addTitle(contentStream: PDPageContentStream, document: PDDocument, page: PDPage, font: PDFont): Unit =
 
@@ -95,9 +113,24 @@ class PDFServiceImpl() extends PDFService:
     contentStream.setNonStrokingColor(white)
     contentStream.setFont(font, 10.5F)
     contentStream.setCharacterSpacing(0.6F)
-    contentStream.newLineAtOffset(24, page.getMediaBox().getHeight() - 42F - getFontHeight(font, 22.5F))
+    contentStream.newLineAtOffset(24, page.getMediaBox().getHeight() - 64.5F - getFontHeight(font, 22.5F))
     contentStream.showText("Web and Graphics Designer")
     contentStream.endText()
 
   private def getFontHeight(font: PDFont, size: Float): Float =
     font.getFontDescriptor().getCapHeight() * size / 1000F;
+
+  private def getStringWidth(text: String, font: PDFont, size: Float): Float =
+    text.codePoints()
+      .mapToObj(codePoint => String(Array(codePoint), 0, 1))
+      .map(codePoint =>
+        try {
+          font.getStringWidth(codePoint) * size / 1000F
+        }
+        catch {
+          case e: IllegalArgumentException =>
+            logger.error("Illegal argument for font width", e)
+            font.getStringWidth("-") * size / 1000F
+        }
+      )
+      .reduce(0.0F, (acc, value) => acc + value)
