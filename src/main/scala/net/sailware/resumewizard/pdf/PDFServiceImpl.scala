@@ -69,11 +69,12 @@ class PDFServiceImpl() extends PDFService:
 
   private def addName(contentStream: PDPageContentStream, document: PDDocument, page: PDPage, font: PDFont): Unit =
 
+    val fontSize = 22.5F
     val topOffset = page.getMediaBox().getHeight() - 64.5F
 
     contentStream.beginText()
     contentStream.setNonStrokingColor(white)
-    contentStream.setFont(font, 22.5F)
+    contentStream.setFont(font, fontSize)
     contentStream.newLineAtOffset(24, topOffset)
     contentStream.showText("John Doe")
     contentStream.endText()
@@ -81,37 +82,39 @@ class PDFServiceImpl() extends PDFService:
     // bottom border line stroke
     contentStream.setStrokingColor(white);
     contentStream.setLineWidth(1)
-    contentStream.moveTo(24F, topOffset + getFontHeight(font, 22.5F))
-    contentStream.lineTo(24F + getStringWidth("John Doe", font, 22.5F), topOffset + getFontHeight(font, 22.5F))
+    contentStream.moveTo(24F, topOffset + getFontHeight(font, fontSize))
+    contentStream.lineTo(24F + getStringWidth("John Doe", font, fontSize), topOffset + getFontHeight(font, fontSize))
     contentStream.closeAndStroke()
 
     // right border line stroke
     contentStream.setStrokingColor(white);
     contentStream.setLineWidth(1)
-    contentStream.moveTo(24F + getStringWidth("John Doe", font, 22.5F), topOffset)
-    contentStream.lineTo(24F + getStringWidth("John Doe", font, 22.5F), topOffset + getFontHeight(font, 22.5F))
+    contentStream.moveTo(24F + getStringWidth("John Doe", font, fontSize), topOffset)
+    contentStream.lineTo(24F + getStringWidth("John Doe", font, fontSize), topOffset + getFontHeight(font, fontSize))
     contentStream.closeAndStroke()
 
     // bottom border line stroke
     contentStream.setStrokingColor(white);
     contentStream.setLineWidth(1)
     contentStream.moveTo(24F, topOffset)
-    contentStream.lineTo(24F + getStringWidth("John Doe", font, 22.5F), topOffset)
+    contentStream.lineTo(24F + getStringWidth("John Doe", font, fontSize), topOffset)
     contentStream.closeAndStroke()
 
     // left border line stroke
     contentStream.setStrokingColor(white);
     contentStream.setLineWidth(1)
     contentStream.moveTo(24F, topOffset)
-    contentStream.lineTo(24F, topOffset + getFontHeight(font, 22.5F))
+    contentStream.lineTo(24F, topOffset + getFontHeight(font, fontSize))
     contentStream.closeAndStroke()
 
 
   private def addTitle(contentStream: PDPageContentStream, document: PDDocument, page: PDPage, font: PDFont): Unit =
 
+    val fontSize = 10.5F
+
     contentStream.beginText()
     contentStream.setNonStrokingColor(white)
-    contentStream.setFont(font, 10.5F)
+    contentStream.setFont(font, fontSize)
     contentStream.setCharacterSpacing(0.6F)
     contentStream.newLineAtOffset(24, page.getMediaBox().getHeight() - 64.5F - getFontHeight(font, 22.5F))
     contentStream.showText("Web and Graphics Designer")
