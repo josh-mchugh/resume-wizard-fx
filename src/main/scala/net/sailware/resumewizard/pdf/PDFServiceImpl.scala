@@ -14,7 +14,7 @@ import org.apache.pdfbox.pdmodel.font.PDType1Font
 import org.apache.pdfbox.pdmodel.font.Standard14Fonts.FontName
 import org.slf4j.LoggerFactory
 
-import java.awt.*
+import java.awt.Color
 
 class PDFServiceImpl() extends PDFService:
 
@@ -32,15 +32,19 @@ class PDFServiceImpl() extends PDFService:
 
       val robotoRegular = PDType0Font.load(document, new File(getClass.getResource("/font/Roboto-Regular.ttf").getPath))
       val robotoMedium = PDType0Font.load(document, new File(getClass.getResource("/font/Roboto-Medium.ttf").getPath))
-      val robotoBold = PDType0Font.load(document, new File(getClass.getResource("/font/Roboto-Bold.ttf").getPath))
 
       val page = new PDPage(PDRectangle.A4)
 
       val contentStream = new PDPageContentStream(document, page)
 
       addLeftBackground(contentStream, page)
-      addName(contentStream, document, page, robotoMedium)
-      addTitle(contentStream, document, page, robotoRegular)
+
+      for(section <- createSections(document))
+        section.content match
+          case Some(content) =>
+            content match
+              case textContent: TextContent => processTextContent(contentStream, section.x, section.y, textContent)
+          case None => logger.info("No content found for section: {}", section.id)
 
       contentStream.close()
 
@@ -120,6 +124,15 @@ class PDFServiceImpl() extends PDFService:
     contentStream.showText("Web and Graphics Designer")
     contentStream.endText()
 
+  private def processTextContent(contentStream: PDPageContentStream, x: Float, y: Float,  content: TextContent): Unit =
+    contentStream.beginText()
+    contentStream.setNonStrokingColor(content.font.color)
+    contentStream.setFont(content.font.font, content.font.size)
+    contentStream.setCharacterSpacing(content.characterSpacing)
+    contentStream.newLineAtOffset(x, y)
+    contentStream.showText(content.text)
+    contentStream.endText()
+
   private def getFontHeight(font: PDFont, size: Float): Float =
     font.getFontDescriptor().getCapHeight() * size / 1000F;
 
@@ -137,3 +150,55 @@ class PDFServiceImpl() extends PDFService:
         }
       )
       .reduce(0.0F, (acc, value) => acc + value)
+
+  private def createSections(document: PDDocument): List[Section] =
+    val regular = PDType0Font.load(document, new File(getClass.getResource("/font/Roboto-Regular.ttf").getPath))
+    val medium = PDType0Font.load(document, new File(getClass.getResource("/font/Roboto-Medium.ttf").getPath))
+
+    List(
+      Section(
+        "LEFT_COLUMN",
+        Option.empty,
+        0,
+        PDRectangle.A4.getHeight(),
+        (64.5F, 0F, 0F, 24F),
+        Option.empty,
+      ),
+      Section(
+        "NAME",
+        Option("LEFT_COLUMN"),
+        24F,
+        24F,
+        (0F, 0F, 0F, 0F),
+        Option(
+          TextContent(
+            Font(medium, 22.5F, Color.WHITE),
+            "John Doe",
+            0F
+          )
+        )
+      )
+    )
+
+case class Font(
+  val font: PDFont,
+  val size: Float,
+  val color: Color
+)
+
+case class Section(
+  val id: String,
+  val parentId: Option[String],
+  val x: Float,
+  val y: Float,
+  val padding: (Float, Float, Float, Float),
+  val content: Option[Content],
+)
+
+sealed trait Content
+
+case class TextContent(
+  val font: Font,
+  val text: String,
+  val characterSpacing: Float
+) extends Content
