@@ -23,7 +23,6 @@ class PDFServiceImpl() extends PDFService:
   val primary = new Color(17, 33, 47)
   val white = new Color(255, 255, 255)
 
-
   override def generatePDF(request: GeneratePDFRequest): GeneratePDFResponse =
 
     val file = new File("resume.pdf")
@@ -37,12 +36,11 @@ class PDFServiceImpl() extends PDFService:
 
       val contentStream = new PDPageContentStream(document, page)
 
-      addLeftBackground(contentStream, page)
-
       for(section <- createSections(document))
         section.content match
           case Some(content) =>
             content match
+              case backgroundContent: BackgroundContent => processBackgroundContent(contentStream, backgroundContent)
               case textContent: TextContent => processTextContent(contentStream, section.x, section.y, textContent)
           case None => logger.info("No content found for section: {}", section.id)
 
@@ -56,19 +54,6 @@ class PDFServiceImpl() extends PDFService:
     }
 
     GeneratePDFResponse(file)
-
-  private def addLeftBackground(contentStream: PDPageContentStream, page: PDPage): Unit =
-
-    contentStream.setNonStrokingColor(primary)
-
-    contentStream.addRect(
-      0,
-      0,
-      page.getMediaBox().getWidth() * 0.347F,
-      page.getMediaBox().getHeight()
-    )
-
-    contentStream.fill()
 
 
   private def addName(contentStream: PDPageContentStream, document: PDDocument, page: PDPage, font: PDFont): Unit =
@@ -133,6 +118,16 @@ class PDFServiceImpl() extends PDFService:
     contentStream.showText(content.text)
     contentStream.endText()
 
+  private def processBackgroundContent(contentStream: PDPageContentStream, content: BackgroundContent): Unit =
+    contentStream.setNonStrokingColor(content.color)
+    contentStream.addRect(
+      content.x,
+      content.y,
+      content.width,
+      content.height,
+    )
+    contentStream.fill()
+
   private def getFontHeight(font: PDFont, size: Float): Float =
     font.getFontDescriptor().getCapHeight() * size / 1000F;
 
@@ -162,7 +157,15 @@ class PDFServiceImpl() extends PDFService:
         0,
         PDRectangle.A4.getHeight(),
         (64.5F, 0F, 0F, 24F),
-        Option.empty,
+        Option(
+          BackgroundContent(
+            0,
+            0,
+            PDRectangle.A4.getWidth() * 0.347F,
+            PDRectangle.A4.getHeight(),
+            primary
+          )
+        ),
       ),
       Section(
         "NAME",
@@ -172,7 +175,7 @@ class PDFServiceImpl() extends PDFService:
         (0F, 0F, 0F, 0F),
         Option(
           TextContent(
-            Font(medium, 22.5F, Color.WHITE),
+            Font(medium, 22.5F, white),
             "John Doe",
             0F
           )
@@ -201,4 +204,12 @@ case class TextContent(
   val font: Font,
   val text: String,
   val characterSpacing: Float
+) extends Content
+
+case class BackgroundContent(
+  val x: Float,
+  val y: Float,
+  val width: Float,
+  val height: Float,
+  val color: Color
 ) extends Content
