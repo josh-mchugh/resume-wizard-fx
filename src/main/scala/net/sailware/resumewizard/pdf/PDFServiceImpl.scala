@@ -15,6 +15,7 @@ import org.apache.pdfbox.pdmodel.font.Standard14Fonts.FontName
 import org.slf4j.LoggerFactory
 
 import java.awt.Color
+import scala.collection.mutable.ListBuffer
 
 class PDFServiceImpl() extends PDFService:
 
@@ -22,6 +23,15 @@ class PDFServiceImpl() extends PDFService:
 
   val primary = new Color(17, 33, 47)
   val white = new Color(255, 255, 255)
+
+  def render(contentStream: PDPageContentStream, node: Node): Unit =
+    node.section.content match
+      case Some(content) =>
+        content match
+          case backgroundContent: BackgroundContent => processBackgroundContent(contentStream, backgroundContent)
+          case textContent: TextContent => processTextContent(contentStream, (0F, 0F), textContent)
+      case None => logger.info("No content for section: {}", node.section.id)
+    if (node.children.nonEmpty) node.children.foreach(child => render(contentStream, child))
 
   override def generatePDF(request: GeneratePDFRequest): GeneratePDFResponse =
 
@@ -37,14 +47,9 @@ class PDFServiceImpl() extends PDFService:
       val contentStream = new PDPageContentStream(document, page)
 
       val sections = createSections(document)
+      val tree = createTree(sections)
 
-      for(section <- sections)
-        section.content match
-          case Some(content) =>
-            content match
-              case backgroundContent: BackgroundContent => processBackgroundContent(contentStream, backgroundContent)
-              case textContent: TextContent => processTextContent(contentStream, section.getParentOffset(sections), textContent)
-          case None => logger.info("No content found for section: {}", section.id)
+      render(contentStream, tree)
 
       contentStream.close()
 
@@ -148,11 +153,11 @@ class PDFServiceImpl() extends PDFService:
       )
       .reduce(0.0F, (acc, value) => acc + value)
 
-  private def createSections(document: PDDocument): List[Section] =
+  private def createSections(document: PDDocument): Array[Section] =
     val regular = PDType0Font.load(document, new File(getClass.getResource("/font/Roboto-Regular.ttf").getPath))
     val medium = PDType0Font.load(document, new File(getClass.getResource("/font/Roboto-Medium.ttf").getPath))
 
-    List(
+    Array(
       Section(
         "LEFT_COLUMN",
         Option.empty,
@@ -196,6 +201,20 @@ class PDFServiceImpl() extends PDFService:
       )
     )
 
+  private def createTree(sections: Array[Section]): Node =
+    Node(
+      sections(0),
+      ListBuffer(
+        Node(
+          sections(1),
+          ListBuffer.empty
+        ),
+        Node(
+          sections(2),
+          ListBuffer.empty
+        )
+      )
+    )
 
 case class Font(
   val font: PDFont,
@@ -217,7 +236,7 @@ case class Section(
   val padding: Padding,
   val content: Option[Content],
 ):
-  def getParentOffset(sections: List[Section]): (Float, Float) =
+  def getParentOffset(sections: Array[Section]): (Float, Float) =
     parentId match
       case Some(parentId) =>
         sections.find(section => parentId == section.id) match
@@ -242,3 +261,12 @@ case class BackgroundContent(
   val height: Float,
   val color: Color
 ) extends Content
+
+sealed trait TreeNode
+
+case class Node(
+  val section: Section,
+  val children: ListBuffer[Node]
+) extends TreeNode
+
+object EmptyNode extends TreeNode
