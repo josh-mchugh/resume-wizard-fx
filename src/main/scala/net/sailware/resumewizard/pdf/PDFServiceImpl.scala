@@ -36,12 +36,14 @@ class PDFServiceImpl() extends PDFService:
 
       val contentStream = new PDPageContentStream(document, page)
 
-      for(section <- createSections(document))
+      val sections = createSections(document)
+
+      for(section <- sections)
         section.content match
           case Some(content) =>
             content match
               case backgroundContent: BackgroundContent => processBackgroundContent(contentStream, backgroundContent)
-              case textContent: TextContent => processTextContent(contentStream, section.x, section.y, textContent)
+              case textContent: TextContent => processTextContent(contentStream, section.getParentOffset(sections), textContent)
           case None => logger.info("No content found for section: {}", section.id)
 
       contentStream.close()
@@ -109,12 +111,12 @@ class PDFServiceImpl() extends PDFService:
     contentStream.showText("Web and Graphics Designer")
     contentStream.endText()
 
-  private def processTextContent(contentStream: PDPageContentStream, x: Float, y: Float,  content: TextContent): Unit =
+  private def processTextContent(contentStream: PDPageContentStream, offset: (Float, Float),  content: TextContent): Unit =
     contentStream.beginText()
     contentStream.setNonStrokingColor(content.font.color)
     contentStream.setFont(content.font.font, content.font.size)
     contentStream.setCharacterSpacing(content.characterSpacing)
-    contentStream.newLineAtOffset(x, y)
+    contentStream.newLineAtOffset(offset._1, offset._2)
     contentStream.showText(content.text)
     contentStream.endText()
 
@@ -155,8 +157,7 @@ class PDFServiceImpl() extends PDFService:
         "LEFT_COLUMN",
         Option.empty,
         0,
-        PDRectangle.A4.getHeight(),
-        (64.5F, 0F, 0F, 24F),
+        Padding(64.5F, 0F, 0F, 24F),
         Option(
           BackgroundContent(
             0,
@@ -170,9 +171,8 @@ class PDFServiceImpl() extends PDFService:
       Section(
         "NAME",
         Option("LEFT_COLUMN"),
-        24F,
-        24F,
-        (0F, 0F, 0F, 0F),
+        0,
+        Padding(0F, 0F, 0F, 0F),
         Option(
           TextContent(
             Font(medium, 22.5F, white),
@@ -180,8 +180,22 @@ class PDFServiceImpl() extends PDFService:
             0F
           )
         )
+      ),
+      Section(
+        "TITLE",
+        Option("LEFT_COLUMN"),
+        1,
+        Padding(0F, 0F, 0F, 0F),
+        Option(
+          TextContent(
+            Font(regular, 10.5F, white),
+            "Senior Web Designer",
+            0.6F
+          )
+        )
       )
     )
+
 
 case class Font(
   val font: PDFont,
@@ -189,14 +203,29 @@ case class Font(
   val color: Color
 )
 
+case class Padding(
+  val top: Float = 0F,
+  val right: Float = 0F,
+  val bottom: Float = 0F,
+  val left: Float = 0F
+)
+
 case class Section(
   val id: String,
   val parentId: Option[String],
-  val x: Float,
-  val y: Float,
-  val padding: (Float, Float, Float, Float),
+  val order: Int,
+  val padding: Padding,
   val content: Option[Content],
-)
+):
+  def getParentOffset(sections: List[Section]): (Float, Float) =
+    parentId match
+      case Some(parentId) =>
+        sections.find(section => parentId == section.id) match
+          case Some(parentSection) =>
+            val parentOffset = parentSection.getParentOffset(sections)
+            (parentOffset._1 + padding.left, parentOffset._2 - padding.top)
+          case None => (0F + padding._4, PDRectangle.A4.getHeight() - padding._1)
+      case None => (0F + padding._4, PDRectangle.A4.getHeight() - padding._1)
 
 sealed trait Content
 
