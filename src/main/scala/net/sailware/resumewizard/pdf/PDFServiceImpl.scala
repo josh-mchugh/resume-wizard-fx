@@ -201,20 +201,15 @@ class PDFServiceImpl() extends PDFService:
       )
     )
 
+  private def createChildren(parent: Section, sections: Array[Section]): List[Node] =
+    sections.filter(section => section.parentId == Option(parent.id))
+      .map(section => Node(section, createChildren(section, sections)))
+      .toList
+
   private def createTree(sections: Array[Section]): Node =
-    Node(
-      sections(0),
-      ListBuffer(
-        Node(
-          sections(1),
-          ListBuffer.empty
-        ),
-        Node(
-          sections(2),
-          ListBuffer.empty
-        )
-      )
-    )
+    sections.find(section => section.parentId == None)
+      .map(section => Node(section, createChildren(section, sections)))
+      .head
 
 case class Font(
   val font: PDFont,
@@ -266,7 +261,7 @@ sealed trait TreeNode
 
 case class Node(
   val section: Section,
-  val children: ListBuffer[Node]
+  val children: List[Node]
 ) extends TreeNode
 
 object EmptyNode extends TreeNode
