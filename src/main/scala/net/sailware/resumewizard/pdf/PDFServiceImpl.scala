@@ -29,7 +29,7 @@ class PDFServiceImpl() extends PDFService:
       case Some(content) =>
         content match
           case backgroundContent: BackgroundContent => processBackgroundContent(contentStream, backgroundContent)
-          case textContent: TextContent => processTextContent(contentStream, node.getParentOffset(), textContent)
+          case textContent: TextContent => processTextContent(contentStream, node.getOffset(), textContent)
       case None => logger.info("No content for section: {}", node.section.id)
     if (node.children.nonEmpty) node.children.foreach(child => render(contentStream, child))
 
@@ -56,6 +56,8 @@ class PDFServiceImpl() extends PDFService:
       document.addPage(page)
       document.save(file)
       document.close()
+
+      logger.info("Tree: {}", tree)
     } catch {
       case t: Throwable => logger.error("error generating PDF", t)
     }
@@ -201,19 +203,27 @@ class PDFServiceImpl() extends PDFService:
       )
     )
 
-  private def createChildren(parent: Node, sections: Array[Section]): List[Node] =
-    sections.filter(section => section.parentId == Option(parent.section.id))
-      .map(section =>
-        val node = Node(Option(parent), section, List.empty)
-        node.copy(children = createChildren(node, sections))
-      )
-      .toList
+  private def windowS[A](l: List[A]): Iterator[List[Option[A]]] =
+    (None :: l.map(Some(_)) ::: List(None)).sliding(3)
+
+  private def createChildren(parent: Node, parentMap: Map[Option[String], Array[Section]]): List[Node] =
+    if parentMap.contains(Option(parent.section.id)) then
+     val childNodes = parentMap(Option(parent.section.id))
+       .map(section => Node(Option(parent), None, section, List.empty))
+       .toList
+
+      windowS(childNodes)
+        .map(group => group(1).get.copy(left = group(0), children = createChildren(group(1).get, parentMap)))
+        .toList
+    else
+      List.empty
 
   private def createTree(sections: Array[Section]): Node =
+    val parentMap = sections.groupBy(_.parentId)
     sections.find(section => section.parentId == None)
       .map(section =>
-        val node = Node(None, section, List.empty)
-        node.copy(children = createChildren(node, sections))
+        val node = Node(None, None, section, List.empty)
+        node.copy(children = createChildren(node, parentMap))
       )
       .head
 
@@ -258,14 +268,20 @@ sealed trait TreeNode
 
 case class Node(
   val parent: Option[Node],
+  val left: Option[Node],
   val section: Section,
   val children: List[Node]
 ) extends TreeNode:
-  def getParentOffset(): (Float, Float) =
-    parent match
+  def getOffset(): (Float, Float) =
+    left match
       case Some(node) =>
-        val parentOffset = node.getParentOffset()
-        (parentOffset._1 + section.padding.left, parentOffset._2 - section.padding.top)
-      case None => (0F + section.padding._4, PDRectangle.A4.getHeight() - section.padding._1)
+        val offset = node.getOffset()
+        (offset._1 + section.padding.left, offset._2 - section.padding.top)
+      case None =>
+        parent match
+          case Some(node) =>
+            val offset = node.getOffset()
+            (offset._1 + section.padding.left, offset._2 - section.padding.top)
+          case None => (0F + section.padding._4, PDRectangle.A4.getHeight() - section.padding._1)
 
 object EmptyNode extends TreeNode
