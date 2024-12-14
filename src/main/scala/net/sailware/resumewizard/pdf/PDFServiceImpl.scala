@@ -29,7 +29,7 @@ class PDFServiceImpl() extends PDFService:
       case Some(content) =>
         content match
           case backgroundContent: BackgroundContent => processBackgroundContent(contentStream, backgroundContent)
-          case textContent: TextContent => processTextContent(contentStream, (0F, 0F), textContent)
+          case textContent: TextContent => processTextContent(contentStream, node.getParentOffset(), textContent)
       case None => logger.info("No content for section: {}", node.section.id)
     if (node.children.nonEmpty) node.children.foreach(child => render(contentStream, child))
 
@@ -201,14 +201,20 @@ class PDFServiceImpl() extends PDFService:
       )
     )
 
-  private def createChildren(parent: Section, sections: Array[Section]): List[Node] =
-    sections.filter(section => section.parentId == Option(parent.id))
-      .map(section => Node(section, createChildren(section, sections)))
+  private def createChildren(parent: Node, sections: Array[Section]): List[Node] =
+    sections.filter(section => section.parentId == Option(parent.section.id))
+      .map(section =>
+        val node = Node(Option(parent), section, List.empty)
+        node.copy(children = createChildren(node, sections))
+      )
       .toList
 
   private def createTree(sections: Array[Section]): Node =
     sections.find(section => section.parentId == None)
-      .map(section => Node(section, createChildren(section, sections)))
+      .map(section =>
+        val node = Node(None, section, List.empty)
+        node.copy(children = createChildren(node, sections))
+      )
       .head
 
 case class Font(
@@ -230,16 +236,7 @@ case class Section(
   val order: Int,
   val padding: Padding,
   val content: Option[Content],
-):
-  def getParentOffset(sections: Array[Section]): (Float, Float) =
-    parentId match
-      case Some(parentId) =>
-        sections.find(section => parentId == section.id) match
-          case Some(parentSection) =>
-            val parentOffset = parentSection.getParentOffset(sections)
-            (parentOffset._1 + padding.left, parentOffset._2 - padding.top)
-          case None => (0F + padding._4, PDRectangle.A4.getHeight() - padding._1)
-      case None => (0F + padding._4, PDRectangle.A4.getHeight() - padding._1)
+)
 
 sealed trait Content
 
@@ -260,8 +257,15 @@ case class BackgroundContent(
 sealed trait TreeNode
 
 case class Node(
+  val parent: Option[Node],
   val section: Section,
   val children: List[Node]
-) extends TreeNode
+) extends TreeNode:
+  def getParentOffset(): (Float, Float) =
+    parent match
+      case Some(node) =>
+        val parentOffset = node.getParentOffset()
+        (parentOffset._1 + section.padding.left, parentOffset._2 - section.padding.top)
+      case None => (0F + section.padding._4, PDRectangle.A4.getHeight() - section.padding._1)
 
 object EmptyNode extends TreeNode
