@@ -80,15 +80,15 @@ class PDFServiceImpl() extends PDFService:
     // bottom border line stroke
     contentStream.setStrokingColor(white);
     contentStream.setLineWidth(1)
-    contentStream.moveTo(24F, topOffset + getFontHeight(font, fontSize))
-    contentStream.lineTo(24F + getStringWidth("John Doe", font, fontSize), topOffset + getFontHeight(font, fontSize))
+    contentStream.moveTo(24F, topOffset + FontUtil.getFontHeight(font, fontSize))
+    contentStream.lineTo(24F + getStringWidth("John Doe", font, fontSize), topOffset + FontUtil.getFontHeight(font, fontSize))
     contentStream.closeAndStroke()
 
     // right border line stroke
     contentStream.setStrokingColor(white);
     contentStream.setLineWidth(1)
     contentStream.moveTo(24F + getStringWidth("John Doe", font, fontSize), topOffset)
-    contentStream.lineTo(24F + getStringWidth("John Doe", font, fontSize), topOffset + getFontHeight(font, fontSize))
+    contentStream.lineTo(24F + getStringWidth("John Doe", font, fontSize), topOffset + FontUtil.getFontHeight(font, fontSize))
     contentStream.closeAndStroke()
 
     // bottom border line stroke
@@ -102,7 +102,7 @@ class PDFServiceImpl() extends PDFService:
     contentStream.setStrokingColor(white);
     contentStream.setLineWidth(1)
     contentStream.moveTo(24F, topOffset)
-    contentStream.lineTo(24F, topOffset + getFontHeight(font, fontSize))
+    contentStream.lineTo(24F, topOffset + FontUtil.getFontHeight(font, fontSize))
     contentStream.closeAndStroke()
 
 
@@ -114,7 +114,7 @@ class PDFServiceImpl() extends PDFService:
     contentStream.setNonStrokingColor(white)
     contentStream.setFont(font, fontSize)
     contentStream.setCharacterSpacing(0.6F)
-    contentStream.newLineAtOffset(24, page.getMediaBox().getHeight() - 64.5F - getFontHeight(font, 22.5F))
+    contentStream.newLineAtOffset(24, page.getMediaBox().getHeight() - 64.5F - FontUtil.getFontHeight(font, 22.5F))
     contentStream.showText("Web and Graphics Designer")
     contentStream.endText()
 
@@ -136,9 +136,6 @@ class PDFServiceImpl() extends PDFService:
       content.height,
     )
     contentStream.fill()
-
-  private def getFontHeight(font: PDFont, size: Float): Float =
-    font.getFontDescriptor().getCapHeight() * size / 1000F;
 
   private def getStringWidth(text: String, font: PDFont, size: Float): Float =
     text.codePoints()
@@ -227,6 +224,10 @@ class PDFServiceImpl() extends PDFService:
       )
       .head
 
+object FontUtil:
+  def getFontHeight(font: PDFont, size: Float): Float =
+    font.getFontDescriptor().getCapHeight() * size / 1000F;
+
 case class Font(
   val font: PDFont,
   val size: Float,
@@ -246,15 +247,22 @@ case class Section(
   val order: Int,
   val padding: Padding,
   val content: Option[Content],
-)
+):
+  def getContentHeight(): Float =
+    content match
+      case Some(content) => padding.top + content.getHeight() + padding.bottom
+      case None => padding.top + padding.bottom
 
-sealed trait Content
+sealed trait Content:
+  def getHeight(): Float
 
 case class TextContent(
   val font: Font,
   val text: String,
   val characterSpacing: Float
-) extends Content
+) extends Content:
+  override def getHeight(): Float =
+    FontUtil.getFontHeight(font.font, font.size)
 
 case class BackgroundContent(
   val x: Float,
@@ -262,7 +270,9 @@ case class BackgroundContent(
   val width: Float,
   val height: Float,
   val color: Color
-) extends Content
+) extends Content:
+  override def getHeight(): Float =
+    0F
 
 sealed trait TreeNode
 
@@ -276,12 +286,12 @@ case class Node(
     left match
       case Some(node) =>
         val offset = node.getOffset()
-        (offset._1 + section.padding.left, offset._2 - section.padding.top)
+        (offset._1 + section.padding.left, offset._2 - section.getContentHeight())
       case None =>
         parent match
           case Some(node) =>
             val offset = node.getOffset()
             (offset._1 + section.padding.left, offset._2 - section.padding.top)
-          case None => (0F + section.padding._4, PDRectangle.A4.getHeight() - section.padding._1)
+          case None => (0F + section.padding._4, PDRectangle.A4.getHeight() - section.getContentHeight())
 
 object EmptyNode extends TreeNode
