@@ -283,15 +283,16 @@ case class Node(
   val children: List[Node]
 ) extends TreeNode:
   def getOffset(): (Float, Float) =
-    left match
+    val parentOffset = left match
       case Some(node) =>
         val offset = node.getOffset()
-        (offset._1 + section.padding.left, offset._2 - section.getContentHeight())
+        (offset._1 + node.section.padding.left, offset._2 - node.section.getContentHeight())
       case None =>
         parent match
           case Some(node) =>
             val offset = node.getOffset()
-            (offset._1 + section.padding.left, offset._2 - section.padding.top)
-          case None => (0F + section.padding._4, PDRectangle.A4.getHeight() - section.getContentHeight())
+            (offset._1 + node.section.padding.left, offset._2 - node.section.getContentHeight())
+          case None => (0F, PDRectangle.A4.getHeight())
+    parentOffset
 
 object EmptyNode extends TreeNode
