@@ -205,7 +205,8 @@ class PDFServiceImpl() extends PDFService:
 
   private def createChildren(parent: Node, parentMap: Map[Option[String], Array[Section]]): List[Node] =
     if parentMap.contains(Option(parent.section.id)) then
-     val childNodes = parentMap(Option(parent.section.id))
+      val childNodes = parentMap(Option(parent.section.id))
+       .sortBy(_.order)
        .map(section => Node(Option(parent), None, section, List.empty))
        .toList
 
@@ -217,7 +218,8 @@ class PDFServiceImpl() extends PDFService:
 
   private def createTree(sections: Array[Section]): Node =
     val parentMap = sections.groupBy(_.parentId)
-    sections.find(section => section.parentId == None)
+    sections.filter(section => section.parentId == None)
+      .sortBy(_.order)
       .map(section =>
         val node = Node(None, None, section, List.empty)
         node.copy(children = createChildren(node, parentMap))
