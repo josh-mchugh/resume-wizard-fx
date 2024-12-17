@@ -29,7 +29,7 @@ class PDFServiceImpl() extends PDFService:
       case Some(content) =>
         content match
           case backgroundContent: BackgroundContent => processBackgroundContent(contentStream, backgroundContent)
-          case textContent: TextContent => processTextContent(contentStream, node.getOffset(), textContent)
+          case textContent: TextContent => processTextContent(contentStream, node, textContent)
       case None => logger.info("No content for section: {}", node.section.id)
     if (node.children.nonEmpty) node.children.foreach(child => render(contentStream, child))
 
@@ -118,12 +118,12 @@ class PDFServiceImpl() extends PDFService:
     contentStream.showText("Web and Graphics Designer")
     contentStream.endText()
 
-  private def processTextContent(contentStream: PDPageContentStream, offset: (Float, Float),  content: TextContent): Unit =
+  private def processTextContent(contentStream: PDPageContentStream, node: Node, content: TextContent): Unit =
     contentStream.beginText()
     contentStream.setNonStrokingColor(content.font.color)
     contentStream.setFont(content.font.font, content.font.size)
     contentStream.setCharacterSpacing(content.characterSpacing)
-    contentStream.newLineAtOffset(offset._1, offset._2)
+    contentStream.newLineAtOffset(node.x, node.y)
     contentStream.showText(content.text)
     contentStream.endText()
 
@@ -160,8 +160,8 @@ class PDFServiceImpl() extends PDFService:
       Section(
         "LEFT_COLUMN",
         Option.empty,
-        0,
         Padding(64.5F, 0F, 0F, 24F),
+        0,
         Option(
           BackgroundContent(
             0,
@@ -175,8 +175,8 @@ class PDFServiceImpl() extends PDFService:
       Section(
         "NAME",
         Option("LEFT_COLUMN"),
-        0,
         Padding(0F, 0F, 0F, 0F),
+        0,
         Option(
           TextContent(
             Font(medium, 22.5F, white),
@@ -188,8 +188,8 @@ class PDFServiceImpl() extends PDFService:
       Section(
         "TITLE",
         Option("LEFT_COLUMN"),
-        1,
         Padding(0F, 0F, 0F, 0F),
+        1,
         Option(
           TextContent(
             Font(regular, 10.5F, white),
@@ -244,8 +244,8 @@ case class Padding(
 case class Section(
   val id: String,
   val parentId: Option[String],
-  val order: Int,
   val padding: Padding,
+  val order: Int,
   val content: Option[Content],
 ):
   def getContentHeight(): Float =
@@ -282,17 +282,22 @@ case class Node(
   val section: Section,
   val children: List[Node]
 ) extends TreeNode:
-  def getOffset(): (Float, Float) =
-    val parentOffset = left match
-      case Some(node) =>
-        val offset = node.getOffset()
-        (offset._1 + node.section.padding.left, offset._2 - node.section.getContentHeight())
-      case None =>
-        parent match
-          case Some(node) =>
-            val offset = node.getOffset()
-            (offset._1 + node.section.padding.left, offset._2 - node.section.getContentHeight())
-          case None => (0F, PDRectangle.A4.getHeight())
-    parentOffset
+
+  val x: Float = calculateX()
+  val y: Float = calculateY()
+
+  private def calculateX(): Float =
+    left match
+      case Some(node) => node.x + node.section.padding.left
+      case None => parent match
+        case Some(node) => node.x + node.section.padding.left
+        case None => 0F
+
+  private def calculateY(): Float =
+    left match
+      case Some(node) => node.y - node.section.getContentHeight()
+      case None => parent match
+        case Some(node) => node.y - node.section.getContentHeight()
+        case None => PDRectangle.A4.getHeight()
 
 object EmptyNode extends TreeNode
