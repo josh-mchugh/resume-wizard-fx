@@ -57,9 +57,9 @@
             <version>3.0.3</version>
         </dependency>
         <dependency>
-            <groupId>com.github.vandeseer</groupId>
-            <artifactId>easytable</artifactId>
-            <version>1.0.2</version>
+            <groupId>com.helger</groupId>
+            <artifactId>ph-pdf-layout</artifactId>
+            <version>7.3.5</version>
         </dependency>
         <!-- Scala -->
         <dependency>

@@ -1,5 +1,22 @@
 package net.sailware.resumewizard.pdf
 
+import com.helger.pdflayout.PageLayoutPDF
+import com.helger.pdflayout.base.PLColor
+import com.helger.pdflayout.base.PLPageSet
+import com.helger.pdflayout.element.box.PLBox
+import com.helger.pdflayout.element.hbox.PLHBox
+import com.helger.pdflayout.element.text.PLText
+import com.helger.pdflayout.element.vbox.PLVBox
+import com.helger.pdflayout.spec.FontSpec
+import com.helger.pdflayout.spec.PreloadFont
+import com.helger.pdflayout.spec.HeightSpec
+import com.helger.pdflayout.spec.PaddingSpec
+import com.helger.pdflayout.spec.PreloadFontManager
+import com.helger.pdflayout.spec.WidthSpec
+import com.helger.font.api.EFontStyle;
+import com.helger.font.api.EFontType;
+import com.helger.font.api.EFontWeight;
+import com.helger.font.api.FontResource;
 import java.io.File
 import net.sailware.resumewizard.pdf.model.GeneratePDFRequest
 import net.sailware.resumewizard.pdf.model.GeneratePDFResponse
@@ -37,33 +54,67 @@ class PDFServiceImpl() extends PDFService:
 
     val file = new File("resume.pdf")
     try {
-      val document = new PDDocument()
+      //val document = new PDDocument()
 
-      val robotoRegular = PDType0Font.load(document, new File(getClass.getResource("/font/Roboto-Regular.ttf").getPath))
-      val robotoMedium = PDType0Font.load(document, new File(getClass.getResource("/font/Roboto-Medium.ttf").getPath))
+      //val robotoRegular = PDType0Font.load(document, new File(getClass.getResource("/font/Roboto-Regular.ttf").getPath))
+      //val robotoMedium = PDType0Font.load(document, new File(getClass.getResource("/font/Roboto-Medium.ttf").getPath))
 
-      val page = new PDPage(PDRectangle.A4)
+      //val page = new PDPage(PDRectangle.A4)
 
-      val contentStream = new PDPageContentStream(document, page)
+      //val contentStream = new PDPageContentStream(document, page)
 
-      val sections = createSections(document)
-      val tree = createTree(sections)
+      //val sections = createSections(document)
+      //val tree = createTree(sections)
 
-      render(contentStream, tree)
+      render2(file)
 
-      contentStream.close()
+      //contentStream.close()
 
-      document.addPage(page)
-      document.save(file)
-      document.close()
+      //document.addPage(page)
+      //document.save(file)
+      //document.close()
 
-      logger.info("Tree: {}", tree)
+      //logger.info("Tree: {}", tree)
     } catch {
       case t: Throwable => logger.error("error generating PDF", t)
     }
 
     GeneratePDFResponse(file)
 
+  private def render2(file: File): Unit =
+    val fontManager = new PreloadFontManager(true);
+    val robotoMediumResource = new FontResource("Roboto", EFontType.TTF, EFontStyle.REGULAR, EFontWeight.MEDIUM, "font/Roboto-Medium.ttf")
+    val robotoRegularResource = new FontResource("Roboto", EFontType.TTF, EFontStyle.REGULAR, EFontWeight.REGULAR, "font/Roboto-Regular.ttf")
+    val robotoMedium = fontManager.getOrAddEmbeddingPreloadFont(robotoMediumResource)
+    val robotoRegular = fontManager.getOrAddEmbeddingPreloadFont(robotoRegularResource)
+    val pageset = new PLPageSet(PDRectangle.A4)
+
+    val vbox = new PLVBox()
+    val box = new PLBox()
+      .setFillColor(new PLColor(17, 33, 47))
+      .setPadding(64.5F, 0F, 0F, 24F)
+
+    val content = new PLVBox()
+
+    val name = new PLText("John Doe", new FontSpec(robotoMedium, 22.5F, new PLColor(255, 255, 255)))
+    content.addRow(name)
+
+    val title = new PLText("Web and Graphics Designer", new FontSpec(robotoRegular, 10.5F, new PLColor(255, 255, 255)))
+    content.addRow(title)
+
+    box.setElement(content)
+
+    vbox.addRow(box, HeightSpec.star())
+
+    val hbox = new PLHBox()
+    hbox.addColumn(vbox, WidthSpec.perc(34.7))
+
+    pageset.addElement(hbox)
+
+    val pageLayout = new PageLayoutPDF()
+    pageLayout.addPageSet(pageset)
+
+    pageLayout.renderTo(file)
 
   private def addName(contentStream: PDPageContentStream, document: PDDocument, page: PDPage, font: PDFont): Unit =
 
