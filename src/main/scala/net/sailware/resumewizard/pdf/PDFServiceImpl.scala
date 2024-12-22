@@ -82,37 +82,47 @@ class PDFServiceImpl() extends PDFService:
     GeneratePDFResponse(file)
 
   private def render2(file: File): Unit =
+    // Fonts
     val fontManager = new PreloadFontManager(true);
     val robotoMediumResource = new FontResource("Roboto", EFontType.TTF, EFontStyle.REGULAR, EFontWeight.MEDIUM, "font/Roboto-Medium.ttf")
     val robotoRegularResource = new FontResource("Roboto", EFontType.TTF, EFontStyle.REGULAR, EFontWeight.REGULAR, "font/Roboto-Regular.ttf")
     val robotoMedium = fontManager.getOrAddEmbeddingPreloadFont(robotoMediumResource)
     val robotoRegular = fontManager.getOrAddEmbeddingPreloadFont(robotoRegularResource)
-    val pageset = new PLPageSet(PDRectangle.A4)
 
-    val vbox = new PLVBox()
-    val box = new PLBox()
+    // Name Section
+    val name = new PLText("John Doe", new FontSpec(robotoMedium, 22.5F, new PLColor(255, 255, 255)))
+    val nameBox = new PLBox()
+      .setElement(name)
+
+    // Title Section
+    val title = new PLText("Web and Graphics Designer", new FontSpec(robotoRegular, 10.5F, new PLColor(255, 255, 255)))
+    val titleBox = new PLBox()
+      .setElement(title)
+
+    // Left Column content
+    val leftContent = new PLVBox()
+      .addRow(nameBox)
+      .addRow(titleBox)
+
+    // Left side column
+    val leftBox = new PLBox()
       .setFillColor(new PLColor(17, 33, 47))
       .setPadding(64.5F, 0F, 0F, 24F)
+      .setElement(leftContent)
 
-    val content = new PLVBox()
+    val leftColumn = new PLVBox()
+      .addRow(leftBox, HeightSpec.star())
 
-    val name = new PLText("John Doe", new FontSpec(robotoMedium, 22.5F, new PLColor(255, 255, 255)))
-    content.addRow(name)
+    // Page root
+    val root = new PLHBox()
+      .addColumn(leftColumn, WidthSpec.perc(34.7))
 
-    val title = new PLText("Web and Graphics Designer", new FontSpec(robotoRegular, 10.5F, new PLColor(255, 255, 255)))
-    content.addRow(title)
-
-    box.setElement(content)
-
-    vbox.addRow(box, HeightSpec.star())
-
-    val hbox = new PLHBox()
-    hbox.addColumn(vbox, WidthSpec.perc(34.7))
-
-    pageset.addElement(hbox)
+    // Page set and Page layout
+    val pageset = new PLPageSet(PDRectangle.A4)
+      .addElement(root)
 
     val pageLayout = new PageLayoutPDF()
-    pageLayout.addPageSet(pageset)
+      .addPageSet(pageset)
 
     pageLayout.renderTo(file)
 
