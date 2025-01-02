@@ -41,6 +41,7 @@ class PDFServiceImpl() extends PDFService:
       document.close()
 
       logger.info("Tree: {}", tree)
+      logger.info("Page A4: {}", PDRectangle.A4)
     } catch {
       case t: Throwable => logger.error("error generating PDF", t)
     }
