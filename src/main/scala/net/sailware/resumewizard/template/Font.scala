@@ -1,7 +1,7 @@
 package net.sailware.resumewizard.template
 
-import org.apache.pdfbox.pdmodel.font.PDFont
 import java.awt.Color
+import org.apache.pdfbox.pdmodel.font.PDFont
 
 case class Font(
   val font: PDFont,
