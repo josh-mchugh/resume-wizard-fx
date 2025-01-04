@@ -28,17 +28,17 @@ case class TextContent(
   override def getHeight(): Float =
     FontUtil.getFontHeight(font.font, font.size)
 
-  def getStringWidth(text: String, font: PDFont, size: Float): Float =
+  def getStringWidth(): Float =
     text.codePoints()
       .mapToObj(codePoint => String(Array(codePoint), 0, 1))
       .map(codePoint =>
         try {
-          font.getStringWidth(codePoint) * size / 1000F
+          font.font.getStringWidth(codePoint) * font.size / 1000F
         }
         catch {
           case e: IllegalArgumentException =>
             logger.error("Illegal argument for font width", e)
-            font.getStringWidth("-") * size / 1000F
+            font.font.getStringWidth("-") * font.size / 1000F
         }
       )
       .reduce(0.0F, (acc, value) => acc + value)

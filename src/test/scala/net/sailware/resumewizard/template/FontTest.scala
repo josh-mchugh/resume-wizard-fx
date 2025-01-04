@@ -28,5 +28,4 @@ class FontTest:
     val document = new PDDocument()
     val pdFont = PDType0Font.load(document, File(getClass.getResource("/font/Roboto-Regular.ttf").getPath))
     val font = Font(pdFont, 0F, Color(255, 255, 255))
-    Assertions.assertEquals(Color(255, 255, 255
-), font.color)
+    Assertions.assertEquals(Color(255, 255, 255), font.color)
