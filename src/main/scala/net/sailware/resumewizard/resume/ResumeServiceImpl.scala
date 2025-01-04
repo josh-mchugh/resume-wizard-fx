@@ -40,7 +40,8 @@ class ResumeServiceImpl extends ResumeService:
     CreateSocialsResponse(resume)
 
   override def handleExperiencesUpdate(request: CreateExperiencesRequest): CreateExperiencesResponse =
-    val experiences = request.experiences.map(experience => new Experience(experience.title, experience.organization, experience.duration, experience.location, experience.description, experience.skills))
+    val experiences =
+      request.experiences.map(experience => new Experience(experience.title, experience.organization, experience.duration, experience.location, experience.description, experience.skills))
     resume = resume.copy(experiences = experiences)
     CreateExperiencesResponse(resume)
 

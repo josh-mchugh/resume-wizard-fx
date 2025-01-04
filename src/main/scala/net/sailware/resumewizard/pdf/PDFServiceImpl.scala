@@ -53,7 +53,7 @@ class PDFServiceImpl() extends PDFService:
       case Some(content) =>
         content match
           case backgroundContent: BackgroundContent => processBackgroundContent(contentStream, backgroundContent)
-          case textContent: TextContent => processTextContent(contentStream, node, textContent)
+          case textContent: TextContent             => processTextContent(contentStream, node, textContent)
       case None => logger.info("No content for section: {}", node.section.id)
     if (node.children.nonEmpty) node.children.foreach(child => render(contentStream, child))
 
@@ -72,6 +72,6 @@ class PDFServiceImpl() extends PDFService:
       content.x,
       content.y,
       content.width,
-      content.height,
+      content.height
     )
     contentStream.fill()

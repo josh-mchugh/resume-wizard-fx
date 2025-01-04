@@ -4,4 +4,4 @@ import org.apache.pdfbox.pdmodel.font.PDFont
 
 object FontUtil:
   def getFontHeight(font: PDFont, size: Float): Float =
-    font.getFontDescriptor().getCapHeight() * size / 1000F;
+    font.getFontDescriptor().getCapHeight() * size / 1000f;

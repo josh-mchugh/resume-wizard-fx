@@ -1,7 +1,7 @@
 package net.sailware.resumewizard.resume.model
 
 case class CreateSocialsRequest(
-  val socials: List[CreateSocial]
+    val socials: List[CreateSocial]
 )
 
 object CreateSocialsRequest:

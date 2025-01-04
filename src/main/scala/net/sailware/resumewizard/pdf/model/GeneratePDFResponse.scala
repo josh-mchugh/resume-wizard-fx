@@ -3,7 +3,7 @@ package net.sailware.resumewizard.pdf.model
 import java.io.File
 
 case class GeneratePDFResponse(
-  file: File
+    file: File
 )
 
 object GeneratePDFResponse:

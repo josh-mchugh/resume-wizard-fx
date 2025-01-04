@@ -12,4 +12,4 @@ class FontUnitTest:
   def whenFontIsRobotoAndSize12PointThenExpectHeight(): Unit =
     val document = new PDDocument()
     val font = PDType0Font.load(document, File(getClass.getResource("/font/Roboto-Regular.ttf").getPath))
-    Assertions.assertEquals(8.53125F, FontUtil.getFontHeight(font, 12))
+    Assertions.assertEquals(8.53125f, FontUtil.getFontHeight(font, 12))

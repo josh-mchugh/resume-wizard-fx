@@ -1,9 +1,9 @@
 package net.sailware.resumewizard.resume.model
 
 case class CreateContactRequest(
-  val phone: String,
-  val email: String,
-  val location: String
+    val phone: String,
+    val email: String,
+    val location: String
 )
 
 object CreateContactRequest:

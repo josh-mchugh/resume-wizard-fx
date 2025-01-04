@@ -3,7 +3,7 @@ package net.sailware.resumewizard.pdf.model
 import net.sailware.resumewizard.resume.Resume
 
 case class GeneratePDFRequest(
-  resume: Resume
+    resume: Resume
 )
 
 object GeneratePDFRequest:

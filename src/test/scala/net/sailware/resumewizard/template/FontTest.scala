@@ -13,19 +13,19 @@ class FontTest:
   def whenCreatedExpectFont(): Unit =
     val document = new PDDocument()
     val pdFont = PDType0Font.load(document, File(getClass.getResource("/font/Roboto-Regular.ttf").getPath))
-    val font = Font(pdFont, 0F, Color(0, 0, 0))
+    val font = Font(pdFont, 0f, Color(0, 0, 0))
     Assertions.assertEquals(pdFont, font.font)
 
   @Test
   def whenCreatedExpectSize(): Unit =
     val document = new PDDocument()
     val pdFont = PDType0Font.load(document, File(getClass.getResource("/font/Roboto-Regular.ttf").getPath))
-    val font = Font(pdFont, 12F, Color(0, 0, 0))
-    Assertions.assertEquals(12F, font.size)
+    val font = Font(pdFont, 12f, Color(0, 0, 0))
+    Assertions.assertEquals(12f, font.size)
 
   @Test
   def whenCreatedExpectColor(): Unit =
     val document = new PDDocument()
     val pdFont = PDType0Font.load(document, File(getClass.getResource("/font/Roboto-Regular.ttf").getPath))
-    val font = Font(pdFont, 0F, Color(255, 255, 255))
+    val font = Font(pdFont, 0f, Color(255, 255, 255))
     Assertions.assertEquals(Color(255, 255, 255), font.color)

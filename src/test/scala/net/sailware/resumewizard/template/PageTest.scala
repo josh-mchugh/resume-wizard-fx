@@ -18,9 +18,9 @@ class PageTest:
   @Test
   def whenPageIsA4ExpectWidth(): Unit =
     val page = Page.A4
-    Assertions.assertEquals(595.27563F, page.width)
+    Assertions.assertEquals(595.27563f, page.width)
 
   @Test
   def whenPageIsA4ExpectHeight(): Unit =
     val page = Page.A4
-    Assertions.assertEquals(841.8898F, page.height)
+    Assertions.assertEquals(841.8898f, page.height)

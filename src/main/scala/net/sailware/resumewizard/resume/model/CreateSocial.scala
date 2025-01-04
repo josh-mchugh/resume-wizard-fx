@@ -1,8 +1,8 @@
 package net.sailware.resumewizard.resume.model
 
 case class CreateSocial(
-  val name: String,
-  val url: String
+    val name: String,
+    val url: String
 )
 
 object CreateSocial:

@@ -3,7 +3,7 @@ package net.sailware.resumewizard.resume.model
 import net.sailware.resumewizard.resume.Resume
 
 case class CreateCertificationsResponse(
-  resume: Resume
+    resume: Resume
 )
 
 object CreateCertificationsResponse:

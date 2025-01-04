@@ -9,7 +9,9 @@ case class OnContinueRequest(
 ):
 
   def toCreateExperiencesRequest: CreateExperiencesRequest =
-    CreateExperiencesRequest(experiences.map(experience => CreateExperience(experience.title, experience.organization, experience.duration, experience.location, experience.description, experience.skills)))
+    CreateExperiencesRequest(
+      experiences.map(experience => CreateExperience(experience.title, experience.organization, experience.duration, experience.location, experience.description, experience.skills))
+    )
 
 object OnContinueRequest:
 

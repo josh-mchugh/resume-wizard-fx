@@ -3,7 +3,7 @@ package net.sailware.resumewizard.resume.model
 import net.sailware.resumewizard.resume.Resume
 
 case class CreateExperiencesResponse(
-  val resume: Resume
+    val resume: Resume
 )
 
 object CreateExperiencesResponse:
