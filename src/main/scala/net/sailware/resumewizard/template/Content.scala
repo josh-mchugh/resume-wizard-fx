@@ -1,11 +1,11 @@
 package net.sailware.resumewizard.template
 
+import java.awt.Canvas
 import java.awt.Color
-import org.apache.pdfbox.pdmodel.font.PDFont
-import org.slf4j.LoggerFactory
+import java.awt.Font
 
 sealed trait Content:
-  def getHeight(): Float
+  def getHeight(): Int
 
 case class BackgroundContent(
     val x: Float,
@@ -14,31 +14,18 @@ case class BackgroundContent(
     val height: Float,
     val color: Color
 ) extends Content:
-  override def getHeight(): Float =
-    0f
+  override def getHeight(): Int =
+    0
 
 case class TextContent(
     val font: Font,
+    val size: Int,
+    val color: Color,
     val text: String,
     val characterSpacing: Float
 ) extends Content:
 
-  val logger = LoggerFactory.getLogger(classOf[TextContent])
-
-  override def getHeight(): Float =
-    FontUtil.getFontHeight(font.font, font.size)
-
-  def getStringWidth(): Float =
-    text
-      .codePoints()
-      .mapToObj(codePoint => String(Array(codePoint), 0, 1))
-      .map(codePoint =>
-        try {
-          font.font.getStringWidth(codePoint) * font.size / 1000f
-        } catch {
-          case e: IllegalArgumentException =>
-            logger.error("Illegal argument for font width", e)
-            font.font.getStringWidth("-") * font.size / 1000f
-        }
-      )
-      .reduce(0.0f, (acc, value) => acc + value)
+  override def getHeight(): Int =
+    // FONT.PLAIN is set as default, if fonts are bold or italic then we need to change this
+    // value to be configured on the TextContent
+    Canvas().getFontMetrics(font.deriveFont(Font.PLAIN, size)).getHeight()

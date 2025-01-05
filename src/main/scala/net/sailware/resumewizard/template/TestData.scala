@@ -1,18 +1,16 @@
 package net.sailware.resumewizard.template
 
 import java.awt.Color
+import java.awt.Font
 import java.io.File
-import org.apache.pdfbox.pdmodel.PDDocument
-import org.apache.pdfbox.pdmodel.common.PDRectangle
-import org.apache.pdfbox.pdmodel.font.PDType0Font
 
 object TestData:
 
-  def sections(document: PDDocument): Array[Section] =
+  def sections(): Array[Section] =
     val primary = Color(17, 33, 47)
     val white = Color(255, 255, 255)
-    val regular = PDType0Font.load(document, File(getClass.getResource("/font/Roboto-Regular.ttf").getPath))
-    val medium = PDType0Font.load(document, File(getClass.getResource("/font/Roboto-Medium.ttf").getPath))
+    val regular = Font.createFont(Font.TRUETYPE_FONT, File(getClass.getResource("/font/Roboto-Regular.ttf").getPath))
+    val medium = Font.createFont(Font.TRUETYPE_FONT, File(getClass.getResource("/font/Roboto-Medium.ttf").getPath))
 
     Array(
       Section(
@@ -24,8 +22,8 @@ object TestData:
           BackgroundContent(
             0,
             0,
-            PDRectangle.A4.getWidth() * 0.347f,
-            PDRectangle.A4.getHeight(),
+            Page.A4.width * 0.347f,
+            Page.A4.height,
             primary
           )
         )
@@ -37,7 +35,9 @@ object TestData:
         0,
         Option(
           TextContent(
-            Font(medium, 22.5f, white),
+            medium,
+            22,
+            white,
             "John Doe",
             0f
           )
@@ -50,7 +50,9 @@ object TestData:
         1,
         Option(
           TextContent(
-            Font(regular, 10.5f, white),
+            regular,
+            10,
+            white,
             "Web and Graphics Designer",
             0.6f
           )

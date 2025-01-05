@@ -20,5 +20,5 @@ class PreviewPresenterImpl(
     service
       .generatePreview()
       .onComplete:
-        case Success(response) => Platform.runLater(() => model.pdf.value = response.file)
+        case Success(response) => Platform.runLater(() => model.resume.value = response.resume)
         case Failure(t)        => logger.error("Error generating PDF", t)
