@@ -1,7 +1,5 @@
 package net.sailware.resumewizard.template
 
-import org.apache.pdfbox.pdmodel.common.PDRectangle
-
 sealed trait TreeNode
 
 object EmptyNode extends TreeNode
@@ -30,7 +28,7 @@ case class Node(
       case None =>
         parent match
           case Some(node) => node.y - node.section.getContentHeight()
-          case None       => PDRectangle.A4.getHeight()
+          case None       => Page.A4.height
 
 object Node:
 
