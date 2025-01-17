@@ -6,7 +6,7 @@ import net.sailware.resumewizard.view.resume.preview.service.PreviewServiceImpl
 import scalafx.scene.Node
 
 class PreviewController(
-    val resumeService: ResumeService,
+    val resumeService: ResumeService
 ) extends Controller[Node]:
 
   val service = new PreviewServiceImpl(resumeService)

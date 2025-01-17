@@ -12,7 +12,7 @@ import net.sailware.resumewizard.view.resume.wizard.social.SocialsController
 import scalafx.scene.Node
 
 class PageFactory(
-    val resumeService: ResumeService,
+    val resumeService: ResumeService
 ):
   def createPage(pageType: PageType): List[Node] =
     List(createView(pageType))

@@ -6,7 +6,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class PreviewServiceImpl(
-    val resumeService: ResumeService,
+    val resumeService: ResumeService
 ) extends PreviewService:
 
   override def generatePreview(): Future[GeneratePreviewResponse] =
