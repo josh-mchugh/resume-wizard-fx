@@ -7,4 +7,4 @@ case class Page(
 
 object Page:
 
-  def A4 = Page(UnitConversion.mmToPoint(210f), UnitConversion.mmToPoint(297f))
+  def A4 = Page(210f, 297f)

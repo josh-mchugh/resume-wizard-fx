@@ -87,5 +87,5 @@ object PageBuilder:
 
   private def convertToUnit(value: Float, config: PageConfig): Float =
     config.measurementUnit match
-      case PageMeasurementUnit.Pixel => UnitConversion.mmToPx(value)
-      case PageMeasurementUnit.Point => UnitConversion.mmToPoint(value)
+      case PageMeasurementUnit.Pixel => UnitOf(UnitType.Millimeter, value).toPx()
+      case PageMeasurementUnit.Point => UnitOf(UnitType.Millimeter, value).toPoint()

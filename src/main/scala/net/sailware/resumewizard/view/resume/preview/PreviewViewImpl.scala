@@ -1,6 +1,7 @@
 package net.sailware.resumewizard.view.resume.preview
 
 import net.sailware.resumewizard.template.Node as ContentNode
+import net.sailware.resumewizard.template.Page
 import net.sailware.resumewizard.template.PageBuilder
 import net.sailware.resumewizard.template.PageConfig
 import net.sailware.resumewizard.template.PageMeasurementUnit
@@ -8,6 +9,8 @@ import net.sailware.resumewizard.template.PageOriginPosition
 import net.sailware.resumewizard.template.PageSize
 import net.sailware.resumewizard.template.Section
 import net.sailware.resumewizard.template.TestData
+import net.sailware.resumewizard.template.UnitOf
+import net.sailware.resumewizard.template.UnitType
 import scala.collection.mutable.ListBuffer
 import scalafx.Includes.*
 import scalafx.scene.layout.Pane
@@ -20,9 +23,9 @@ class PreviewViewImpl(val model: PreviewModel) extends PreviewView:
   override def view(): Region =
     new Pane:
       style = "-fx-background-color: white"
-      maxWidth = 793.7f
-      maxHeight = 1122.52f
-      minWidth = 793.7f
+      maxWidth = UnitOf(UnitType.Millimeter, Page.A4.width).toPx()
+      maxHeight = UnitOf(UnitType.Millimeter, Page.A4.height).toPx()
+      minWidth = UnitOf(UnitType.Millimeter, Page.A4.width).toPx()
       minHeight = 1122.52f
       children = buildSections()
 
