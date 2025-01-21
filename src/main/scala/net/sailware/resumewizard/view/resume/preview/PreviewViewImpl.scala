@@ -26,7 +26,7 @@ class PreviewViewImpl(val model: PreviewModel) extends PreviewView:
       maxWidth = UnitOf(UnitType.Millimeter, Page.A4.width).toPx()
       maxHeight = UnitOf(UnitType.Millimeter, Page.A4.height).toPx()
       minWidth = UnitOf(UnitType.Millimeter, Page.A4.width).toPx()
-      minHeight = 1122.52f
+      minHeight = UnitOf(UnitType.Millimeter, Page.A4.height).toPx()
       children = buildSections()
 
   private def buildSections(): List[Node] =
@@ -45,7 +45,7 @@ class PreviewViewImpl(val model: PreviewModel) extends PreviewView:
     node.children.foreach(child => processNode(child, buffer))
 
   private def buildSection(node: ContentNode): Option[Text] =
-    node.section.content match
+    node.content match
       case Some(content) =>
         val text = new Text("Test"):
           x = node.x.get

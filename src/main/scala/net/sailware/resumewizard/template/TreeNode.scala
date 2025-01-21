@@ -9,6 +9,12 @@ case class Node(
     val left: Option[Node],
     val x: Option[Float],
     val y: Option[Float],
-    val section: Section,
+    val margin: Margin,
+    val padding: Padding,
+    val content: Option[Content],
     val children: List[Node]
-) extends TreeNode
+) extends TreeNode:
+  def getHeight(): Float =
+    content match
+      case Some(content) => margin.top + padding.top + content.getHeight() + padding.bottom + margin.bottom
+      case None          => margin.top + padding.top + padding.bottom + margin.bottom

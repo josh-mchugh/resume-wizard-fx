@@ -18,6 +18,13 @@ case class PageConfig(
     val measurementUnit: PageMeasurementUnit
 )
 
+case class CreateChildNodeRequest(
+  parent: Node,
+  section: Section,
+  parentMap: Map[Option[String], Array[Section]],
+  config: PageConfig
+)
+
 object PageBuilder:
 
   def apply(sections: Array[Section], config: PageConfig): Node = createTree(sections, config)
@@ -28,26 +35,28 @@ object PageBuilder:
       .filter(section => section.parentId == None)
       .sortBy(_.order)
       .map(section =>
-        var node = Node(None, None, None, None, section, List.empty)
+        var node = Node(None, None, None, None, section.margin, section.padding, section.content, List.empty)
         node = node.copy(x = Some(calculateX(node, config)), y = Some(calculateY(node, config)))
-        node.copy(children = createChildren(node, parentMap, config))
+        node.copy(children = createChildren(CreateChildNodeRequest(node, section,  parentMap, config)))
       )
       .head
 
-  private def createChildren(parent: Node, parentMap: Map[Option[String], Array[Section]], config: PageConfig): List[Node] =
-    if parentMap.contains(Option(parent.section.id)) then
-      val childNodes = parentMap(Option(parent.section.id))
+  private def createChildren(request: CreateChildNodeRequest): List[Node] =
+    if request.parentMap.contains(Option(request.section.id)) then
+      val childNodes = request.parentMap(Option(request.section.id))
         .sortBy(_.order)
-        .map(section => Node(Option(parent), None, None, None, section, List.empty))
+        .map(section => (section, Node(Option(request.parent), None, None, None, section.margin, section.padding, section.content, List.empty)))
+
         .toList
 
       windowS(childNodes)
         .map(group =>
-          var node = group(1).get
-          val left = group(0)
+          var node = group(1).get._2
+          val left = if group(0).isDefined then Some(group(0).get._2) else Option.empty
+          val section = group(1).get._1
           node = node.copy(left = left)
-          node = node.copy(x = Some(calculateX(node, config)), y = Some(calculateY(node, config)))
-          node = node.copy(children = createChildren(node, parentMap, config))
+          node = node.copy(x = Some(calculateX(node, request.config)), y = Some(calculateY(node, request.config)))
+          node = node.copy(children = createChildren(CreateChildNodeRequest(node, section, request.parentMap, request.config)))
           node
         )
         .toList
@@ -79,11 +88,11 @@ object PageBuilder:
 
   private def calculateNodeYOffset(node: Node, config: PageConfig): Float =
     config.originPosition match
-      case PageOriginPosition.TopLeft    => node.y.getOrElse(0f) + node.section.getContentHeight()
-      case PageOriginPosition.BottomLeft => node.y.getOrElse(0f) - node.section.getContentHeight()
+      case PageOriginPosition.TopLeft    => node.y.getOrElse(0f) + node.getHeight()
+      case PageOriginPosition.BottomLeft => node.y.getOrElse(0f) - node.getHeight()
 
   private def calculateNodeXOffset(node: Node): Float =
-    node.x.getOrElse(0f) + node.section.padding.left
+    node.x.getOrElse(0f) + node.padding.left
 
   private def convertToUnit(value: Float, config: PageConfig): Float =
     config.measurementUnit match

@@ -1,5 +1,6 @@
 package net.sailware.resumewizard.template
 
+import net.sailware.resumewizard.template.UnitType.Point
 import java.awt.Color
 import java.awt.Font
 import java.io.File
@@ -16,7 +17,8 @@ object TestData:
       Section(
         "LEFT_COLUMN",
         Option.empty,
-        Padding(64.5f, 0f, 0f, 24f),
+        Margin(0F, 0F, 0F, 0F, Point),
+        Padding(64.5f, 0f, 0f, 24f, Point),
         0,
         Option(
           BackgroundContent(
@@ -31,7 +33,8 @@ object TestData:
       Section(
         "NAME",
         Option("LEFT_COLUMN"),
-        Padding(0f, 0f, 0f, 0f),
+        Margin(0F, 0F, 0F, 0F, Point),
+        Padding(0f, 0f, 0f, 0f, Point),
         0,
         Option(
           TextContent(
@@ -46,7 +49,8 @@ object TestData:
       Section(
         "TITLE",
         Option("LEFT_COLUMN"),
-        Padding(0f, 0f, 0f, 0f),
+        Margin(0F, 0F, 0F, 0F, Point),
+        Padding(0f, 0f, 0f, 0f, Point),
         1,
         Option(
           TextContent(
