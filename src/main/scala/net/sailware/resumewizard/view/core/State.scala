@@ -1,3 +1,3 @@
 package net.sailware.resumewizard.view.core
 
-case class State(val currentPageType: PageType = PageType.Dashboard)
+case class State(val currentPageType: PageType = PageType.Preview)

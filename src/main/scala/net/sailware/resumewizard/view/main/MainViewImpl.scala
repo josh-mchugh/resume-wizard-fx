@@ -55,7 +55,7 @@ class MainViewImpl(
       fitToWidth = true
       content = new StackPane:
         style = "-fx-padding: 20;"
-        children = pageFactory.createPage(PageType.Dashboard)
+        children = pageFactory.createPage(state.value.currentPageType)
         state.onChange({
           children = pageFactory.createPage(state.value.currentPageType)
         })
