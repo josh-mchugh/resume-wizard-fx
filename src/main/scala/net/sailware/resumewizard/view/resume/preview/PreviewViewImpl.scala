@@ -26,7 +26,7 @@ class PreviewViewImpl(val model: PreviewModel) extends PreviewView:
       children = renderRow()
 
   private def renderRow(): List[Node] =
-    val row = Row(
+    val element = Element(
       x = 0F,
       y = 0F,
       width = 793.7007874F,
@@ -35,40 +35,40 @@ class PreviewViewImpl(val model: PreviewModel) extends PreviewView:
       border = Some(Border(Color.RED))
     )
     val results = collection.mutable.ListBuffer[Node]()
-    if row.border.isDefined then
-      val border = row.border.get
-      results += createTopBorder(row)
-      results += createRightBorder(row)
-      results += createBottomBorder(row)
-      results += createLeftBorder(row)
+    if element.border.isDefined then
+      val border = element.border.get
+      results += createTopBorder(element)
+      results += createRightBorder(element)
+      results += createBottomBorder(element)
+      results += createLeftBorder(element)
     results.toList
 
-  private def createTopBorder(row: Row): Line =
-    val border = row.border.get
-    val startX = row.x + row.margin.left
-    val startY = row.y + row.margin.top
-    val endX = row.x + row.width - row.margin.right
+  private def createTopBorder(element: Element): Line =
+    val border = element.border.get
+    val startX = element.x + element.margin.left
+    val startY = element.y + element.margin.top
+    val endX = element.x + element.width - element.margin.right
     renderLine(startX, startY, endX, startY, border.color)
 
-  private def createRightBorder(row: Row): Line =
-    val border = row.border.get
-    val startY = row.y + row.margin.top
-    val endX = row.x + row.width - row.margin.right
-    val endY = row.y + row.height - row.margin.bottom
+  private def createRightBorder(element: Element): Line =
+    val border = element.border.get
+    val startY = element.y + element.margin.top
+    val endX = element.x + element.width - element.margin.right
+    val endY = element.y + element.height - element.margin.bottom
     renderLine(endX, startY, endX, endY, border.color)
 
-  private def createBottomBorder(row: Row): Line =
-    val border = row.border.get
-    val startX = row.x + row.margin.left
-    val endX = row.x + row.width - row.margin.right
-    val endY = row.y + row.height - row.margin.bottom
+  private def createBottomBorder(element: Element): Line =
+    val border = element.border.get
+    val startX = element.x + element.margin.left
+    val endX = element.x + element.width - element.margin.right
+    val endY = element.y + element.height - element.margin.bottom
     renderLine(startX, endY, endX, endY, border.color)
 
-  private def createLeftBorder(row: Row): Line =
-    val border = row.border.get
-    val startX = row.x + row.margin.left
-    val startY = row.y + row.margin.top
-    val endY = row.y + row.height - row.margin.bottom
+  private def createLeftBorder(element: Element): Line =
+    val border = element.border.get
+    val startX = element.x + element.margin.left
+    val startY = element.y + element.margin.top
+    val endY = element.y + element.height - element.margin.bottom
     renderLine(startX, startY, startX, endY, border.color)
 
   private def renderLine(startX: Float, startY: Float, endX: Float, endY: Float, color: Color): Line =
@@ -99,7 +99,7 @@ case class Border(
   val color: Color
 )
 
-case class Row(
+case class Element(
   val x: Float,
   val y: Float,
   val width: Float,
