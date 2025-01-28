@@ -11,6 +11,8 @@ import scalafx.scene.text.Font
 import scalafx.scene.text.Text
 import org.slf4j.LoggerFactory
 
+import scala.jdk.CollectionConverters.*
+
 class PreviewViewImpl(val model: PreviewModel) extends PreviewView:
 
   val logger = LoggerFactory.getLogger(classOf[PreviewViewImpl])
@@ -26,6 +28,7 @@ class PreviewViewImpl(val model: PreviewModel) extends PreviewView:
       children = renderRow()
 
   private def renderRow(): List[Node] =
+    val debug = true
     val element = Element(
       x = 0F,
       y = 0F,
@@ -37,49 +40,81 @@ class PreviewViewImpl(val model: PreviewModel) extends PreviewView:
     val results = collection.mutable.ListBuffer[Node]()
     if element.border.isDefined then
       val border = element.border.get
-      results += createTopBorder(element)
-      results += createRightBorder(element)
-      results += createBottomBorder(element)
-      results += createLeftBorder(element)
+      results += createElementBorderTop(element)
+      results += createElementBorderRight(element)
+      results += createElementBorderBottom(element)
+      results += createElementBorderLeft(element)
+    if debug then
+      results += createElementDebugMarginBorderTop(element)
+      results += createElementDebugMarginBorderRight(element)
+      results += createElementDebugMarginBorderBottom(element)
+      results += createElementDebugMarginBorderLeft(element)
     results.toList
 
-  private def createTopBorder(element: Element): Line =
+  private def createElementBorderTop(element: Element): Line =
     val border = element.border.get
     val startX = element.x + element.margin.left
     val startY = element.y + element.margin.top
     val endX = element.x + element.width - element.margin.right
     renderLine(startX, startY, endX, startY, border.color)
 
-  private def createRightBorder(element: Element): Line =
+  private def createElementBorderRight(element: Element): Line =
     val border = element.border.get
     val startY = element.y + element.margin.top
     val endX = element.x + element.width - element.margin.right
     val endY = element.y + element.height - element.margin.bottom
     renderLine(endX, startY, endX, endY, border.color)
 
-  private def createBottomBorder(element: Element): Line =
+  private def createElementBorderBottom(element: Element): Line =
     val border = element.border.get
     val startX = element.x + element.margin.left
     val endX = element.x + element.width - element.margin.right
     val endY = element.y + element.height - element.margin.bottom
     renderLine(startX, endY, endX, endY, border.color)
 
-  private def createLeftBorder(element: Element): Line =
+  private def createElementBorderLeft(element: Element): Line =
     val border = element.border.get
     val startX = element.x + element.margin.left
     val startY = element.y + element.margin.top
     val endY = element.y + element.height - element.margin.bottom
     renderLine(startX, startY, startX, endY, border.color)
 
+  private def createElementDebugMarginBorderTop(element: Element): Line =
+    val startX = element.x
+    val startY = element.y
+    val endX = element.x + element.width
+    renderLine(startX, startY, endX, startY, Color.AQUA, List(5d, 5d))
+
+  private def createElementDebugMarginBorderRight(element: Element): Line =
+    val startY = element.y
+    val endX = element.x + element.width
+    val endY = element.y + element.height
+    renderLine(endX, startY, endX, endY, Color.AQUA, List(5d, 5d))
+
+  private def createElementDebugMarginBorderBottom(element: Element): Line =
+    val startX = element.x
+    val endX = element.x + element.width
+    val endY = element.y + element.height
+    renderLine(startX, endY, endX, endY, Color.AQUA, List(5d, 5d))
+
+  private def createElementDebugMarginBorderLeft(element: Element): Line =
+    val startX = element.x
+    val startY = element.y
+    val endY = element.y + element.height
+    renderLine(startX, startY, startX, endY, Color.AQUA, List(5d, 5d))
+
   private def renderLine(startX: Float, startY: Float, endX: Float, endY: Float, color: Color): Line =
-    val result = new Line()
-    result.setStartX(startX)
-    result.setStartY(startY)
-    result.setEndX(endX)
-    result.setEndY(endY)
-    result.setStrokeWidth(1F)
-    result.setStroke(color)
-    result
+    renderLine(startX, startY, endX, endY, color, List.empty)
+
+  private def renderLine(startXValue: Float, startYValue: Float, endXValue: Float, endYValue: Float, colorValue: Color, strokeDashList: List[java.lang.Double]): Line =
+    new Line:
+      startX =startXValue
+      startY = startYValue
+      endX = endXValue
+      endY = endYValue
+      stroke = colorValue
+      strokeWidth = 1F
+      strokeDashArray = strokeDashList
 
 case class Margin(
   val top: Float = 0F,
