@@ -29,13 +29,9 @@ class PreviewViewImpl(val model: PreviewModel) extends PreviewView:
 
   private def renderRow(): List[Node] =
     val debug = true
-    val element = Element(
-      x = 0F,
-      y = 0F,
-      width = 793.7007874F,
-      height = 1122.519685F,
-      margin = Margin(0F, 0F, 0F, 0F),
-      padding = Padding(0F, 0F, 0F, 0F),
+    val element = Page(
+      margin = Margin(100F, 50F, 100F, 50F),
+      padding = Padding(100F, 50F, 100F, 50F),
       border = Border(Color.RED, 25F)
     )
     val results = collection.mutable.ListBuffer[Node]()
@@ -161,12 +157,21 @@ case class Border(
   val width: Float = 0F
 )
 
-case class Element(
-  val x: Float,
-  val y: Float,
-  val width: Float,
-  val height: Float,
+abstract class Element:
+  def x: Float
+  def y: Float
+  def width: Float
+  def height: Float
+  def margin: Margin
+  def padding: Padding
+  def border: Border
+
+class Page(
+  val x: Float = 0F,
+  val y: Float = 0F,
+  val width: Float = 793.7007874F,
+  val height: Float = 1122.519685F,
   val margin: Margin = Margin(),
   val padding: Padding = Padding(),
   val border: Border = Border()
-)
+) extends Element
