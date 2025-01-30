@@ -34,12 +34,12 @@ class PreviewViewImpl(val model: PreviewModel) extends PreviewView:
       y = 0F,
       width = 793.7007874F,
       height = 1122.519685F,
-      margin = Margin(100F, 50F, 100F, 50F),
-      padding = Padding(100F, 50F, 100F, 50F),
-      border = Some(Border(Color.RED))
+      margin = Margin(0F, 0F, 0F, 0F),
+      padding = Padding(0F, 0F, 0F, 0F),
+      border = Border(Color.RED, 25F)
     )
     val results = collection.mutable.ListBuffer[Node]()
-    if element.border.isDefined then
+    if element.width > 0F then
       results += createElementBorderTop(element)
       results += createElementBorderRight(element)
       results += createElementBorderBottom(element)
@@ -58,92 +58,88 @@ class PreviewViewImpl(val model: PreviewModel) extends PreviewView:
     results.toList
 
   private def createElementBorderTop(element: Element): Line =
-    val border = element.border.get
-    val startX = element.x + element.margin.left
-    val startY = element.y + element.margin.top
-    val endX = element.x + element.width - element.margin.right
-    renderLine(startX, startY, endX, startY, border.color)
+    val startX = element.x + element.margin.left + (element.border.width / 2F)
+    val startY = element.y + element.margin.top + (element.border.width / 2F)
+    val endX = element.x + element.width - element.margin.right - (element.border.width / 2F)
+    renderLine(startX, startY, endX, startY, element.border.color, element.border.width)
 
   private def createElementBorderRight(element: Element): Line =
-    val border = element.border.get
-    val startY = element.y + element.margin.top
-    val endX = element.x + element.width - element.margin.right
-    val endY = element.y + element.height - element.margin.bottom
-    renderLine(endX, startY, endX, endY, border.color)
+    val startY = element.y + element.margin.top + (element.border.width / 2F)
+    val endX = element.x + element.width - element.margin.right - (element.border.width / 2F)
+    val endY = element.y + element.height - element.margin.bottom - (element.border.width / 2F)
+    renderLine(endX, startY, endX, endY, element.border.color, element.border.width)
 
   private def createElementBorderBottom(element: Element): Line =
-    val border = element.border.get
-    val startX = element.x + element.margin.left
-    val endX = element.x + element.width - element.margin.right
-    val endY = element.y + element.height - element.margin.bottom
-    renderLine(startX, endY, endX, endY, border.color)
+    val startX = element.x + element.margin.left + (element.border.width / 2F)
+    val endX = element.x + element.width - element.margin.right - (element.border.width / 2F)
+    val endY = element.y + element.height - element.margin.bottom - (element.border.width / 2F)
+    renderLine(startX, endY, endX, endY, element.border.color, element.border.width)
 
   private def createElementBorderLeft(element: Element): Line =
-    val border = element.border.get
-    val startX = element.x + element.margin.left
-    val startY = element.y + element.margin.top
-    val endY = element.y + element.height - element.margin.bottom
-    renderLine(startX, startY, startX, endY, border.color)
+    val startX = element.x + element.margin.left + (element.border.width / 2F)
+    val startY = element.y + element.margin.top + (element.border.width / 2F)
+    val endY = element.y + element.height - element.margin.bottom - (element.border.width / 2F)
+    renderLine(startX, startY, startX, endY, element.border.color, element.border.width)
 
   private def createElementDebugMarginBorderTop(element: Element): Line =
     val startX = element.x
     val startY = element.y
     val endX = element.x + element.width
-    renderLine(startX, startY, endX, startY, Color.AQUA, List(5d, 5d))
+    renderLine(startX, startY, endX, startY, Color.AQUA, 1F, List(5d, 5d))
 
   private def createElementDebugMarginBorderRight(element: Element): Line =
     val startY = element.y
     val endX = element.x + element.width
     val endY = element.y + element.height
-    renderLine(endX, startY, endX, endY, Color.AQUA, List(5d, 5d))
+    renderLine(endX, startY, endX, endY, Color.AQUA, 1F, List(5d, 5d))
 
   private def createElementDebugMarginBorderBottom(element: Element): Line =
     val startX = element.x
     val endX = element.x + element.width
     val endY = element.y + element.height
-    renderLine(startX, endY, endX, endY, Color.AQUA, List(5d, 5d))
+    renderLine(startX, endY, endX, endY, Color.AQUA, 1F, List(5d, 5d))
 
   private def createElementDebugMarginBorderLeft(element: Element): Line =
     val startX = element.x
     val startY = element.y
     val endY = element.y + element.height
-    renderLine(startX, startY, startX, endY, Color.AQUA, List(5d, 5d))
+    renderLine(startX, startY, startX, endY, Color.AQUA, 1F, List(5d, 5d))
 
   private def createElementDebugPaddingBorderTop(element: Element): Line =
-    val startX = element.x + element.margin.left + element.padding.left
-    val startY = element.y + element.margin.top + element.padding.top
-    val endX = element.x + element.width - element.margin.right - element.padding.right
-    renderLine(startX, startY, endX, startY, Color.PINK, List(5d, 5d))
+    val startX = element.x + element.margin.left + element.border.width + element.padding.left
+    val startY = element.y + element.margin.top + element.border.width + element.padding.top
+    val endX = element.x + element.width - element.margin.right - element.border.width - element.padding.right
+    renderLine(startX, startY, endX, startY, Color.PINK, 1F, List(5d, 5d))
 
   private def createElementDebugPaddingBorderRight(element: Element): Line =
-    val startY = element.y + element.margin.top + element.padding.top
-    val endX = element.x + element.width - element.margin.right - element.padding.right
-    val endY = element.y + element.height - element.margin.bottom - element.padding.bottom
-    renderLine(endX, startY, endX, endY, Color.PINK, List(5d, 5d))
+    val startY = element.y + element.margin.top + element.border.width + element.padding.top
+    val endX = element.x + element.width - element.margin.right - element.border.width - element.padding.right
+    val endY = element.y + element.height - element.margin.bottom - element.border.width - element.padding.bottom
+    renderLine(endX, startY, endX, endY, Color.PINK, 1F, List(5d, 5d))
 
   private def createElementDebugPaddingBorderBottom(element: Element): Line =
-    val startX = element.x + element.margin.left + element.padding.left
-    val endX = element.x + element.width - element.margin.right - element.padding.right
-    val endY = element.y + element.height - element.margin.bottom - element.padding.bottom
-    renderLine(startX, endY, endX, endY, Color.PINK, List(5d, 5d))
+    val startX = element.x + element.margin.left + element.border.width + element.padding.left
+    val endX = element.x + element.width - element.margin.right - element.border.width - element.padding.right
+    val endY = element.y + element.height - element.margin.bottom - element.border.width - element.padding.bottom
+    renderLine(startX, endY, endX, endY, Color.PINK, 1F, List(5d, 5d))
 
   private def createElementDebugPaddingBorderLeft(element: Element): Line =
-    val startX = element.x + element.margin.left + element.padding.left
-    val startY = element.y + element.margin.top + element.padding.top
-    val endY = element.y + element.height - element.margin.bottom - element.padding.bottom
-    renderLine(startX, startY, startX, endY, Color.PINK, List(5d, 5d))
+    val startX = element.x + element.margin.left + element.border.width + element.padding.left
+    val startY = element.y + element.margin.top + element.border.width + element.padding.top
+    val endY = element.y + element.height - element.margin.bottom - element.border.width - element.padding.bottom
+    renderLine(startX, startY, startX, endY, Color.PINK, 1F, List(5d, 5d))
 
-  private def renderLine(startX: Float, startY: Float, endX: Float, endY: Float, color: Color): Line =
-    renderLine(startX, startY, endX, endY, color, List.empty)
+  private def renderLine(startX: Float, startY: Float, endX: Float, endY: Float, color: Color, strokeWidth: Float): Line =
+    renderLine(startX, startY, endX, endY, color, strokeWidth,  List.empty)
 
-  private def renderLine(startXValue: Float, startYValue: Float, endXValue: Float, endYValue: Float, colorValue: Color, strokeDashList: List[java.lang.Double]): Line =
+  private def renderLine(startXValue: Float, startYValue: Float, endXValue: Float, endYValue: Float, colorValue: Color, strokeWidthValue: Float, strokeDashList: List[java.lang.Double]): Line =
     new Line:
       startX =startXValue
       startY = startYValue
       endX = endXValue
       endY = endYValue
       stroke = colorValue
-      strokeWidth = 1F
+      strokeWidth = strokeWidthValue
       strokeDashArray = strokeDashList
 
 case class Margin(
@@ -161,7 +157,8 @@ case class Padding(
 )
 
 case class Border(
-  val color: Color
+  val color: Color = Color.BLACK,
+  val width: Float = 0F
 )
 
 case class Element(
@@ -171,5 +168,5 @@ case class Element(
   val height: Float,
   val margin: Margin = Margin(),
   val padding: Padding = Padding(),
-  val border: Option[Border] = None
+  val border: Border = Border()
 )
