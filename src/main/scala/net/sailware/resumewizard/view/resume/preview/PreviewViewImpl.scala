@@ -25,16 +25,9 @@ class PreviewViewImpl(val model: PreviewModel) extends PreviewView:
       maxHeight = 1122.519685F
       minWidth = 793.7007874F
       minHeight = 1122.519685F
-      children = renderRow()
+      children = renderPage()
 
-  private def renderRow(): List[Node] =
-    val debug = true
-    val element = Page(
-      margin = Margin(100F, 50F, 100F, 50F),
-      padding = Padding(100F, 50F, 100F, 50F),
-      border = Border(Color.RED, 25F)
-    )
-    val results = collection.mutable.ListBuffer[Node]()
+  private def renderElement(element: Element, debug: Boolean, results: collection.mutable.ListBuffer[Node]): Unit =
     if element.width > 0F then
       results += createElementBorderTop(element)
       results += createElementBorderRight(element)
@@ -51,6 +44,12 @@ class PreviewViewImpl(val model: PreviewModel) extends PreviewView:
       results += createElementDebugPaddingBorderBottom(element)
       results += createElementDebugPaddingBorderLeft(element)
 
+  private def renderPage(): List[Node] =
+    val debug = true
+    val page = Data().createPage()
+    val results = collection.mutable.ListBuffer[Node]()
+    renderElement(page, debug, results)
+    for row <- page.rows do renderElement(row, debug, results)
     results.toList
 
   private def createElementBorderTop(element: Element): Line =
@@ -165,13 +164,42 @@ abstract class Element:
   def margin: Margin
   def padding: Padding
   def border: Border
+  def contentStartX(): Float = x + margin.left + border.width + padding.left
+  def contentStartY(): Float = y + margin.top + border.width + padding.top
 
-class Page(
+case class Page(
   val x: Float = 0F,
   val y: Float = 0F,
   val width: Float = 793.7007874F,
   val height: Float = 1122.519685F,
   val margin: Margin = Margin(),
   val padding: Padding = Padding(),
-  val border: Border = Border()
+  val border: Border = Border(),
+  val rows: List[Row] = List.empty
 ) extends Element
+
+case class Row(
+  val x: Float,
+  val y: Float,
+  val width: Float,
+  val height: Float,
+  val margin: Margin = Margin(),
+  val padding: Padding = Padding(),
+  val border: Border = Border(),
+) extends Element
+
+class Data:
+  def createPage(): Page =
+    val page = Page(
+      margin = Margin(4F, 4F, 4F, 4F),
+      padding = Padding(4F, 4F, 4F, 4F),
+      border = Border(Color.Black, 0F)
+    )
+    val row = Row(
+      x = page.contentStartX(),
+      y = page.contentStartY(),
+      width = page.width,
+      height = page.height,
+      border = Border(Color.Purple, 2F)
+    )
+    page.copy(rows = List(row))
