@@ -45,7 +45,7 @@ class PreviewViewImpl(val model: PreviewModel) extends PreviewView:
       results += createElementDebugPaddingBorderLeft(element)
 
   private def renderPage(): List[Node] =
-    val debug = true
+    val debug = false
     val page = Data().createPage()
     val results = collection.mutable.ListBuffer[Node]()
     renderElement(page, debug, results)
@@ -166,6 +166,8 @@ abstract class Element:
   def border: Border
   def contentStartX(): Float = x + margin.left + border.width + padding.left
   def contentStartY(): Float = y + margin.top + border.width + padding.top
+  def contentWidth(): Float = width - margin.left - border.width - padding.left - padding.right - border.width - margin.right
+  def contentHeight(): Float = height - margin.top - border.width - padding.top - padding.bottom - border.width - margin.bottom
 
 case class Page(
   val x: Float = 0F,
@@ -193,13 +195,15 @@ class Data:
     val page = Page(
       margin = Margin(4F, 4F, 4F, 4F),
       padding = Padding(4F, 4F, 4F, 4F),
-      border = Border(Color.Black, 0F)
+      border = Border(Color.Blue, 1F)
     )
     val row = Row(
       x = page.contentStartX(),
       y = page.contentStartY(),
-      width = page.width,
-      height = page.height,
-      border = Border(Color.Purple, 2F)
+      width = page.contentWidth(),
+      height = page.contentHeight(),
+      margin = Margin(4F, 4F, 4F, 4F),
+      padding = Padding(4F, 4F, 4F, 4F),
+      border = Border(Color.Purple, 1F)
     )
     page.copy(rows = List(row))
