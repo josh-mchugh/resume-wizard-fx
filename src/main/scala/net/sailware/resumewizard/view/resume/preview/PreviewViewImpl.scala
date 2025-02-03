@@ -2,140 +2,128 @@ package net.sailware.resumewizard.view.resume.preview
 
 import scalafx.Includes.*
 import scalafx.scene.Node
+import scalafx.scene.canvas.Canvas
+import scalafx.scene.canvas.GraphicsContext
 import scalafx.scene.paint.Color
-import scalafx.scene.shape.Line
-import scalafx.scene.shape.Rectangle
-import scalafx.scene.layout.Pane
-import scalafx.scene.layout.Region
-import scalafx.scene.text.Font
-import scalafx.scene.text.Text
 import org.slf4j.LoggerFactory
-
-import scala.jdk.CollectionConverters.*
 
 class PreviewViewImpl(val model: PreviewModel) extends PreviewView:
 
   val logger = LoggerFactory.getLogger(classOf[PreviewViewImpl])
 
-  override def view(): Region =
+  override def view(): Node =
     model.resume.onInvalidate { resume => logger.info("resume: {}", resume) }
-    new Pane:
-      style = "-fx-background-color: white"
-      maxWidth = 793.7007874F
-      maxHeight = 1122.519685F
-      minWidth = 793.7007874F
-      minHeight = 1122.519685F
-      children = renderPage()
+    val canvas = new Canvas(793.7007874F, 1122.519685F)
+    val gc = canvas.getGraphicsContext2D()
+    renderPage(gc)
+    canvas
 
-  private def renderElement(element: Element, debug: Boolean, results: collection.mutable.ListBuffer[Node]): Unit =
+  private def renderElement(element: Element, debug: Boolean, gc: GraphicsContext): Unit =
     if element.width > 0F then
-      results += createElementBorderTop(element)
-      results += createElementBorderRight(element)
-      results += createElementBorderBottom(element)
-      results += createElementBorderLeft(element)
+      createElementBorderTop(element, gc)
+      createElementBorderRight(element, gc)
+      createElementBorderBottom(element, gc)
+      createElementBorderLeft(element, gc)
     if debug then
-      results += createElementDebugMarginBorderTop(element)
-      results += createElementDebugMarginBorderRight(element)
-      results += createElementDebugMarginBorderBottom(element)
-      results += createElementDebugMarginBorderLeft(element)
+      createElementDebugMarginBorderTop(element, gc)
+      createElementDebugMarginBorderRight(element, gc)
+      createElementDebugMarginBorderBottom(element, gc)
+      createElementDebugMarginBorderLeft(element, gc)
 
-      results += createElementDebugPaddingBorderTop(element)
-      results += createElementDebugPaddingBorderRight(element)
-      results += createElementDebugPaddingBorderBottom(element)
-      results += createElementDebugPaddingBorderLeft(element)
+      createElementDebugPaddingBorderTop(element, gc)
+      createElementDebugPaddingBorderRight(element, gc)
+      createElementDebugPaddingBorderBottom(element, gc)
+      createElementDebugPaddingBorderLeft(element, gc)
 
-  private def renderPage(): List[Node] =
+  private def renderPage(gc: GraphicsContext): Unit =
     val debug = false
     val page = Data().createPage()
-    val results = collection.mutable.ListBuffer[Node]()
-    renderElement(page, debug, results)
-    for row <- page.rows do renderElement(row, debug, results)
-    results.toList
+    gc.setFill(Color.WHITE)
+    gc.fillRect(0F, 0F, 793.7007874F, 1122.519685F)
+    renderElement(page, debug, gc)
+    for row <- page.rows do renderElement(row, debug, gc)
 
-  private def createElementBorderTop(element: Element): Line =
+
+  private def createElementBorderTop(element: Element, gc: GraphicsContext): Unit =
     val startX = element.x + element.margin.left + (element.border.width / 2F)
     val startY = element.y + element.margin.top + (element.border.width / 2F)
     val endX = element.x + element.width - element.margin.right - (element.border.width / 2F)
-    renderLine(startX, startY, endX, startY, element.border.color, element.border.width)
+    renderLine(startX, startY, endX, startY, element.border.color, element.border.width, gc)
 
-  private def createElementBorderRight(element: Element): Line =
+  private def createElementBorderRight(element: Element, gc: GraphicsContext): Unit =
     val startY = element.y + element.margin.top + (element.border.width / 2F)
     val endX = element.x + element.width - element.margin.right - (element.border.width / 2F)
     val endY = element.y + element.height - element.margin.bottom - (element.border.width / 2F)
-    renderLine(endX, startY, endX, endY, element.border.color, element.border.width)
+    renderLine(endX, startY, endX, endY, element.border.color, element.border.width, gc)
 
-  private def createElementBorderBottom(element: Element): Line =
+  private def createElementBorderBottom(element: Element, gc: GraphicsContext): Unit =
     val startX = element.x + element.margin.left + (element.border.width / 2F)
     val endX = element.x + element.width - element.margin.right - (element.border.width / 2F)
     val endY = element.y + element.height - element.margin.bottom - (element.border.width / 2F)
-    renderLine(startX, endY, endX, endY, element.border.color, element.border.width)
+    renderLine(startX, endY, endX, endY, element.border.color, element.border.width, gc)
 
-  private def createElementBorderLeft(element: Element): Line =
+  private def createElementBorderLeft(element: Element, gc: GraphicsContext): Unit =
     val startX = element.x + element.margin.left + (element.border.width / 2F)
     val startY = element.y + element.margin.top + (element.border.width / 2F)
     val endY = element.y + element.height - element.margin.bottom - (element.border.width / 2F)
-    renderLine(startX, startY, startX, endY, element.border.color, element.border.width)
+    renderLine(startX, startY, startX, endY, element.border.color, element.border.width, gc)
 
-  private def createElementDebugMarginBorderTop(element: Element): Line =
+  private def createElementDebugMarginBorderTop(element: Element, gc: GraphicsContext): Unit =
     val startX = element.x
     val startY = element.y
     val endX = element.x + element.width
-    renderLine(startX, startY, endX, startY, Color.AQUA, 1F, List(5d, 5d))
+    renderLine(startX, startY, endX, startY, Color.AQUA, 1F, List(5d, 5d), gc)
 
-  private def createElementDebugMarginBorderRight(element: Element): Line =
+  private def createElementDebugMarginBorderRight(element: Element, gc: GraphicsContext): Unit =
     val startY = element.y
     val endX = element.x + element.width
     val endY = element.y + element.height
-    renderLine(endX, startY, endX, endY, Color.AQUA, 1F, List(5d, 5d))
+    renderLine(endX, startY, endX, endY, Color.AQUA, 1F, List(5d, 5d), gc)
 
-  private def createElementDebugMarginBorderBottom(element: Element): Line =
+  private def createElementDebugMarginBorderBottom(element: Element, gc: GraphicsContext): Unit =
     val startX = element.x
     val endX = element.x + element.width
     val endY = element.y + element.height
-    renderLine(startX, endY, endX, endY, Color.AQUA, 1F, List(5d, 5d))
+    renderLine(startX, endY, endX, endY, Color.AQUA, 1F, List(5d, 5d), gc)
 
-  private def createElementDebugMarginBorderLeft(element: Element): Line =
+  private def createElementDebugMarginBorderLeft(element: Element, gc: GraphicsContext): Unit =
     val startX = element.x
     val startY = element.y
     val endY = element.y + element.height
-    renderLine(startX, startY, startX, endY, Color.AQUA, 1F, List(5d, 5d))
+    renderLine(startX, startY, startX, endY, Color.AQUA, 1F, List(5d, 5d), gc)
 
-  private def createElementDebugPaddingBorderTop(element: Element): Line =
+  private def createElementDebugPaddingBorderTop(element: Element, gc: GraphicsContext): Unit =
     val startX = element.x + element.margin.left + element.border.width + element.padding.left
     val startY = element.y + element.margin.top + element.border.width + element.padding.top
     val endX = element.x + element.width - element.margin.right - element.border.width - element.padding.right
-    renderLine(startX, startY, endX, startY, Color.PINK, 1F, List(5d, 5d))
+    renderLine(startX, startY, endX, startY, Color.PINK, 1F, List(5d, 5d), gc)
 
-  private def createElementDebugPaddingBorderRight(element: Element): Line =
+  private def createElementDebugPaddingBorderRight(element: Element, gc: GraphicsContext): Unit =
     val startY = element.y + element.margin.top + element.border.width + element.padding.top
     val endX = element.x + element.width - element.margin.right - element.border.width - element.padding.right
     val endY = element.y + element.height - element.margin.bottom - element.border.width - element.padding.bottom
-    renderLine(endX, startY, endX, endY, Color.PINK, 1F, List(5d, 5d))
+    renderLine(endX, startY, endX, endY, Color.PINK, 1F, List(5d, 5d), gc)
 
-  private def createElementDebugPaddingBorderBottom(element: Element): Line =
+  private def createElementDebugPaddingBorderBottom(element: Element, gc: GraphicsContext): Unit =
     val startX = element.x + element.margin.left + element.border.width + element.padding.left
     val endX = element.x + element.width - element.margin.right - element.border.width - element.padding.right
     val endY = element.y + element.height - element.margin.bottom - element.border.width - element.padding.bottom
-    renderLine(startX, endY, endX, endY, Color.PINK, 1F, List(5d, 5d))
+    renderLine(startX, endY, endX, endY, Color.PINK, 1F, List(5d, 5d), gc)
 
-  private def createElementDebugPaddingBorderLeft(element: Element): Line =
+  private def createElementDebugPaddingBorderLeft(element: Element, gc: GraphicsContext): Unit =
     val startX = element.x + element.margin.left + element.border.width + element.padding.left
     val startY = element.y + element.margin.top + element.border.width + element.padding.top
     val endY = element.y + element.height - element.margin.bottom - element.border.width - element.padding.bottom
-    renderLine(startX, startY, startX, endY, Color.PINK, 1F, List(5d, 5d))
+    renderLine(startX, startY, startX, endY, Color.PINK, 1F, List(5d, 5d), gc)
 
-  private def renderLine(startX: Float, startY: Float, endX: Float, endY: Float, color: Color, strokeWidth: Float): Line =
-    renderLine(startX, startY, endX, endY, color, strokeWidth,  List.empty)
+  private def renderLine(startX: Float, startY: Float, endX: Float, endY: Float, color: Color, strokeWidth: Float, gc: GraphicsContext): Unit =
+    renderLine(startX, startY, endX, endY, color, strokeWidth,  List.empty, gc)
 
-  private def renderLine(startXValue: Float, startYValue: Float, endXValue: Float, endYValue: Float, colorValue: Color, strokeWidthValue: Float, strokeDashList: List[java.lang.Double]): Line =
-    new Line:
-      startX =startXValue
-      startY = startYValue
-      endX = endXValue
-      endY = endYValue
-      stroke = colorValue
-      strokeWidth = strokeWidthValue
-      strokeDashArray = strokeDashList
+  private def renderLine(startX: Float, startY: Float, endX: Float, endY: Float, color: Color, strokeWidth: Float, strokeDashList: List[Double], gc: GraphicsContext): Unit =
+    gc.setStroke(color)
+    gc.setLineWidth(strokeWidth)
+    gc.setLineDashes(strokeDashList*)
+    gc.strokeLine(startX, startY, endX, endY)
 
 case class Margin(
   val top: Float = 0F,
