@@ -41,8 +41,10 @@ class PreviewViewImpl(val model: PreviewModel) extends PreviewView:
     gc.setFill(Color.WHITE)
     gc.fillRect(0F, 0F, 793.7007874F, 1122.519685F)
     renderElement(page, debug, gc)
-    for row <- page.rows do renderElement(row, debug, gc)
-
+    for row <- page.rows do
+      renderElement(row, debug, gc)
+      for column <- row.columns do
+        renderElement(column, debug, gc)
 
   private def createElementBorderTop(element: Element, gc: GraphicsContext): Unit =
     val startX = element.x + element.margin.left + (element.border.width / 2F)
@@ -176,6 +178,17 @@ case class Row(
   val margin: Margin = Margin(),
   val padding: Padding = Padding(),
   val border: Border = Border(),
+  val columns: List[Column] = List.empty
+) extends Element
+
+case class Column(
+  val x: Float,
+  val y: Float,
+  val width: Float,
+  val height: Float,
+  val margin: Margin = Margin(),
+  val padding: Padding = Padding(),
+  val border: Border = Border(),
 ) extends Element
 
 class Data:
@@ -185,13 +198,23 @@ class Data:
       padding = Padding(4F, 4F, 4F, 4F),
       border = Border(Color.Blue, 1F)
     )
-    val row = Row(
+    var row = Row(
       x = page.contentStartX(),
       y = page.contentStartY(),
       width = page.contentWidth(),
       height = page.contentHeight(),
       margin = Margin(4F, 4F, 4F, 4F),
       padding = Padding(4F, 4F, 4F, 4F),
-      border = Border(Color.Purple, 1F)
+      border = Border(Color.Purple, 1F),
     )
+    val column = Column(
+      x = row.contentStartX(),
+      y = row.contentStartY(),
+      width = row.contentWidth() / 2,
+      height = row.contentHeight(),
+      margin = Margin(4F, 4F, 4F, 4F),
+      padding = Padding(4F, 4F, 4F, 4F),
+      border = Border(Color.Orange, 1F),
+    )
+    row = row.copy(columns = List(column))
     page.copy(rows = List(row))
