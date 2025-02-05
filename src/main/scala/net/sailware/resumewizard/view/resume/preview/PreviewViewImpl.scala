@@ -35,6 +35,9 @@ class PreviewViewImpl(val model: PreviewModel) extends PreviewView:
       createElementDebugPaddingBorderBottom(element, gc)
       createElementDebugPaddingBorderLeft(element, gc)
 
+    gc.setFill(element.background.color)
+    gc.fillRect(element.contentStartX(), element.contentStartY(), element.contentWidth(), element.contentHeight())
+
   private def renderPage(gc: GraphicsContext): Unit =
     val debug = false
     val page = Data().createPage()
@@ -146,6 +149,10 @@ case class Border(
   val width: Float = 0F
 )
 
+case class Background(
+  val color: Color = Color.Transparent
+)
+
 abstract class Element:
   def x: Float
   def y: Float
@@ -154,6 +161,7 @@ abstract class Element:
   def margin: Margin
   def padding: Padding
   def border: Border
+  def background: Background
   def contentStartX(): Float = x + margin.left + border.width + padding.left
   def contentStartY(): Float = y + margin.top + border.width + padding.top
   def contentWidth(): Float = width - margin.left - border.width - padding.left - padding.right - border.width - margin.right
@@ -167,6 +175,7 @@ case class Page(
   val margin: Margin = Margin(),
   val padding: Padding = Padding(),
   val border: Border = Border(),
+  val background: Background = Background(),
   val rows: List[Row] = List.empty
 ) extends Element
 
@@ -178,6 +187,7 @@ case class Row(
   val margin: Margin = Margin(),
   val padding: Padding = Padding(),
   val border: Border = Border(),
+  val background: Background = Background(),
   val columns: List[Column] = List.empty
 ) extends Element
 
@@ -189,6 +199,7 @@ case class Column(
   val margin: Margin = Margin(),
   val padding: Padding = Padding(),
   val border: Border = Border(),
+  val background: Background = Background(),
 ) extends Element
 
 class Data:
@@ -196,7 +207,8 @@ class Data:
     val page = Page(
       margin = Margin(4F, 4F, 4F, 4F),
       padding = Padding(4F, 4F, 4F, 4F),
-      border = Border(Color.Blue, 1F)
+      border = Border(Color.Blue, 1F),
+      background = Background(Color.Yellow)
     )
     var row = Row(
       x = page.contentStartX(),
@@ -206,6 +218,7 @@ class Data:
       margin = Margin(4F, 4F, 4F, 4F),
       padding = Padding(4F, 4F, 4F, 4F),
       border = Border(Color.Purple, 1F),
+      background = Background(Color.GREEN)
     )
     val column = Column(
       x = row.contentStartX(),
@@ -215,6 +228,7 @@ class Data:
       margin = Margin(4F, 4F, 4F, 4F),
       padding = Padding(4F, 4F, 4F, 4F),
       border = Border(Color.Orange, 1F),
+      background = Background(Color.RED)
     )
     row = row.copy(columns = List(column))
     page.copy(rows = List(row))
