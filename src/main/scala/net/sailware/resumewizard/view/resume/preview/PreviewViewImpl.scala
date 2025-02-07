@@ -48,6 +48,8 @@ class PreviewViewImpl(val model: PreviewModel) extends PreviewView:
       renderElement(row, debug, gc)
       for column <- row.columns do
         renderElement(column, debug, gc)
+        for block <- column.blocks do
+          renderElement(block, debug, gc)
 
   private def createElementBorderTop(element: Element, gc: GraphicsContext): Unit =
     val startX = element.x + element.margin.left + (element.border.width / 2F)
@@ -200,6 +202,18 @@ case class Column(
   val padding: Padding = Padding(),
   val border: Border = Border(),
   val background: Background = Background(),
+  val blocks: List[Content] = List.empty
+) extends Element
+
+case class Content(
+  val x: Float,
+  val y: Float,
+  val width: Float,
+  val height: Float,
+  val margin: Margin = Margin(),
+  val padding: Padding = Padding(),
+  val border: Border = Border(),
+  val background: Background = Background(),
 ) extends Element
 
 class Data:
@@ -208,7 +222,6 @@ class Data:
       margin = Margin(4F, 4F, 4F, 4F),
       padding = Padding(4F, 4F, 4F, 4F),
       border = Border(Color.Blue, 1F),
-      background = Background(Color.Yellow)
     )
     var row = Row(
       x = page.contentStartX(),
@@ -218,9 +231,8 @@ class Data:
       margin = Margin(4F, 4F, 4F, 4F),
       padding = Padding(4F, 4F, 4F, 4F),
       border = Border(Color.Purple, 1F),
-      background = Background(Color.GREEN)
     )
-    val column = Column(
+    var column1 = Column(
       x = row.contentStartX(),
       y = row.contentStartY(),
       width = row.contentWidth() / 2,
@@ -228,7 +240,31 @@ class Data:
       margin = Margin(4F, 4F, 4F, 4F),
       padding = Padding(4F, 4F, 4F, 4F),
       border = Border(Color.Orange, 1F),
-      background = Background(Color.RED)
     )
-    row = row.copy(columns = List(column))
+    var column2 = Column(
+      x = row.contentStartX()+ row.contentWidth() / 2,
+      y = row.contentStartY(),
+      width = row.contentWidth() / 2,
+      height = row.contentHeight(),
+      margin = Margin(4F, 4F, 4F, 4F),
+      padding = Padding(4F, 4F, 4F, 4F),
+      border = Border(Color.Orange, 1F),
+    )
+    val block1 = Content(
+      x = column1.contentStartX(),
+      y = column1.contentStartY(),
+      width = column1.contentWidth(),
+      height= column1.contentHeight() / 3,
+      background = Background(Color.DimGray)
+    )
+    val block2 = Content(
+      x = column2.contentStartX(),
+      y = column2.contentStartY(),
+      width = column2.contentWidth(),
+      height= column2.contentHeight() / 4,
+      background = Background(Color.DimGray)
+    )
+    column1 = column1.copy(blocks = List(block1))
+    column2 = column2.copy(blocks = List(block2))
+    row = row.copy(columns = List(column1, column2))
     page.copy(rows = List(row))
