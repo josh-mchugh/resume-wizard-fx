@@ -19,7 +19,7 @@ class PreviewViewImpl(val model: PreviewModel) extends PreviewView:
     canvas
 
   private def renderElement(element: Element, debug: Boolean, gc: GraphicsContext): Unit =
-    if element.width > 0F then
+    if element.border.width > 0F then
       createElementBorderTop(element, gc)
       createElementBorderRight(element, gc)
       createElementBorderBottom(element, gc)
@@ -48,8 +48,8 @@ class PreviewViewImpl(val model: PreviewModel) extends PreviewView:
       renderElement(row, debug, gc)
       for column <- row.columns do
         renderElement(column, debug, gc)
-        for block <- column.blocks do
-          renderElement(block, debug, gc)
+        for content <- column.content do
+          renderElement(content, debug, gc)
 
   private def createElementBorderTop(element: Element, gc: GraphicsContext): Unit =
     val startX = element.x + element.margin.left + (element.border.width / 2F)
@@ -202,7 +202,7 @@ case class Column(
   val padding: Padding = Padding(),
   val border: Border = Border(),
   val background: Background = Background(),
-  val blocks: List[Content] = List.empty
+  val content: List[Content] = List.empty
 ) extends Element
 
 case class Content(
@@ -219,52 +219,93 @@ case class Content(
 class Data:
   def createPage(): Page =
     val page = Page(
-      margin = Margin(4F, 4F, 4F, 4F),
-      padding = Padding(4F, 4F, 4F, 4F),
-      border = Border(Color.Blue, 1F),
+      padding = Padding(50F, 50F, 100F, 50F),
     )
-    var row = Row(
+    var row1 = Row(
       x = page.contentStartX(),
       y = page.contentStartY(),
       width = page.contentWidth(),
-      height = page.contentHeight(),
-      margin = Margin(4F, 4F, 4F, 4F),
-      padding = Padding(4F, 4F, 4F, 4F),
-      border = Border(Color.Purple, 1F),
+      height = 50F,
     )
-    var column1 = Column(
-      x = row.contentStartX(),
-      y = row.contentStartY(),
-      width = row.contentWidth() / 2,
-      height = row.contentHeight(),
-      margin = Margin(4F, 4F, 4F, 4F),
-      padding = Padding(4F, 4F, 4F, 4F),
-      border = Border(Color.Orange, 1F),
+    val r1Column1 = Column(
+      x = row1.contentStartX(),
+      y = row1.contentStartY(),
+      width = row1.contentWidth() / 3,
+      height = row1.contentHeight(),
+      margin = Margin(0F, 15F, 0F, 0F),
+      background = Background(Color.Gray)
     )
-    var column2 = Column(
-      x = row.contentStartX()+ row.contentWidth() / 2,
-      y = row.contentStartY(),
-      width = row.contentWidth() / 2,
-      height = row.contentHeight(),
-      margin = Margin(4F, 4F, 4F, 4F),
-      padding = Padding(4F, 4F, 4F, 4F),
-      border = Border(Color.Orange, 1F),
+    var r1Column2 = Column(
+      x = row1.contentStartX() + row1.contentWidth() / 3,
+      y = row1.contentStartY(),
+      width = row1.contentWidth() / 3,
+      height = row1.contentHeight(),
+      margin = Margin(0F, 15F, 0F, 15F),
+      background = Background(Color.Gray)
     )
-    val block1 = Content(
-      x = column1.contentStartX(),
-      y = column1.contentStartY(),
-      width = column1.contentWidth(),
-      height= column1.contentHeight() / 3,
-      background = Background(Color.DimGray)
+    var r1C2Content = Content(
+      x = r1Column2.contentStartX(),
+      y = r1Column2.contentStartY(),
+      width = r1Column2.contentWidth() / 2,
+      height = 35F,
+      margin = Margin(5F, 0F, 0F, 5F),
+      background = Background(Color.WhiteSmoke)
     )
-    val block2 = Content(
-      x = column2.contentStartX(),
-      y = column2.contentStartY(),
-      width = column2.contentWidth(),
-      height= column2.contentHeight() / 4,
-      background = Background(Color.DimGray)
+    r1Column2 = r1Column2.copy(content = List(r1C2Content))
+    val r1Column3 = Column(
+      x = row1.contentStartX() + row1.contentWidth() / 3 * 2,
+      y = row1.contentStartY(),
+      width = row1.contentWidth() / 3,
+      height = row1.contentHeight(),
+      margin = Margin(0F, 0F, 0F, 15F),
+      background = Background(Color.Gray)
     )
-    column1 = column1.copy(blocks = List(block1))
-    column2 = column2.copy(blocks = List(block2))
-    row = row.copy(columns = List(column1, column2))
-    page.copy(rows = List(row))
+    row1 = row1.copy(columns = List(r1Column1, r1Column2, r1Column3))
+    var row2 = Row(
+      x = page.contentStartX(),
+      y = page.contentStartY() + row1.height,
+      width = page.contentWidth(),
+      height = page.contentHeight() - row1.height,
+      margin = Margin(10F, 0F, 0F, 0F)
+    )
+    var r2Column1 = Column(
+      x = row2.contentStartX(),
+      y = row2.contentStartY(),
+      width = row2.contentWidth() / 3,
+      height = row2.contentHeight(),
+      margin = Margin(0F, 15F, 0F, 0F),
+    )
+    val r2C1Content1 = Content(
+      x = r2Column1.contentStartX(),
+      y = r2Column1.contentStartY(),
+      width = r2Column1.contentWidth(),
+      height = r2Column1.contentHeight() / 3,
+      margin = Margin(0F, 0F, 10F, 0F),
+      background = Background(Color.Gray)
+    )
+    val r2C1Content2 = Content(
+      x = r2Column1.contentStartX(),
+      y = r2Column1.contentStartY() + r2C1Content1.height,
+      width = r2Column1.contentWidth(),
+      height = 50F,
+      background = Background(Color.Gray)
+    )
+    r2Column1 = r2Column1.copy(content = List(r2C1Content1, r2C1Content2))
+    val r2Column2 = Column(
+      x = row2.contentStartX() + row2.contentWidth() / 3,
+      y = row2.contentStartY(),
+      width = row2.contentWidth() / 3,
+      height = row2.contentHeight(),
+      margin = Margin(0F, 15F, 0F, 15F),
+      background = Background(Color.Gray)
+    )
+    val r2Column3 = Column(
+      x = row2.contentStartX() + row2.contentWidth() / 3 * 2,
+      y = row2.contentStartY(),
+      width = row2.contentWidth() / 3,
+      height = row2.contentHeight(),
+      margin = Margin(0F, 0F, 0F, 15F),
+      background = Background(Color.Gray)
+    )
+    row2 = row2.copy(columns = List(r2Column1, r2Column2, r2Column3))
+    page.copy(rows = List(row1, row2))
