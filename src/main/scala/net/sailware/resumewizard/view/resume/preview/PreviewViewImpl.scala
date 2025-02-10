@@ -41,7 +41,7 @@ class PreviewViewImpl(val model: PreviewModel) extends PreviewView:
 
   private def renderPage(gc: GraphicsContext): Unit =
     val debug = true
-    val page = Data().createPage()
+    val page = Data().borderTestTemplate()
     gc.setFill(Color.WHITE)
     gc.fillRect(0F, 0F, 793.7007874F, 1122.519685F)
     renderElement(page, debug, gc)
@@ -240,7 +240,21 @@ case class Content(
 ) extends Element
 
 class Data:
-  def createPage(): Page =
+  /**
+    * Simple template with with Margins, Padding, and Border to verify
+    * that the lines are drawn correctly
+    */
+  def borderTestTemplate(): Page =
+    Page(
+      margin = Margin(100F, 50F, 100F, 50F),
+      padding = Padding(100F, 50F, 100F, 50F),
+      border = Border(width = 5F)
+    )
+
+  /**
+    * Creates a two row page with 3 columns in each row
+    */
+  def twoRowSixColumnTemplate(): Page =
     val page = Page(
       padding = Padding(50F, 50F, 100F, 50F),
     )
