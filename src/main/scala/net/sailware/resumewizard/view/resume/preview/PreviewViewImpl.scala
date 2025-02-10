@@ -40,7 +40,7 @@ class PreviewViewImpl(val model: PreviewModel) extends PreviewView:
     gc.fillRect(element.contentStartX(), element.contentStartY(), element.contentWidth(), element.contentHeight())
 
   private def renderPage(gc: GraphicsContext): Unit =
-    val debug = false
+    val debug = true
     val page = Data().createPage()
     gc.setFill(Color.WHITE)
     gc.fillRect(0F, 0F, 793.7007874F, 1122.519685F)
@@ -75,6 +75,11 @@ case class Background(
   val color: Color = Color.Transparent
 )
 
+case class Position(
+  val x: Float,
+  val y: Float
+)
+
 abstract class Element:
   def x: Float
   def y: Float
@@ -89,76 +94,93 @@ abstract class Element:
   def contentWidth(): Float = width - margin.left - border.width - padding.left - padding.right - border.width - margin.right
   def contentHeight(): Float = height - margin.top - border.width - padding.top - padding.bottom - border.width - margin.bottom
 
+  def borderTopY(): Float = y + margin.top + (border.width / 2F)
+  def borderRightX(): Float = x + width - margin.right - (border.width / 2F)
+  def borderBottomY(): Float = y + height - margin.bottom - (border.width / 2F)
+  def borderLeftX(): Float = x + margin.left + (border.width / 2F)
+
+  def borderTopLeft(): Position = Position(borderLeftX(), borderTopY())
+  def borderTopRight(): Position = Position(borderRightX(), borderTopY())
+  def borderBottomRight(): Position = Position(borderRightX(), borderBottomY())
+  def borderBottomLeft(): Position = Position(borderLeftX(), borderBottomY())
+
+  def marginTopY(): Float = y
+  def marginRightX(): Float = x
+  def marginBottomY(): Float = y + height
+  def marginLeftX(): Float = x + width
+
+  def marginTopLeft(): Position = Position(marginLeftX(), marginTopY())
+  def marginTopRight(): Position = Position(marginRightX(), marginTopY())
+  def marginBottomLeft(): Position = Position(marginLeftX(), marginBottomY())
+  def marginBottomRight(): Position = Position(marginRightX(), marginBottomY())
+
+  def paddingTopY(): Float = y + margin.top + border.width + padding.top
+  def paddingRightX(): Float = x + width - margin.right - border.width - padding.right
+  def paddingBottomY(): Float = y + height - margin.bottom - border.width - padding.bottom
+  def paddingLeftX(): Float = x + margin.left + border.width + padding.left
+
   def renderBorderTop()(using gc: GraphicsContext): Unit =
-    val startX = x + margin.left + (border.width / 2F)
-    val startY = y + margin.top + (border.width / 2F)
-    val endX = x + width - margin.right - (border.width / 2F)
-    renderLine(startX, startY, endX, startY, border.color, border.width, gc)
+    val topLeft = borderTopLeft()
+    val topRight = borderTopRight()
+    renderLine(topLeft.x, topLeft.y, topRight.x, topRight.y, border.color, border.width, gc)
 
   def renderBorderRight()(using gc: GraphicsContext): Unit =
-    val startY = y + margin.top + (border.width / 2F)
-    val endX = x + width - margin.right - (border.width / 2F)
-    val endY = y + height - margin.bottom - (border.width / 2F)
-    renderLine(endX, startY, endX, endY, border.color, border.width, gc)
+    val topRight = borderTopRight()
+    val bottomRight = borderBottomRight()
+    renderLine(topRight.x, topRight.y, bottomRight.x, bottomRight.y, border.color, border.width, gc)
 
   def renderBorderBottom()(using gc: GraphicsContext): Unit =
-    val startX = x + margin.left + (border.width / 2F)
-    val endX = x + width - margin.right - (border.width / 2F)
-    val endY = y + height - margin.bottom - (border.width / 2F)
-    renderLine(startX, endY, endX, endY, border.color, border.width, gc)
+    val bottomLeft = borderBottomLeft()
+    val bottomRight = borderBottomRight()
+    renderLine(bottomLeft.x, bottomLeft.y, bottomRight.x, bottomRight.y, border.color, border.width, gc)
 
   def renderBorderLeft()(using gc: GraphicsContext): Unit =
-    val startX = x + margin.left + (border.width / 2F)
-    val startY = y + margin.top + (border.width / 2F)
-    val endY = y + height - margin.bottom - (border.width / 2F)
-    renderLine(startX, startY, startX, endY, border.color, border.width, gc)
+    val topLeft = borderTopLeft()
+    val bottomLeft = borderBottomLeft()
+    renderLine(topLeft.x, topLeft.y, bottomLeft.x, bottomLeft.y, border.color, border.width, gc)
 
   def renderDebugMarginBorderTop()(using gc: GraphicsContext): Unit =
-    val startX = x
-    val startY = y
-    val endX = x + width
-    renderLine(startX, startY, endX, startY, Color.AQUA, 1F, List(5d, 5d), gc)
+    val topLeft = marginTopLeft()
+    val topRight = marginTopRight()
+    renderLine(topLeft.x, topLeft.y, topRight.x, topRight.y, Color.AQUA, 1F, List(5d, 5d), gc)
 
   def renderDebugMarginBorderRight()(using gc: GraphicsContext): Unit =
-    val startY = y
-    val endX = x + width
-    val endY = y + height
-    renderLine(endX, startY, endX, endY, Color.AQUA, 1F, List(5d, 5d), gc)
+    val topRight = marginTopRight()
+    val bottomRight = marginBottomRight()
+    renderLine(topRight.x, topRight.y, bottomRight.x, bottomRight.y, Color.AQUA, 1F, List(5d, 5d), gc)
 
   def renderDebugMarginBorderBottom()(using gc: GraphicsContext): Unit =
-    val startX = x
-    val endX = x + width
-    val endY = y + height
-    renderLine(startX, endY, endX, endY, Color.AQUA, 1F, List(5d, 5d), gc)
+    val bottomLeft = marginBottomLeft()
+    val bottomRight = marginBottomRight()
+    renderLine(bottomLeft.x, bottomLeft.y, bottomRight.x, bottomRight.y, Color.AQUA, 1F, List(5d, 5d), gc)
 
   def renderDebugMarginBorderLeft()(using gc: GraphicsContext): Unit =
-    val startX = x
-    val startY = y
-    val endY = y + height
-    renderLine(startX, startY, startX, endY, Color.AQUA, 1F, List(5d, 5d), gc)
+    val topLeft = marginTopLeft()
+    val bottomLeft = marginBottomLeft()
+    renderLine(topLeft.x, topLeft.y, bottomLeft.x, bottomLeft.y, Color.AQUA, 1F, List(5d, 5d), gc)
 
   def renderDebugPaddingBorderTop()(using gc: GraphicsContext): Unit =
-    val startX = x + margin.left + border.width + padding.left
-    val startY = y + margin.top + border.width + padding.top
-    val endX = x + width - margin.right - border.width - padding.right
+    val startX = paddingLeftX()
+    val startY = paddingTopY()
+    val endX = paddingRightX()
     renderLine(startX, startY, endX, startY, Color.PINK, 1F, List(5d, 5d), gc)
 
   def renderDebugPaddingBorderRight()(using gc: GraphicsContext): Unit =
-    val startY = y + margin.top + border.width + padding.top
-    val endX = x + width - margin.right - border.width - padding.right
-    val endY = y + height - margin.bottom - border.width - padding.bottom
+    val startY = paddingTopY()
+    val endX = paddingRightX()
+    val endY = paddingBottomY()
     renderLine(endX, startY, endX, endY, Color.PINK, 1F, List(5d, 5d), gc)
 
   def renderDebugPaddingBorderBottom()(using gc: GraphicsContext): Unit =
-    val startX = x + margin.left + border.width + padding.left
-    val endX = x + width - margin.right - border.width - padding.right
-    val endY = y + height - margin.bottom - border.width - padding.bottom
+    val startX = paddingLeftX()
+    val endX = paddingRightX()
+    val endY = paddingBottomY()
     renderLine(startX, endY, endX, endY, Color.PINK, 1F, List(5d, 5d), gc)
 
   def renderDebugPaddingBorderLeft()(using gc: GraphicsContext): Unit =
-    val startX = x + margin.left + border.width + padding.left
-    val startY = y + margin.top + border.width + padding.top
-    val endY = y + height - margin.bottom - border.width - padding.bottom
+    val startX = paddingLeftX()
+    val startY = paddingTopY()
+    val endY = paddingBottomY()
     renderLine(startX, startY, startX, endY, Color.PINK, 1F, List(5d, 5d), gc)
 
   private def renderLine(startX: Float, startY: Float, endX: Float, endY: Float, color: Color, strokeWidth: Float, gc: GraphicsContext): Unit =
