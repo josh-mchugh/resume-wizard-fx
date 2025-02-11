@@ -80,6 +80,41 @@ case class Position(
   val y: Float
 )
 
+sealed abstract class BoundingBox:
+  def top(): Float
+  def right(): Float
+  def bottom(): Float
+  def left(): Float
+  def topLeft(): Position = Position(left(), top())
+  def topRight(): Position = Position(right(), top())
+  def bottomRight(): Position = Position(right(), bottom())
+  def bottomLeft(): Position = Position(left(), bottom())
+
+case class BorderBoundingBox(
+  element: Element
+) extends BoundingBox:
+  def top(): Float = element.y + element.margin.top + (element.border.width / 2F)
+  def right(): Float = element.x + element.width - element.margin.right - (element.border.width / 2F)
+  def bottom(): Float = element.y + element.height - element.margin.bottom - (element.border.width / 2F)
+  def left(): Float = element.x + element.margin.left + (element.border.width / 2F)
+
+
+case class MarginBoundingBox(
+  element: Element
+) extends BoundingBox:
+  def top(): Float = element.y
+  def left(): Float = element.x
+  def bottom(): Float = element.y + element.height
+  def right(): Float = element.x + element.width
+
+case class PaddingBoundingBox(
+  element: Element
+) extends BoundingBox:
+  def top(): Float = element.y + element.margin.top + element.border.width + element.padding.top
+  def right(): Float = element.x + element.width - element.margin.right - element.border.width - element.padding.right
+  def bottom(): Float = element.y + element.height - element.margin.bottom - element.border.width - element.padding.bottom
+  def left(): Float = element.x + element.margin.left + element.border.width + element.padding.left
+
 abstract class Element:
   def x: Float
   def y: Float
@@ -94,94 +129,69 @@ abstract class Element:
   def contentWidth(): Float = width - margin.left - border.width - padding.left - padding.right - border.width - margin.right
   def contentHeight(): Float = height - margin.top - border.width - padding.top - padding.bottom - border.width - margin.bottom
 
-  def borderTopY(): Float = y + margin.top + (border.width / 2F)
-  def borderRightX(): Float = x + width - margin.right - (border.width / 2F)
-  def borderBottomY(): Float = y + height - margin.bottom - (border.width / 2F)
-  def borderLeftX(): Float = x + margin.left + (border.width / 2F)
-
-  def borderTopLeft(): Position = Position(borderLeftX(), borderTopY())
-  def borderTopRight(): Position = Position(borderRightX(), borderTopY())
-  def borderBottomRight(): Position = Position(borderRightX(), borderBottomY())
-  def borderBottomLeft(): Position = Position(borderLeftX(), borderBottomY())
-
-  def marginTopY(): Float = y
-  def marginRightX(): Float = x
-  def marginBottomY(): Float = y + height
-  def marginLeftX(): Float = x + width
-
-  def marginTopLeft(): Position = Position(marginLeftX(), marginTopY())
-  def marginTopRight(): Position = Position(marginRightX(), marginTopY())
-  def marginBottomLeft(): Position = Position(marginLeftX(), marginBottomY())
-  def marginBottomRight(): Position = Position(marginRightX(), marginBottomY())
-
-  def paddingTopY(): Float = y + margin.top + border.width + padding.top
-  def paddingRightX(): Float = x + width - margin.right - border.width - padding.right
-  def paddingBottomY(): Float = y + height - margin.bottom - border.width - padding.bottom
-  def paddingLeftX(): Float = x + margin.left + border.width + padding.left
+  def borderBoundingBox = BorderBoundingBox(this)
+  def marginBoundingBox = MarginBoundingBox(this)
+  def paddingBoundingBox = PaddingBoundingBox(this)
 
   def renderBorderTop()(using gc: GraphicsContext): Unit =
-    val topLeft = borderTopLeft()
-    val topRight = borderTopRight()
-    renderLine(topLeft.x, topLeft.y, topRight.x, topRight.y, border.color, border.width, gc)
+    renderBoundingBoxTop(borderBoundingBox, border, gc)
 
   def renderBorderRight()(using gc: GraphicsContext): Unit =
-    val topRight = borderTopRight()
-    val bottomRight = borderBottomRight()
-    renderLine(topRight.x, topRight.y, bottomRight.x, bottomRight.y, border.color, border.width, gc)
+    renderBoundingBoxRight(borderBoundingBox, border, gc)
 
   def renderBorderBottom()(using gc: GraphicsContext): Unit =
-    val bottomLeft = borderBottomLeft()
-    val bottomRight = borderBottomRight()
-    renderLine(bottomLeft.x, bottomLeft.y, bottomRight.x, bottomRight.y, border.color, border.width, gc)
+    renderBoundingBoxBottom(borderBoundingBox, border, gc)
 
   def renderBorderLeft()(using gc: GraphicsContext): Unit =
-    val topLeft = borderTopLeft()
-    val bottomLeft = borderBottomLeft()
-    renderLine(topLeft.x, topLeft.y, bottomLeft.x, bottomLeft.y, border.color, border.width, gc)
+    renderBoundingBoxLeft(borderBoundingBox, border, gc)
 
   def renderDebugMarginBorderTop()(using gc: GraphicsContext): Unit =
-    val topLeft = marginTopLeft()
-    val topRight = marginTopRight()
-    renderLine(topLeft.x, topLeft.y, topRight.x, topRight.y, Color.AQUA, 1F, List(5d, 5d), gc)
+    renderBoundingBoxTop(marginBoundingBox, Color.AQUA, 1F, List(5d, 5d), gc)
 
   def renderDebugMarginBorderRight()(using gc: GraphicsContext): Unit =
-    val topRight = marginTopRight()
-    val bottomRight = marginBottomRight()
-    renderLine(topRight.x, topRight.y, bottomRight.x, bottomRight.y, Color.AQUA, 1F, List(5d, 5d), gc)
+    renderBoundingBoxRight(marginBoundingBox, Color.AQUA, 1F, List(5d, 5d), gc)
 
   def renderDebugMarginBorderBottom()(using gc: GraphicsContext): Unit =
-    val bottomLeft = marginBottomLeft()
-    val bottomRight = marginBottomRight()
-    renderLine(bottomLeft.x, bottomLeft.y, bottomRight.x, bottomRight.y, Color.AQUA, 1F, List(5d, 5d), gc)
+    renderBoundingBoxBottom(marginBoundingBox, Color.AQUA, 1F, List(5d, 5d), gc)
 
   def renderDebugMarginBorderLeft()(using gc: GraphicsContext): Unit =
-    val topLeft = marginTopLeft()
-    val bottomLeft = marginBottomLeft()
-    renderLine(topLeft.x, topLeft.y, bottomLeft.x, bottomLeft.y, Color.AQUA, 1F, List(5d, 5d), gc)
+    renderBoundingBoxLeft(marginBoundingBox, Color.AQUA, 1F, List(5d, 5d), gc)
 
   def renderDebugPaddingBorderTop()(using gc: GraphicsContext): Unit =
-    val startX = paddingLeftX()
-    val startY = paddingTopY()
-    val endX = paddingRightX()
-    renderLine(startX, startY, endX, startY, Color.PINK, 1F, List(5d, 5d), gc)
+    renderBoundingBoxTop(paddingBoundingBox, Color.PINK, 1F, List(5d, 5d), gc)
 
   def renderDebugPaddingBorderRight()(using gc: GraphicsContext): Unit =
-    val startY = paddingTopY()
-    val endX = paddingRightX()
-    val endY = paddingBottomY()
-    renderLine(endX, startY, endX, endY, Color.PINK, 1F, List(5d, 5d), gc)
+    renderBoundingBoxRight(paddingBoundingBox, Color.PINK, 1F, List(5d, 5d), gc)
 
   def renderDebugPaddingBorderBottom()(using gc: GraphicsContext): Unit =
-    val startX = paddingLeftX()
-    val endX = paddingRightX()
-    val endY = paddingBottomY()
-    renderLine(startX, endY, endX, endY, Color.PINK, 1F, List(5d, 5d), gc)
+    renderBoundingBoxBottom(paddingBoundingBox, Color.PINK, 1F, List(5d, 5d), gc)
 
   def renderDebugPaddingBorderLeft()(using gc: GraphicsContext): Unit =
-    val startX = paddingLeftX()
-    val startY = paddingTopY()
-    val endY = paddingBottomY()
-    renderLine(startX, startY, startX, endY, Color.PINK, 1F, List(5d, 5d), gc)
+    renderBoundingBoxLeft(paddingBoundingBox, Color.PINK, 1F, List(5d, 5d), gc)
+
+  private def renderBoundingBoxTop(boundingBox: BoundingBox, border: Border, gc: GraphicsContext): Unit =
+    renderBoundingBoxTop(boundingBox, border.color, border.width, List.empty, gc)
+
+  private def renderBoundingBoxRight(boundingBox: BoundingBox, border: Border, gc: GraphicsContext): Unit =
+    renderBoundingBoxRight(boundingBox, border.color, border.width, List.empty, gc)
+
+  private def renderBoundingBoxBottom(boundingBox: BoundingBox, border: Border, gc: GraphicsContext): Unit =
+    renderBoundingBoxBottom(boundingBox, border.color, border.width, List.empty, gc)
+
+  private def renderBoundingBoxLeft(boundingBox: BoundingBox, border: Border, gc: GraphicsContext): Unit =
+    renderBoundingBoxLeft(boundingBox, border.color, border.width, List.empty, gc)
+
+  private def renderBoundingBoxTop(boundingBox: BoundingBox, color: Color, width: Float, pattern: List[Double], gc: GraphicsContext): Unit =
+    renderLine(boundingBox.topLeft().x, boundingBox.topLeft().y, boundingBox.topRight().x, boundingBox.topRight().y, color, width, pattern, gc)
+
+  private def renderBoundingBoxRight(boundingBox: BoundingBox, color: Color, width: Float, pattern: List[Double], gc: GraphicsContext): Unit =
+    renderLine(boundingBox.topRight().x, boundingBox.topRight().y, boundingBox.bottomRight().x, boundingBox.bottomRight().y, color, width, pattern, gc)
+
+  private def renderBoundingBoxBottom(boundingBox: BoundingBox, color: Color, width: Float, pattern: List[Double], gc: GraphicsContext): Unit =
+    renderLine(boundingBox.bottomLeft().x, boundingBox.bottomLeft().y, boundingBox.bottomRight().x, boundingBox.bottomRight().y, color, width, pattern, gc)
+
+  private def renderBoundingBoxLeft(boundingBox: BoundingBox, color: Color, width: Float, pattern: List[Double], gc: GraphicsContext): Unit =
+    renderLine(boundingBox.topLeft().x, boundingBox.topLeft().y, boundingBox.bottomLeft().x, boundingBox.bottomLeft().y, color, width, pattern, gc)
 
   private def renderLine(startX: Float, startY: Float, endX: Float, endY: Float, color: Color, strokeWidth: Float, gc: GraphicsContext): Unit =
     renderLine(startX, startY, endX, endY, color, strokeWidth,  List.empty, gc)
