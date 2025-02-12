@@ -4,8 +4,10 @@ import scalafx.Includes.*
 import scalafx.scene.Node
 import scalafx.scene.canvas.Canvas
 import scalafx.scene.canvas.GraphicsContext
+import scalafx.scene.layout.VBox
 import scalafx.scene.paint.Color
 import org.slf4j.LoggerFactory
+import scalafx.geometry.Pos
 
 class PreviewViewImpl(val model: PreviewModel) extends PreviewView:
 
@@ -13,10 +15,20 @@ class PreviewViewImpl(val model: PreviewModel) extends PreviewView:
 
   override def view(): Node =
     model.resume.onInvalidate { resume => logger.info("resume: {}", resume) }
-    val canvas = new Canvas(793.7007874F, 1122.519685F)
-    val gc = canvas.getGraphicsContext2D()
-    renderPage(gc)
-    canvas
+    val pages = List(
+      Data().borderTestTemplate(),
+      Data().borderTestTemplate()
+    )
+    val canvases = pages.map(page =>
+      val result = new Canvas(793.7007874F, 1122.519685F)
+      val gc = result.getGraphicsContext2D()
+      renderPage(page, gc)
+      result
+    )
+    new VBox:
+      spacing = 10
+      alignment = Pos.CENTER
+      children = canvases
 
   private def renderElement(element: Element, debug: Boolean, gc: GraphicsContext): Unit =
     given GraphicsContext = gc
@@ -39,11 +51,10 @@ class PreviewViewImpl(val model: PreviewModel) extends PreviewView:
     gc.setFill(element.background.color)
     gc.fillRect(element.contentStartX(), element.contentStartY(), element.contentWidth(), element.contentHeight())
 
-  private def renderPage(gc: GraphicsContext): Unit =
+  private def renderPage(page: Page, gc: GraphicsContext): Unit =
     val debug = true
-    val page = Data().borderTestTemplate()
     gc.setFill(Color.WHITE)
-    gc.fillRect(0F, 0F, 793.7007874F, 1122.519685F)
+    gc.fillRect(page.x, page.x, page.width, page.height)
     renderElement(page, debug, gc)
     for row <- page.rows do
       renderElement(row, debug, gc)
