@@ -15,10 +15,7 @@ class PreviewViewImpl(val model: PreviewModel) extends PreviewView:
 
   override def view(): Node =
     model.resume.onInvalidate { resume => logger.info("resume: {}", resume) }
-    val pages = List(
-      Data().borderTestTemplate(),
-      Data().borderTestTemplate()
-    )
+    val pages = List(Data().longPage())
     val canvases = pages.map(page =>
       val result = new Canvas(793.7007874F, 1122.519685F)
       val gc = result.getGraphicsContext2D()
@@ -367,3 +364,57 @@ class Data:
     )
     row2 = row2.copy(columns = List(r2Column1, r2Column2, r2Column3))
     page.copy(rows = List(row1, row2))
+
+  /**
+    * Long page
+    */
+  def longPage(): Page =
+
+    var page =  Page(
+      padding = Padding(50F, 50F, 50F, 50F)
+    )
+
+    var row = Row(
+      x = page.contentStartX(),
+      y = page.contentStartY(),
+      width = page.contentWidth(),
+      height = page.contentHeight()
+    )
+
+    var column = Column (
+      x = page.contentStartX(),
+      y = page.contentStartY(),
+      width = page.contentWidth(),
+      height = page.contentHeight()
+    )
+
+    var prevContent: Content = null
+    val contents = Range.inclusive(1, 36).map(i =>
+      val background = if i % 2 == 0 then Background(Color.rgb(163, 209, 198)) else Background(Color.rgb(179, 216, 168))
+      if(i == 1) then
+        val content = Content(
+          x = column.contentStartX(),
+          y = column.contentStartY(),
+          width = column.contentWidth(),
+          height = 80F,
+          margin = Margin(0F, 0F, 10F, 0F),
+          background = background
+        )
+        prevContent = content
+        content
+      else
+        val content = Content(
+          x = column.contentStartX(),
+          y = prevContent.y + prevContent.height,
+          width = column.contentWidth(),
+          height = 80F,
+          margin = Margin(0F, 0F, 10F, 0F),
+          background = background
+        )
+        prevContent = content
+        content
+    ).toList
+
+    column = column.copy(content = contents)
+    row = row.copy(columns = List(column))
+    page.copy(rows = List(row))
