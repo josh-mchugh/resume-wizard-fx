@@ -8,6 +8,7 @@ import scalafx.scene.layout.VBox
 import scalafx.scene.paint.Color
 import org.slf4j.LoggerFactory
 import scalafx.geometry.Pos
+import scala.compiletime.ops.double
 
 class PreviewViewImpl(val model: PreviewModel) extends PreviewView:
 
@@ -366,55 +367,307 @@ class Data:
     page.copy(rows = List(row1, row2))
 
   /**
-    * Long page
+    * Long page, it's a test to push the contents beyond the Page content max height
     */
   def longPage(): Page =
 
-    var page =  Page(
+    // page root template
+    val root: Template = templateRoot()
+
+    // template map with id as key and template as value
+    val templateMap: collection.mutable.Map[String, Template] = templateById()
+
+    // list of row ids in order
+    val rowIds: List[String] = templateRowIds()
+
+    // map of columns with key being row id and list of column ids in order
+    val columnRowMap: collection.mutable.Map[String, List[String]] = templateColumnByRowIdMap()
+
+    // map of content with key being the column id and list of the content ids in order
+    val contentColumnMap: collection.mutable.Map[String, List[String]] = templateContentByColumnIdMap()
+
+    // create page from root
+    val page: Page = Page(
+      padding = root.padding
+    )
+
+    // max y
+    val maxY = page.paddingBoundingBox.bottomRight().y
+
+    def createRows: (Float, Float, Position) => List[Row] = (parentWidth: Float, parentHeight: Float, startPosition: Position) =>
+      var cursor: Position = startPosition
+      for rowId <- rowIds yield
+        val template = templateMap(rowId)
+        val row = Row(
+          x = cursor.x,
+          y = cursor.y,
+          width = parentWidth,
+          height = if template.height > 0 then template.height else  parentHeight
+        )
+        cursor = row.marginBoundingBox.bottomLeft()
+
+        row.copy(columns = createColumns(rowId, row.width, row.height, Position(row.contentStartX(), row.contentStartY())))
+
+    def createColumns: (String, Float, Float, Position) => List[Column] = (rowId: String, parentWidth: Float, parentHeight: Float, startPosition: Position) =>
+      var cursor: Position = startPosition
+      for columnId <- columnRowMap(rowId) yield
+        val template = templateMap(columnId)
+        val column = Column(
+          x = cursor.x,
+          y = cursor.y,
+          width = parentWidth,
+          height = if template.height > 0 then template.height else parentHeight
+        )
+        cursor = column.marginBoundingBox.bottomLeft()
+
+        column.copy(content = createContent(columnId, column.contentWidth(), column.contentHeight(), Position(column.contentStartX(), column.contentStartY())))
+
+    def createContent: (String, Float, Float, Position) => List[Content] = (columnId: String, parentWidth: Float, parentHeight: Float, startPosition: Position) =>
+      var cursor: Position = startPosition
+      for contentId <- contentColumnMap(columnId) yield
+        if cursor.y > maxY then println("Exceeding max y")
+        val template = templateMap(contentId)
+        val content = Content(
+          x = cursor.x,
+          y = cursor.y,
+          width = parentWidth,
+          height = if template.height > 0 then template.height else parentHeight,
+          margin = template.margin,
+          background = template.background
+        )
+        cursor = content.marginBoundingBox.bottomLeft()
+        content
+
+    page.copy(rows = createRows(page.contentWidth(), page.contentHeight(), Position(page.contentStartX(), page.contentStartY())))
+
+  def templateRoot(): Template =
+    Template(
+      id = "PAGE_ROOT",
+      parentId = None,
+      `type` = TemplateType.Page,
+      height = 0F,
+      order = 0,
       padding = Padding(50F, 50F, 50F, 50F)
     )
 
-    var row = Row(
-      x = page.contentStartX(),
-      y = page.contentStartY(),
-      width = page.contentWidth(),
-      height = page.contentHeight()
+  def templateById(): collection.mutable.Map[String, Template] =
+    val map = collection.mutable.HashMap[String, Template]()
+    templateData().foreach(template => map.addOne(template.id, template))
+    map
+
+  def templateRowIds(): List[String] =
+    templateData()
+      .filter(template => template.`type` == TemplateType.Row)
+      .sortBy(_.order)
+      .map(_.id)
+
+  def templateColumnByRowIdMap(): collection.mutable.Map[String, List[String]] =
+    val map = collection.mutable.HashMap[String, List[String]]()
+    templateData()
+      .filter(template => template.`type` == TemplateType.Column)
+      .groupBy(_.parentId)
+      .foreach((key, values) => map.addOne(key.getOrElse(""), values.sortBy(_.order).map(_.id)))
+    map
+
+  def templateContentByColumnIdMap(): collection.mutable.Map[String, List[String]] =
+    val map = collection.mutable.HashMap[String, List[String]]()
+    templateData()
+      .filter(template => template.`type` == TemplateType.Content)
+      .groupBy(_.parentId)
+      .foreach((key, values) => map.addOne(key.getOrElse(""), values.sortBy(_.order).map(_.id)))
+    map
+
+  def templateData(): List[Template] =
+    List(
+      Template(
+        id = "ROW",
+        parentId = Some("PAGE_ROOT"),
+        `type` = TemplateType.Row,
+        height = 0F,
+        order = 1,
+      ),
+      Template(
+        id = "COLUMN",
+        parentId = Some("ROW"),
+        `type` = TemplateType.Column,
+        height = 0F,
+        order = 1,
+      ),
+      Template(
+        id ="CONTENT_1",
+        parentId = Some("COLUMN"),
+        `type` = TemplateType.Content,
+        height = 80F,
+        order = 1,
+        margin = Margin(0F, 0F, 10F, 0),
+        background = Background(color = Color.rgb(61, 141, 122))
+      ),
+      Template(
+        id ="CONTENT_2",
+        parentId = Some("COLUMN"),
+        `type` = TemplateType.Content,
+        height = 80F,
+        order = 2,
+        margin = Margin(0F, 0F, 10F, 0),
+        background = Background(color = Color.rgb(163, 209, 198))
+      ),
+      Template(
+        id ="CONTENT_3",
+        parentId = Some("COLUMN"),
+        `type` = TemplateType.Content,
+        height = 80F,
+        order = 3,
+        margin = Margin(0F, 0F, 10F, 0),
+        background = Background(color = Color.rgb(61, 141, 122))
+      ),
+      Template(
+        id ="CONTENT_4",
+        parentId = Some("COLUMN"),
+        `type` = TemplateType.Content,
+        height = 80F,
+        order = 4,
+        margin = Margin(0F, 0F, 10F, 0),
+        background = Background(color = Color.rgb(163, 209, 198))
+      ),
+      Template(
+        id ="CONTENT_5",
+        parentId = Some("COLUMN"),
+        `type` = TemplateType.Content,
+        height = 80F,
+        order = 5,
+        margin = Margin(0F, 0F, 10F, 0),
+        background = Background(color = Color.rgb(61, 141, 122))
+      ),
+      Template(
+        id ="CONTENT_6",
+        parentId = Some("COLUMN"),
+        `type` = TemplateType.Content,
+        height = 80F,
+        order = 6,
+        margin = Margin(0F, 0F, 10F, 0),
+        background = Background(color = Color.rgb(163, 209, 198))
+      ),
+      Template(
+        id ="CONTENT_7",
+        parentId = Some("COLUMN"),
+        `type` = TemplateType.Content,
+        height = 80F,
+        order = 7,
+        margin = Margin(0F, 0F, 10F, 0),
+        background = Background(color = Color.rgb(61, 141, 122))
+      ),
+      Template(
+        id ="CONTENT_8",
+        parentId = Some("COLUMN"),
+        `type` = TemplateType.Content,
+        height = 80F,
+        order = 8,
+        margin = Margin(0F, 0F, 10F, 0),
+        background = Background(color = Color.rgb(163, 209, 198))
+      ),
+      Template(
+        id ="CONTENT_9",
+        parentId = Some("COLUMN"),
+        `type` = TemplateType.Content,
+        height = 80F,
+        order = 9,
+        margin = Margin(0F, 0F, 10F, 0),
+        background = Background(color = Color.rgb(61, 141, 122))
+      ),
+      Template(
+        id ="CONTENT_10",
+        parentId = Some("COLUMN"),
+        `type` = TemplateType.Content,
+        height = 80F,
+        order = 10,
+        margin = Margin(0F, 0F, 10F, 0),
+        background = Background(color = Color.rgb(163, 209, 198))
+      ),
+      Template(
+        id ="CONTENT_11",
+        parentId = Some("COLUMN"),
+        `type` = TemplateType.Content,
+        height = 80F,
+        order = 11,
+        margin = Margin(0F, 0F, 10F, 0),
+        background = Background(color = Color.rgb(61, 141, 122))
+      ),
+      Template(
+        id ="CONTENT_12",
+        parentId = Some("COLUMN"),
+        `type` = TemplateType.Content,
+        height = 80F,
+        order = 12,
+        margin = Margin(0F, 0F, 10F, 0),
+        background = Background(color = Color.rgb(163, 209, 198))
+      ),
+      Template(
+        id ="CONTENT_13",
+        parentId = Some("COLUMN"),
+        `type` = TemplateType.Content,
+        height = 80F,
+        order = 13,
+        margin = Margin(0F, 0F, 10F, 0),
+        background = Background(color = Color.rgb(61, 141, 122))
+      ),
+      Template(
+        id ="CONTENT_14",
+        parentId = Some("COLUMN"),
+        `type` = TemplateType.Content,
+        height = 80F,
+        order = 14,
+        margin = Margin(0F, 0F, 10F, 0),
+        background = Background(color = Color.rgb(163, 209, 198))
+      ),
+      Template(
+        id ="CONTENT_15",
+        parentId = Some("COLUMN"),
+        `type` = TemplateType.Content,
+        height = 80F,
+        order = 15,
+        margin = Margin(0F, 0F, 10F, 0),
+        background = Background(color = Color.rgb(61, 141, 122))
+      ),
+      Template(
+        id ="CONTENT_16",
+        parentId = Some("COLUMN"),
+        `type` = TemplateType.Content,
+        height = 80F,
+        order = 16,
+        margin = Margin(0F, 0F, 10F, 0),
+        background = Background(color = Color.rgb(163, 209, 198))
+      ),
+      Template(
+        id ="CONTENT_17",
+        parentId = Some("COLUMN"),
+        `type` = TemplateType.Content,
+        height = 80F,
+        order = 17,
+        margin = Margin(0F, 0F, 10F, 0),
+        background = Background(color = Color.rgb(61, 141, 122))
+      ),
+      Template(
+        id ="CONTENT_18",
+        parentId = Some("COLUMN"),
+        `type` = TemplateType.Content,
+        height = 80F,
+        order = 18,
+        margin = Margin(0F, 0F, 10F, 0),
+        background = Background(color = Color.rgb(163, 209, 198))
+      ),
     )
 
-    var column = Column (
-      x = page.contentStartX(),
-      y = page.contentStartY(),
-      width = page.contentWidth(),
-      height = page.contentHeight()
-    )
+enum TemplateType:
+  case Page, Row, Column, Content
 
-    var prevContent: Content = null
-    val contents = Range.inclusive(1, 36).map(i =>
-      val background = if i % 2 == 0 then Background(Color.rgb(163, 209, 198)) else Background(Color.rgb(179, 216, 168))
-      if(i == 1) then
-        val content = Content(
-          x = column.contentStartX(),
-          y = column.contentStartY(),
-          width = column.contentWidth(),
-          height = 80F,
-          margin = Margin(0F, 0F, 10F, 0F),
-          background = background
-        )
-        prevContent = content
-        content
-      else
-        val content = Content(
-          x = column.contentStartX(),
-          y = prevContent.y + prevContent.height,
-          width = column.contentWidth(),
-          height = 80F,
-          margin = Margin(0F, 0F, 10F, 0F),
-          background = background
-        )
-        prevContent = content
-        content
-    ).toList
-
-    column = column.copy(content = contents)
-    row = row.copy(columns = List(column))
-    page.copy(rows = List(row))
+case class Template(
+  val id: String,
+  val parentId: Option[String],
+  val `type`: TemplateType,
+  val height: Float,
+  val order: Int,
+  val margin: Margin = Margin(),
+  val padding: Padding = Padding(),
+  val border: Border = Border(),
+  val background: Background = Background(),
+)
