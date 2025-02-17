@@ -124,6 +124,19 @@ case class PaddingBoundingBox(
   def bottom(): Float = element.y + element.height - element.margin.bottom - element.border.width - element.padding.bottom
   def left(): Float = element.x + element.margin.left + element.border.width + element.padding.left
 
+object ElementUtil:
+  def contentStartX(x: Float, margin: Margin, padding: Padding, border: Border): Float =
+    x + margin.left + border.width + padding.left
+
+  def contentStartY(y: Float, margin: Margin, padding: Padding, border: Border): Float =
+    y + margin.top + border.width + padding.top
+
+  def contentStartPosition(x: Float, y: Float, margin: Margin, padding: Padding, border: Border): Position =
+    Position(contentStartX(x, margin, padding, border), contentStartY(y, margin, padding, border))
+
+  def contentStartPosition(position: Position, margin: Margin, padding: Padding, border: Border): Position =
+    Position(contentStartX(position.x, margin, padding, border), contentStartY(position.y, margin, padding, border))
+
 abstract class Element:
   def x: Float
   def y: Float
@@ -400,15 +413,20 @@ class Data:
       var cursor: Position = startPosition
       for rowId <- rowIds yield
         val template = templateMap(rowId)
-        val row = Row(
+        val width = parentWidth
+        val height = if template.height > 0 then template.height else  parentHeight
+        val contentStartPosition = ElementUtil.contentStartPosition(cursor, template.margin, template.padding, template.border)
+        val columns = createColumns(rowId, width, height, contentStartPosition)
+
+        cursor = Position(cursor.x + width, cursor.y + height)
+
+        Row(
           x = cursor.x,
           y = cursor.y,
-          width = parentWidth,
-          height = if template.height > 0 then template.height else  parentHeight
+          width = width,
+          height = height,
+          columns = columns
         )
-        cursor = row.marginBoundingBox.bottomLeft()
-
-        row.copy(columns = createColumns(rowId, row.width, row.height, Position(row.contentStartX(), row.contentStartY())))
 
     def createColumns: (String, Float, Float, Position) => List[Column] = (rowId: String, parentWidth: Float, parentHeight: Float, startPosition: Position) =>
       var cursor: Position = startPosition
