@@ -28,7 +28,7 @@ class PreviewViewImpl(val model: PreviewModel) extends PreviewView:
       alignment = Pos.CENTER
       children = canvases
 
-  private def renderElement(element: Element, debug: Boolean, gc: GraphicsContext): Unit =
+  private def renderElement(element: RenderElement, debug: Boolean, gc: GraphicsContext): Unit =
     given GraphicsContext = gc
     if element.border.width > 0F then
       element.renderBorderTop()
@@ -142,6 +142,7 @@ abstract class Element:
   def marginBoundingBox = MarginBoundingBox(this)
   def paddingBoundingBox = PaddingBoundingBox(this)
 
+abstract class RenderElement extends Element:
   def renderBorderTop()(using gc: GraphicsContext): Unit =
     renderBoundingBoxTop(borderBoundingBox, border, gc)
 
@@ -211,6 +212,7 @@ abstract class Element:
     gc.setLineDashes(strokeDashList*)
     gc.strokeLine(startX, startY, endX, endY)
 
+
 case class Page(
   val x: Float = 0F,
   val y: Float = 0F,
@@ -221,7 +223,7 @@ case class Page(
   val border: Border = Border(),
   val background: Background = Background(),
   val rows: List[Row] = List.empty
-) extends Element
+) extends RenderElement
 
 case class Row(
   val x: Float,
@@ -233,7 +235,7 @@ case class Row(
   val border: Border = Border(),
   val background: Background = Background(),
   val columns: List[Column] = List.empty
-) extends Element
+) extends RenderElement
 
 case class Column(
   val x: Float,
@@ -245,7 +247,7 @@ case class Column(
   val border: Border = Border(),
   val background: Background = Background(),
   val content: List[Content] = List.empty
-) extends Element
+) extends RenderElement
 
 case class Content(
   val x: Float,
@@ -256,7 +258,7 @@ case class Content(
   val padding: Padding = Padding(),
   val border: Border = Border(),
   val background: Background = Background(),
-) extends Element
+) extends RenderElement
 
 class Data:
   /**
@@ -418,7 +420,7 @@ class Data:
           width = parentWidth,
           height = if template.height > 0 then template.height else parentHeight
         )
-        cursor = column.marginBoundingBox.bottomLeft()
+        cursor = column.marginBoundingBox.topRight()
 
         column.copy(content = createContent(columnId, column.contentWidth(), column.contentHeight(), Position(column.contentStartX(), column.contentStartY())))
 
