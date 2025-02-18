@@ -16,7 +16,7 @@ class PreviewViewImpl(val model: PreviewModel) extends PreviewView:
 
   override def view(): Node =
     model.resume.onInvalidate { resume => logger.info("resume: {}", resume) }
-    val pages = List(Data().longPage())
+    val pages = Data().longPage()
     val canvases = pages.map(page =>
       val result = new Canvas(793.7007874F, 1122.519685F)
       val gc = result.getGraphicsContext2D()
@@ -384,7 +384,7 @@ class Data:
   /**
     * Long page, it's a test to push the contents beyond the Page content max height
     */
-  def longPage(): Page =
+  def longPage(): List[Page] =
 
     // page root template
     val root: Template = templateRoot()
@@ -393,13 +393,13 @@ class Data:
     val templateMap: collection.mutable.Map[String, Template] = templateById()
 
     // list of row ids in order
-    val rowIds: List[String] = templateRowIds()
+    val rowIds: collection.mutable.Queue[String] = templateRowIds()
 
     // map of columns with key being row id and list of column ids in order
-    val columnRowMap: collection.mutable.Map[String, List[String]] = templateColumnByRowIdMap()
+    val columnRowMap: collection.mutable.Map[String, collection.mutable.Queue[String]] = templateColumnByRowIdMap()
 
     // map of content with key being the column id and list of the content ids in order
-    val contentColumnMap: collection.mutable.Map[String, List[String]] = templateContentByColumnIdMap()
+    val contentColumnMap: collection.mutable.Map[String, collection.mutable.Queue[String]] = templateContentByColumnIdMap()
 
     // create page from root
     val page: Page = Page(
@@ -411,48 +411,86 @@ class Data:
 
     def createRows: (Float, Float, Position) => List[Row] = (parentWidth: Float, parentHeight: Float, startPosition: Position) =>
       var cursor: Position = startPosition
-      for rowId <- rowIds yield
+      var continue: Boolean = true
+
+      val result = collection.mutable.ListBuffer[Row]()
+
+      while
+
+        continue && rowIds.nonEmpty
+
+      do
+
+      //for rowId <- rowIds yield
+        val rowId = rowIds.front
         val template = templateMap(rowId)
         val width = parentWidth
         val height = if template.height > 0 then template.height else  parentHeight
         val contentStartPosition = ElementUtil.contentStartPosition(cursor, template.margin, template.padding, template.border)
         val columns = createColumns(rowId, width, height, contentStartPosition)
+        continue = columns._2
+        if continue then rowIds.dequeue()
 
         val currentCursor = cursor
         cursor = Position(cursor.x, cursor.y + height)
 
-        Row(
+        result += Row(
           x = currentCursor.x,
           y = currentCursor.y,
           width = width,
           height = height,
-          columns = columns
+          columns = columns._1
         )
 
-    def createColumns: (String, Float, Float, Position) => List[Column] = (rowId: String, parentWidth: Float, parentHeight: Float, startPosition: Position) =>
+      result.toList
+
+    def createColumns: (String, Float, Float, Position) => (List[Column], Boolean) = (rowId: String, parentWidth: Float, parentHeight: Float, startPosition: Position) =>
       var cursor: Position = startPosition
-      for columnId <- columnRowMap(rowId) yield
+      var continue: Boolean = true
+
+      val result = collection.mutable.ListBuffer[Column]()
+
+      while
+
+       continue && columnRowMap(rowId).nonEmpty
+
+      do
+
+      //for columnId <- columnRowMap(rowId) yield
+        val columnId = columnRowMap(rowId).front
         val template = templateMap(columnId)
         val width = parentWidth
         val height = if template.height > 0 then template.height else parentHeight
         val contentStartPosition = ElementUtil.contentStartPosition(cursor, template.margin, template.padding, template.border)
         val content = createContent(columnId, width, height, contentStartPosition)
+        continue = content._2
+        if continue then columnRowMap(rowId).dequeue()
 
         val currentCursor = cursor
         cursor = Position(cursor.x, cursor.y + height)
 
-        Column(
+        result += Column(
           x = currentCursor.x,
           y = currentCursor.y,
           width = width,
           height = height,
-          content = content
+          content = content._1
         )
 
-    def createContent: (String, Float, Float, Position) => List[Content] = (columnId: String, parentWidth: Float, parentHeight: Float, startPosition: Position) =>
+      (result.toList, continue)
+
+    def createContent: (String, Float, Float, Position) => (List[Content], Boolean) = (columnId: String, parentWidth: Float, parentHeight: Float, startPosition: Position) =>
       var cursor: Position = startPosition
-      for contentId <- contentColumnMap(columnId) yield
-        if cursor.y > maxY then println("Exceeding max y")
+
+      val result = collection.mutable.ListBuffer[Content]()
+
+      while
+
+        cursor.y < maxY && contentColumnMap(columnId).nonEmpty
+
+      do
+
+        val contentId = contentColumnMap(columnId).dequeue()
         val template = templateMap(contentId)
         val width = parentWidth
         val height = if template.height > 0 then template.height else parentHeight
@@ -460,7 +498,7 @@ class Data:
         val currentCursor = cursor
         cursor = Position(cursor.x, cursor.y + height)
 
-        Content(
+        result += Content(
           x = currentCursor.x,
           y = currentCursor.y,
           width = width,
@@ -469,7 +507,20 @@ class Data:
           background = template.background
         )
 
-    page.copy(rows = createRows(page.contentWidth(), page.contentHeight(), Position(page.contentStartX(), page.contentStartY())))
+      println(s"is the content list empty? ${contentColumnMap(columnId).isEmpty}")
+      (result.toList, contentColumnMap(columnId).isEmpty)
+
+    val result = collection.mutable.ListBuffer[Page]()
+
+    while
+
+      rowIds.nonEmpty
+
+    do
+      println("Looping")
+      result += page.copy(rows = createRows(page.contentWidth(), page.contentHeight(), Position(page.contentStartX(), page.contentStartY())))
+
+    result.toList
 
   def templateRoot(): Template =
     Template(
@@ -486,26 +537,32 @@ class Data:
     templateData().foreach(template => map.addOne(template.id, template))
     map
 
-  def templateRowIds(): List[String] =
-    templateData()
+  def templateRowIds(): collection.mutable.Queue[String] =
+    val rows = templateData()
       .filter(template => template.`type` == TemplateType.Row)
       .sortBy(_.order)
       .map(_.id)
 
-  def templateColumnByRowIdMap(): collection.mutable.Map[String, List[String]] =
-    val map = collection.mutable.HashMap[String, List[String]]()
+    collection.mutable.Queue.from(rows)
+
+  def templateColumnByRowIdMap(): collection.mutable.Map[String, collection.mutable.Queue[String]] =
+    val map = collection.mutable.HashMap[String, collection.mutable.Queue[String]]()
     templateData()
       .filter(template => template.`type` == TemplateType.Column)
       .groupBy(_.parentId)
-      .foreach((key, values) => map.addOne(key.getOrElse(""), values.sortBy(_.order).map(_.id)))
+      .foreach(
+        (key, values) => map.addOne(key.getOrElse(""), collection.mutable.Queue.from(values.sortBy(_.order).map(_.id)))
+      )
     map
 
-  def templateContentByColumnIdMap(): collection.mutable.Map[String, List[String]] =
-    val map = collection.mutable.HashMap[String, List[String]]()
+  def templateContentByColumnIdMap(): collection.mutable.Map[String, collection.mutable.Queue[String]] =
+    val map = collection.mutable.HashMap[String, collection.mutable.Queue[String]]()
     templateData()
       .filter(template => template.`type` == TemplateType.Content)
       .groupBy(_.parentId)
-      .foreach((key, values) => map.addOne(key.getOrElse(""), values.sortBy(_.order).map(_.id)))
+      .foreach(
+        (key, values) => map.addOne(key.getOrElse(""), collection.mutable.Queue.from(values.sortBy(_.order).map(_.id)))
+      )
     map
 
   def templateData(): List[Template] =
