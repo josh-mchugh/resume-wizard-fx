@@ -418,11 +418,12 @@ class Data:
         val contentStartPosition = ElementUtil.contentStartPosition(cursor, template.margin, template.padding, template.border)
         val columns = createColumns(rowId, width, height, contentStartPosition)
 
-        cursor = Position(cursor.x + width, cursor.y + height)
+        val currentCursor = cursor
+        cursor = Position(cursor.x, cursor.y + height)
 
         Row(
-          x = cursor.x,
-          y = cursor.y,
+          x = currentCursor.x,
+          y = currentCursor.y,
           width = width,
           height = height,
           columns = columns
@@ -432,31 +433,41 @@ class Data:
       var cursor: Position = startPosition
       for columnId <- columnRowMap(rowId) yield
         val template = templateMap(columnId)
-        val column = Column(
-          x = cursor.x,
-          y = cursor.y,
-          width = parentWidth,
-          height = if template.height > 0 then template.height else parentHeight
-        )
-        cursor = column.marginBoundingBox.topRight()
+        val width = parentWidth
+        val height = if template.height > 0 then template.height else parentHeight
+        val contentStartPosition = ElementUtil.contentStartPosition(cursor, template.margin, template.padding, template.border)
+        val content = createContent(columnId, width, height, contentStartPosition)
 
-        column.copy(content = createContent(columnId, column.contentWidth(), column.contentHeight(), Position(column.contentStartX(), column.contentStartY())))
+        val currentCursor = cursor
+        cursor = Position(cursor.x, cursor.y + height)
+
+        Column(
+          x = currentCursor.x,
+          y = currentCursor.y,
+          width = width,
+          height = height,
+          content = content
+        )
 
     def createContent: (String, Float, Float, Position) => List[Content] = (columnId: String, parentWidth: Float, parentHeight: Float, startPosition: Position) =>
       var cursor: Position = startPosition
       for contentId <- contentColumnMap(columnId) yield
         if cursor.y > maxY then println("Exceeding max y")
         val template = templateMap(contentId)
-        val content = Content(
-          x = cursor.x,
-          y = cursor.y,
-          width = parentWidth,
-          height = if template.height > 0 then template.height else parentHeight,
+        val width = parentWidth
+        val height = if template.height > 0 then template.height else parentHeight
+
+        val currentCursor = cursor
+        cursor = Position(cursor.x, cursor.y + height)
+
+        Content(
+          x = currentCursor.x,
+          y = currentCursor.y,
+          width = width,
+          height = height,
           margin = template.margin,
           background = template.background
         )
-        cursor = content.marginBoundingBox.bottomLeft()
-        content
 
     page.copy(rows = createRows(page.contentWidth(), page.contentHeight(), Position(page.contentStartX(), page.contentStartY())))
 
