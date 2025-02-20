@@ -44,8 +44,8 @@ class TemplateTransformer(templates: List[Template]):
       val width = request.parentWidth
       val height = if template.height > 0 then template.height else request.parentHeight
       val contentStartPosition = ElementUtil.contentStartPosition(cursor, template.margin, template.padding, template.border)
-      val columns = createColumns(ColumnCreate(rowId, width, height, contentStartPosition))
-      continue = columns._2
+      val continuableResults = createColumns(ColumnCreate(rowId, width, height, contentStartPosition))
+      continue = continuableResults.continue
       if continue then rowIds.dequeue()
 
       result += Row(
@@ -53,14 +53,14 @@ class TemplateTransformer(templates: List[Template]):
         y = cursor.y,
         width = width,
         height = height,
-        columns = columns._1
+        columns = continuableResults.items
       )
 
       cursor = Position(cursor.x, cursor.y + height)
 
     result.toList
 
-  def createColumns(request: ColumnCreate): (List[Column], Boolean) =
+  def createColumns(request: ColumnCreate): ContinuableResults[Column] =
     var cursor: Position = request.start
     var continue: Boolean = true
 
@@ -73,8 +73,8 @@ class TemplateTransformer(templates: List[Template]):
       val width = request.parentWidth
       val height = if template.height > 0 then template.height else request.parentHeight
       val contentStartPosition = ElementUtil.contentStartPosition(cursor, template.margin, template.padding, template.border)
-      val content = createContent(ContentCreate(columnId, width, height, contentStartPosition))
-      continue = content._2
+      val continuableResults = createContent(ContentCreate(columnId, width, height, contentStartPosition))
+      continue = continuableResults.continue
       if continue then columnMap(request.parentRowId).dequeue()
 
       result += Column(
@@ -82,14 +82,14 @@ class TemplateTransformer(templates: List[Template]):
         y = cursor.y,
         width = width,
         height = height,
-        content = content._1
+        content = continuableResults.items
       )
 
       cursor = Position(cursor.x, cursor.y + height)
 
-    (result.toList, continue)
+    ContinuableResults(result.toList, continue)
 
-  def createContent(request: ContentCreate): (List[Content], Boolean) =
+  def createContent(request: ContentCreate): ContinuableResults[Content] =
     var cursor: Position = request.start
 
     val result = ListBuffer[Content]()
@@ -112,7 +112,7 @@ class TemplateTransformer(templates: List[Template]):
 
       cursor = Position(cursor.x, cursor.y + height)
 
-    (result.toList, contentMap(request.parentColumnId).isEmpty)
+    ContinuableResults(result.toList, contentMap(request.parentColumnId).isEmpty)
 
   def templateRoot(templates: List[Template]): Template =
     templates.find(template => template.parentId == None)
@@ -157,4 +157,9 @@ case class RowCreate(
   val parentWidth: Float,
   val parentHeight: Float,
   val start: Position
+)
+
+case class ContinuableResults[T](
+  val items: List[T],
+  val continue: Boolean
 )
