@@ -22,73 +22,72 @@ class TemplateTransformer(templates: List[Template]):
   val maxY = page.paddingBoundingBox.bottomRight().y
 
   def transform(): List[Page] =
-
-    def createRows: (Float, Float, Position) => List[Row] = (parentWidth: Float, parentHeight: Float, startPosition: Position) =>
-      var cursor: Position = startPosition
-      var continue: Boolean = true
-
-      val result = ListBuffer[Row]()
-
-      while continue && rowIds.nonEmpty do
-
-        val rowId = rowIds.front
-        val template = templateMap(rowId)
-        val width = parentWidth
-        val height = if template.height > 0 then template.height else  parentHeight
-        val contentStartPosition = ElementUtil.contentStartPosition(cursor, template.margin, template.padding, template.border)
-        val columns = createColumns(rowId, width, height, contentStartPosition)
-        continue = columns._2
-        if continue then rowIds.dequeue()
-
-        val currentCursor = cursor
-        cursor = Position(cursor.x, cursor.y + height)
-
-        result += Row(
-          x = currentCursor.x,
-          y = currentCursor.y,
-          width = width,
-          height = height,
-          columns = columns._1
-        )
-
-      result.toList
-
-    def createColumns: (String, Float, Float, Position) => (List[Column], Boolean) = (rowId: String, parentWidth: Float, parentHeight: Float, startPosition: Position) =>
-      var cursor: Position = startPosition
-      var continue: Boolean = true
-
-      val result = ListBuffer[Column]()
-
-      while continue && columnMap(rowId).nonEmpty do
-
-        val columnId = columnMap(rowId).front
-        val template = templateMap(columnId)
-        val width = parentWidth
-        val height = if template.height > 0 then template.height else parentHeight
-        val contentStartPosition = ElementUtil.contentStartPosition(cursor, template.margin, template.padding, template.border)
-        val content = createContent(ContentCreate(columnId, width, height, contentStartPosition))
-        continue = content._2
-        if continue then columnMap(rowId).dequeue()
-
-        val currentCursor = cursor
-        cursor = Position(cursor.x, cursor.y + height)
-
-        result += Column(
-          x = currentCursor.x,
-          y = currentCursor.y,
-          width = width,
-          height = height,
-          content = content._1
-        )
-
-      (result.toList, continue)
-
     val result = ListBuffer[Page]()
 
     while rowIds.nonEmpty do
-      result += page.copy(rows = createRows(page.contentWidth(), page.contentHeight(), Position(page.contentStartX(), page.contentStartY())))
+      val start = Position(page.contentStartX(), page.contentStartY())
+      val request = RowCreate(page.contentWidth(), page.contentHeight(), start)
+      result += page.copy(rows = createRows(request))
 
     result.toList
+
+  def createRows(request: RowCreate): List[Row] =
+    var cursor: Position = request.start
+    var continue: Boolean = true
+
+    val result = ListBuffer[Row]()
+
+    while continue && rowIds.nonEmpty do
+
+      val rowId = rowIds.front
+      val template = templateMap(rowId)
+      val width = request.parentWidth
+      val height = if template.height > 0 then template.height else request.parentHeight
+      val contentStartPosition = ElementUtil.contentStartPosition(cursor, template.margin, template.padding, template.border)
+      val columns = createColumns(ColumnCreate(rowId, width, height, contentStartPosition))
+      continue = columns._2
+      if continue then rowIds.dequeue()
+
+      result += Row(
+        x = cursor.x,
+        y = cursor.y,
+        width = width,
+        height = height,
+        columns = columns._1
+      )
+
+      cursor = Position(cursor.x, cursor.y + height)
+
+    result.toList
+
+  def createColumns(request: ColumnCreate): (List[Column], Boolean) =
+    var cursor: Position = request.start
+    var continue: Boolean = true
+
+    val result = ListBuffer[Column]()
+
+    while continue && columnMap(request.parentRowId).nonEmpty do
+
+      val columnId = columnMap(request.parentRowId).front
+      val template = templateMap(columnId)
+      val width = request.parentWidth
+      val height = if template.height > 0 then template.height else request.parentHeight
+      val contentStartPosition = ElementUtil.contentStartPosition(cursor, template.margin, template.padding, template.border)
+      val content = createContent(ContentCreate(columnId, width, height, contentStartPosition))
+      continue = content._2
+      if continue then columnMap(request.parentRowId).dequeue()
+
+      result += Column(
+        x = cursor.x,
+        y = cursor.y,
+        width = width,
+        height = height,
+        content = content._1
+      )
+
+      cursor = Position(cursor.x, cursor.y + height)
+
+    (result.toList, continue)
 
   def createContent(request: ContentCreate): (List[Content], Boolean) =
     var cursor: Position = request.start
@@ -142,6 +141,19 @@ class TemplateTransformer(templates: List[Template]):
 
 case class ContentCreate(
   val parentColumnId: String,
+  val parentWidth: Float,
+  val parentHeight: Float,
+  val start: Position
+)
+
+case class ColumnCreate(
+  val parentRowId: String,
+  val parentWidth: Float,
+  val parentHeight: Float,
+  val start: Position
+)
+
+case class RowCreate(
   val parentWidth: Float,
   val parentHeight: Float,
   val start: Position
