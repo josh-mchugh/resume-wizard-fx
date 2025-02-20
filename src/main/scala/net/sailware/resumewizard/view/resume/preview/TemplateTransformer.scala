@@ -9,20 +9,11 @@ object TemplateTransformer:
 
   def transform(templates: List[Template]): List[Page] =
 
-    // page root template
     val root: Template = templateRoot(templates)
-
-    // template map with id as key and template as value
-    val templateMap: Map[String, Template] = templateById(templates)
-
-    // list of row ids in order
-    val rowIds: Queue[String] = templateRowIds(templates)
-
-    // map of columns with key being row id and list of column ids in order
-    val columnRowMap: Map[String, Queue[String]] = templateColumnByRowIdMap(templates)
-
-    // map of content with key being the column id and list of the content ids in order
-    val contentColumnMap: Map[String, Queue[String]] = templateContentByColumnIdMap(templates)
+    val templateMap: Map[String, Template] = templatesGroupById(templates)
+    val rowIds: Queue[String] = templateIds(templates, TemplateType.Row)
+    val columnMap: Map[String, Queue[String]] = templateIdsGroupByParentId(templates, TemplateType.Column)
+    val contentMap: Map[String, Queue[String]] = templateIdsGroupByParentId(templates, TemplateType.Content)
 
     // create page from root
     val page: Page = Page(
@@ -68,16 +59,16 @@ object TemplateTransformer:
 
       val result = ListBuffer[Column]()
 
-      while continue && columnRowMap(rowId).nonEmpty do
+      while continue && columnMap(rowId).nonEmpty do
 
-        val columnId = columnRowMap(rowId).front
+        val columnId = columnMap(rowId).front
         val template = templateMap(columnId)
         val width = parentWidth
         val height = if template.height > 0 then template.height else parentHeight
         val contentStartPosition = ElementUtil.contentStartPosition(cursor, template.margin, template.padding, template.border)
         val content = createContent(columnId, width, height, contentStartPosition)
         continue = content._2
-        if continue then columnRowMap(rowId).dequeue()
+        if continue then columnMap(rowId).dequeue()
 
         val currentCursor = cursor
         cursor = Position(cursor.x, cursor.y + height)
@@ -97,9 +88,9 @@ object TemplateTransformer:
 
       val result = ListBuffer[Content]()
 
-      while cursor.y < maxY && contentColumnMap(columnId).nonEmpty do
+      while cursor.y < maxY && contentMap(columnId).nonEmpty do
 
-        val contentId = contentColumnMap(columnId).dequeue()
+        val contentId = contentMap(columnId).dequeue()
         val template = templateMap(contentId)
         val width = parentWidth
         val height = if template.height > 0 then template.height else parentHeight
@@ -116,7 +107,7 @@ object TemplateTransformer:
           background = template.background
         )
 
-      (result.toList, contentColumnMap(columnId).isEmpty)
+      (result.toList, contentMap(columnId).isEmpty)
 
     val result = ListBuffer[Page]()
 
@@ -129,35 +120,23 @@ object TemplateTransformer:
     templates.find(template => template.parentId == None)
       .getOrElse(throw new Exception("Templates must have a root page node"))
 
-  def templateById(templates: List[Template]): Map[String, Template] =
-    val map = HashMap[String, Template]()
-    templates.foreach(template => map.addOne(template.id, template))
-    map
-
-  def templateRowIds(templates: List[Template]): Queue[String] =
+  def templateIds(templates: List[Template], `type`: TemplateType): Queue[String] =
     val rows = templates
-      .filter(template => template.`type` == TemplateType.Row)
+      .filter(_.`type` == `type`)
       .sortBy(_.order)
       .map(_.id)
 
     Queue.from(rows)
 
-  def templateColumnByRowIdMap(templates: List[Template]): Map[String, Queue[String]] =
-    val map = HashMap[String, Queue[String]]()
-    templates
-      .filter(template => template.`type` == TemplateType.Column)
-      .groupBy(_.parentId)
-      .foreach(
-        (key, values) => map.addOne(key.getOrElse(""), Queue.from(values.sortBy(_.order).map(_.id)))
-      )
+  def templatesGroupById(templates: List[Template]): Map[String, Template] =
+    val map = HashMap[String, Template]()
+    templates.foreach(template => map.addOne(template.id, template))
     map
 
-  def templateContentByColumnIdMap(templates: List[Template]): Map[String, Queue[String]] =
+  def templateIdsGroupByParentId(templates: List[Template], `type`: TemplateType): Map[String, Queue[String]] =
     val map = HashMap[String, Queue[String]]()
     templates
-      .filter(template => template.`type` == TemplateType.Content)
+      .filter(_.`type` == `type`)
       .groupBy(_.parentId)
-      .foreach(
-        (key, values) => map.addOne(key.getOrElse(""), Queue.from(values.sortBy(_.order).map(_.id)))
-      )
+      .foreach((key, values) => map(key.getOrElse("")) = Queue.from(values.sortBy(_.order).map(_.id)))
     map
