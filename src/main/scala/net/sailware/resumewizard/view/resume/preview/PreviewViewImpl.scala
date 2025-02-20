@@ -384,7 +384,7 @@ class Data:
   /**
     * Long page, it's a test to push the contents beyond the Page content max height
     */
-  def longPage(): List[Page] = TemplateTransformer.transform(TemplateFactory.alternatingGreen18())
+  def longPage(): List[Page] = TemplateTransformer(TemplateFactory.alternatingGreen18()).transform()
 
 enum TemplateType:
   case Page, Row, Column, Content
