@@ -386,17 +386,41 @@ class Data:
     */
   def longPage(): List[Page] = TemplateTransformer(TemplateFactory.alternatingGreen18()).transform()
 
-enum TemplateType:
-  case Page, Row, Column, Content
+enum SectionType:
+  case Row, Column, Content
 
-case class Template(
+case class SectionTemplate(
   val id: String,
   val parentId: Option[String],
-  val `type`: TemplateType,
+  val `type`: SectionType,
   val height: Float,
   val order: Int,
   val margin: Margin = Margin(),
   val padding: Padding = Padding(),
   val border: Border = Border(),
   val background: Background = Background(),
+)
+
+case class PageTemplate(
+  val width: Float,
+  val height: Float,
+  val margin: Margin = Margin(),
+  val padding: Padding = Padding(),
+  val border: Border = Border(),
+  val background: Background = Background(),
+)
+
+object PageTemplate:
+  def A4(width: Float = 793.7007874F, height: Float = 1122.519685F, margin: Margin = Margin(), padding: Padding = Padding(), border: Border = Border()): PageTemplate =
+    PageTemplate(width, height, margin, padding, border)
+
+case class Palette()
+
+case class TypeFaces()
+
+case class LayoutTemplate(
+  val page: PageTemplate,
+  val sections: List[SectionTemplate],
+  val typeFaces: TypeFaces = TypeFaces(),
+  val palette: Palette = Palette()
 )
