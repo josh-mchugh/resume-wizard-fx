@@ -24,7 +24,7 @@ class TemplateTransformer(layout: LayoutTemplate):
     val result = ListBuffer[Page]()
 
     while rowIds.nonEmpty do
-      val request = RowCreate(page.contentWidth(), page.contentHeight(), page.contentStartPosition())
+      val request = RowCreate(page.contentWidth(), page.contentHeight(), ElementUtil.contentStartPosition(page))
       result += page.copy(rows = createRows(request))
 
     result.toList
