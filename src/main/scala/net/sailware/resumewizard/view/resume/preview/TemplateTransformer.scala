@@ -24,8 +24,7 @@ class TemplateTransformer(layout: LayoutTemplate):
     val result = ListBuffer[Page]()
 
     while rowIds.nonEmpty do
-      val start = Position(page.contentStartX(), page.contentStartY())
-      val request = RowCreate(page.contentWidth(), page.contentHeight(), start)
+      val request = RowCreate(page.contentWidth(), page.contentHeight(), page.contentStartPosition())
       result += page.copy(rows = createRows(request))
 
     result.toList
@@ -48,8 +47,7 @@ class TemplateTransformer(layout: LayoutTemplate):
       if continue then rowIds.dequeue()
 
       result += Row(
-        x = cursor.x,
-        y = cursor.y,
+        position = cursor,
         width = width,
         height = height,
         columns = continuableResults.items
@@ -77,8 +75,7 @@ class TemplateTransformer(layout: LayoutTemplate):
       if continue then columnMap(request.parentRowId).dequeue()
 
       result += Column(
-        x = cursor.x,
-        y = cursor.y,
+        position = cursor,
         width = width,
         height = height,
         content = continuableResults.items
@@ -101,8 +98,7 @@ class TemplateTransformer(layout: LayoutTemplate):
       val height = if section.height > 0 then section.height else request.parentHeight
 
       result += Content(
-        x = cursor.x,
-        y = cursor.y,
+        position = cursor,
         width = width,
         height = height,
         margin = section.margin,

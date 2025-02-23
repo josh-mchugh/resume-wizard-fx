@@ -47,12 +47,12 @@ class PreviewViewImpl(val model: PreviewModel) extends PreviewView:
       element.renderDebugPaddingBorderLeft()
 
     gc.setFill(element.background.color)
-    gc.fillRect(element.contentStartX(), element.contentStartY(), element.contentWidth(), element.contentHeight())
+    gc.fillRect(element.contentStartPosition().x, element.contentStartPosition().y, element.contentWidth(), element.contentHeight())
 
   private def renderPage(page: Page, gc: GraphicsContext): Unit =
     val debug = true
     gc.setFill(Color.WHITE)
-    gc.fillRect(page.x, page.x, page.width, page.height)
+    gc.fillRect(page.position.x, page.position.x, page.width, page.height)
     renderElement(page, debug, gc)
     for row <- page.rows do
       renderElement(row, debug, gc)
@@ -102,27 +102,27 @@ sealed abstract class BoundingBox:
 case class BorderBoundingBox(
   element: Element
 ) extends BoundingBox:
-  def top(): Float = element.y + element.margin.top + (element.border.width / 2F)
-  def right(): Float = element.x + element.width - element.margin.right - (element.border.width / 2F)
-  def bottom(): Float = element.y + element.height - element.margin.bottom - (element.border.width / 2F)
-  def left(): Float = element.x + element.margin.left + (element.border.width / 2F)
+  def top(): Float = element.position.y + element.margin.top + (element.border.width / 2F)
+  def right(): Float = element.position.x + element.width - element.margin.right - (element.border.width / 2F)
+  def bottom(): Float = element.position.y + element.height - element.margin.bottom - (element.border.width / 2F)
+  def left(): Float = element.position.x + element.margin.left + (element.border.width / 2F)
 
 
 case class MarginBoundingBox(
   element: Element
 ) extends BoundingBox:
-  def top(): Float = element.y
-  def left(): Float = element.x
-  def bottom(): Float = element.y + element.height
-  def right(): Float = element.x + element.width
+  def top(): Float = element.position.y
+  def left(): Float = element.position.x
+  def bottom(): Float = element.position.y + element.height
+  def right(): Float = element.position.x + element.width
 
 case class PaddingBoundingBox(
   element: Element
 ) extends BoundingBox:
-  def top(): Float = element.y + element.margin.top + element.border.width + element.padding.top
-  def right(): Float = element.x + element.width - element.margin.right - element.border.width - element.padding.right
-  def bottom(): Float = element.y + element.height - element.margin.bottom - element.border.width - element.padding.bottom
-  def left(): Float = element.x + element.margin.left + element.border.width + element.padding.left
+  def top(): Float = element.position.y + element.margin.top + element.border.width + element.padding.top
+  def right(): Float = element.position.x + element.width - element.margin.right - element.border.width - element.padding.right
+  def bottom(): Float = element.position.y + element.height - element.margin.bottom - element.border.width - element.padding.bottom
+  def left(): Float = element.position.x + element.margin.left + element.border.width + element.padding.left
 
 object ElementUtil:
   def contentStartX(x: Float, margin: Margin, padding: Padding, border: Border): Float =
@@ -138,16 +138,14 @@ object ElementUtil:
     Position(contentStartX(position.x, margin, padding, border), contentStartY(position.y, margin, padding, border))
 
 abstract class Element:
-  def x: Float
-  def y: Float
+  def position: Position
   def width: Float
   def height: Float
   def margin: Margin
   def padding: Padding
   def border: Border
   def background: Background
-  def contentStartX(): Float = x + margin.left + border.width + padding.left
-  def contentStartY(): Float = y + margin.top + border.width + padding.top
+  def contentStartPosition(): Position = ElementUtil.contentStartPosition(position, margin, padding, border)
   def contentWidth(): Float = width - margin.left - border.width - padding.left - padding.right - border.width - margin.right
   def contentHeight(): Float = height - margin.top - border.width - padding.top - padding.bottom - border.width - margin.bottom
 
@@ -225,10 +223,8 @@ abstract class RenderElement extends Element:
     gc.setLineDashes(strokeDashList*)
     gc.strokeLine(startX, startY, endX, endY)
 
-
 case class Page(
-  val x: Float = 0F,
-  val y: Float = 0F,
+  val position: Position = Position(0F, 0F),
   val width: Float = 793.7007874F,
   val height: Float = 1122.519685F,
   val margin: Margin = Margin(),
@@ -239,8 +235,7 @@ case class Page(
 ) extends RenderElement
 
 case class Row(
-  val x: Float,
-  val y: Float,
+  val position: Position,
   val width: Float,
   val height: Float,
   val margin: Margin = Margin(),
@@ -251,8 +246,7 @@ case class Row(
 ) extends RenderElement
 
 case class Column(
-  val x: Float,
-  val y: Float,
+  val position: Position,
   val width: Float,
   val height: Float,
   val margin: Margin = Margin(),
@@ -263,8 +257,7 @@ case class Column(
 ) extends RenderElement
 
 case class Content(
-  val x: Float,
-  val y: Float,
+  val position: Position,
   val width: Float,
   val height: Float,
   val margin: Margin = Margin(),
@@ -292,31 +285,28 @@ class Data:
     val page = Page(
       padding = Padding(50F, 50F, 100F, 50F),
     )
+    val pageContentPosition = page.contentStartPosition()
     var row1 = Row(
-      x = page.contentStartX(),
-      y = page.contentStartY(),
+      position = page.contentStartPosition(),
       width = page.contentWidth(),
       height = 50F,
     )
     val r1Column1 = Column(
-      x = row1.contentStartX(),
-      y = row1.contentStartY(),
+      position = row1.contentStartPosition(),
       width = row1.contentWidth() / 3,
       height = row1.contentHeight(),
       margin = Margin(0F, 15F, 0F, 0F),
       background = Background(Color.Gray)
     )
     var r1Column2 = Column(
-      x = row1.contentStartX() + row1.contentWidth() / 3,
-      y = row1.contentStartY(),
+      position = Position(row1.contentStartPosition().x + row1.contentWidth() / 3, row1.contentStartPosition().y),
       width = row1.contentWidth() / 3,
       height = row1.contentHeight(),
       margin = Margin(0F, 15F, 0F, 15F),
       background = Background(Color.Gray)
     )
     var r1C2Content = Content(
-      x = r1Column2.contentStartX(),
-      y = r1Column2.contentStartY(),
+      position = r1Column2.contentStartPosition(),
       width = r1Column2.contentWidth() / 2,
       height = 35F,
       margin = Margin(5F, 0F, 0F, 5F),
@@ -324,8 +314,7 @@ class Data:
     )
     r1Column2 = r1Column2.copy(content = List(r1C2Content))
     val r1Column3 = Column(
-      x = row1.contentStartX() + row1.contentWidth() / 3 * 2,
-      y = row1.contentStartY(),
+      position = Position(row1.contentStartPosition().x + row1.contentWidth() / 3 * 2, row1.contentStartPosition().y),
       width = row1.contentWidth() / 3,
       height = row1.contentHeight(),
       margin = Margin(0F, 0F, 0F, 15F),
@@ -333,46 +322,40 @@ class Data:
     )
     row1 = row1.copy(columns = List(r1Column1, r1Column2, r1Column3))
     var row2 = Row(
-      x = page.contentStartX(),
-      y = page.contentStartY() + row1.height,
+      position = Position(page.contentStartPosition().x, page.contentStartPosition().y + row1.height),
       width = page.contentWidth(),
       height = page.contentHeight() - row1.height,
       margin = Margin(10F, 0F, 0F, 0F)
     )
     var r2Column1 = Column(
-      x = row2.contentStartX(),
-      y = row2.contentStartY(),
+      position = row2.contentStartPosition(),
       width = row2.contentWidth() / 3,
       height = row2.contentHeight(),
       margin = Margin(0F, 15F, 0F, 0F),
     )
     val r2C1Content1 = Content(
-      x = r2Column1.contentStartX(),
-      y = r2Column1.contentStartY(),
+      position = r2Column1.contentStartPosition(),
       width = r2Column1.contentWidth(),
       height = r2Column1.contentHeight() / 3,
       margin = Margin(0F, 0F, 10F, 0F),
       background = Background(Color.Gray)
     )
     val r2C1Content2 = Content(
-      x = r2Column1.contentStartX(),
-      y = r2Column1.contentStartY() + r2C1Content1.height,
+      position = Position(r2Column1.contentStartPosition().x, r2Column1.contentStartPosition().y + r2C1Content1.height),
       width = r2Column1.contentWidth(),
       height = 50F,
       background = Background(Color.Gray)
     )
     r2Column1 = r2Column1.copy(content = List(r2C1Content1, r2C1Content2))
     val r2Column2 = Column(
-      x = row2.contentStartX() + row2.contentWidth() / 3,
-      y = row2.contentStartY(),
+      position = Position(row2.contentStartPosition().x + row2.contentWidth() / 3, row2.contentStartPosition().y),
       width = row2.contentWidth() / 3,
       height = row2.contentHeight(),
       margin = Margin(0F, 15F, 0F, 15F),
       background = Background(Color.Gray)
     )
     val r2Column3 = Column(
-      x = row2.contentStartX() + row2.contentWidth() / 3 * 2,
-      y = row2.contentStartY(),
+      position = Position(row2.contentStartPosition().x + row2.contentWidth() / 3 * 2, row2.contentStartPosition().y ),
       width = row2.contentWidth() / 3,
       height = row2.contentHeight(),
       margin = Margin(0F, 0F, 0F, 15F),
