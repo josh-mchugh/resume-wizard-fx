@@ -1,13 +1,14 @@
 package net.sailware.resumewizard.view.resume.preview
 
 import scalafx.Includes.*
+import scalafx.geometry.Pos
 import scalafx.scene.Node
 import scalafx.scene.canvas.Canvas
 import scalafx.scene.canvas.GraphicsContext
 import scalafx.scene.layout.VBox
 import scalafx.scene.paint.Color
+import scalafx.stage.Screen
 import org.slf4j.LoggerFactory
-import scalafx.geometry.Pos
 import scala.compiletime.ops.double
 
 class PreviewViewImpl(val model: PreviewModel) extends PreviewView:
@@ -18,7 +19,7 @@ class PreviewViewImpl(val model: PreviewModel) extends PreviewView:
     model.resume.onInvalidate { resume => logger.info("resume: {}", resume) }
     val pages = Data().longPage()
     val canvases = pages.map(page =>
-      val result = new Canvas(793.7007874F, 1122.519685F)
+      val result = new Canvas(Point(595F).toPx, Point(842F).toPx)
       val gc = result.getGraphicsContext2D()
       renderPage(page, gc)
       result
@@ -61,6 +62,15 @@ class PreviewViewImpl(val model: PreviewModel) extends PreviewView:
         renderElement(column, debug, gc)
         for content <- column.content do
           renderElement(content, debug, gc)
+
+opaque type Point = Float
+
+object Point:
+  def apply(value: Float): Point = value
+
+extension (value: Point)
+  def toFloat: Float = value
+  def toPx: Float = value * (Screen.primary.getDpi().toFloat / 72F)
 
 case class Margin(
   val top: Float = 0F,
@@ -229,8 +239,8 @@ abstract class RenderElement extends Element:
 
 case class Page(
   val position: Position = Position(0F, 0F),
-  val width: Float = 793.7007874F,
-  val height: Float = 1122.519685F,
+  val width: Float = Point(595).toPx,
+  val height: Float = Point(842).toPx,
   val margin: Margin = Margin(),
   val padding: Padding = Padding(),
   val border: Border = Border(),
