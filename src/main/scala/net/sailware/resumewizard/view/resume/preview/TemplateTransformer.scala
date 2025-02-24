@@ -39,7 +39,10 @@ class TemplateTransformer(layout: LayoutTemplate):
 
       val rowId = rowIds.front
       val section = sectionMap(rowId)
-      val width = request.parentWidth
+      val width = section.width match
+        case Some(point) => point.toPx
+        case None => request.parentWidth
+
       val height = if section.height > 0 then section.height else request.parentHeight
       val contentStartPosition = ElementUtil.contentStartPosition(cursor, section.margin, section.padding, section.border)
       val continuableResults = createColumns(ColumnCreate(rowId, width, height, contentStartPosition))

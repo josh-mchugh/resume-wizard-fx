@@ -389,6 +389,7 @@ case class SectionTemplate(
   val id: String,
   val parentId: Option[String],
   val `type`: SectionType,
+  val width: Option[Point] = None,
   val height: Float,
   val order: Int,
   val margin: Margin = Margin(),
