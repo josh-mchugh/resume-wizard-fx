@@ -24,7 +24,8 @@ class TemplateTransformer(layout: LayoutTemplate):
     val result = ListBuffer[Page]()
 
     while rowIds.nonEmpty do
-      val request = RowCreate(page.contentWidth(), page.contentHeight(), ElementUtil.contentStartPosition(page))
+                              //TODO Remove this Point conversion
+      val request = RowCreate(Point(page.contentWidth()), page.contentHeight(), ElementUtil.contentStartPosition(page))
       result += page.copy(rows = createRows(request))
 
     result.toList
@@ -39,10 +40,7 @@ class TemplateTransformer(layout: LayoutTemplate):
 
       val rowId = rowIds.front
       val section = sectionMap(rowId)
-      val width = section.width match
-        case Some(point) => point.toPx
-        case None => request.parentWidth
-
+      val width = sectionWidth(section, request.parentWidth)
       val height = if section.height > 0 then section.height else request.parentHeight
       val contentStartPosition = ElementUtil.contentStartPosition(cursor, section.margin, section.padding, section.border)
       val continuableResults = createColumns(ColumnCreate(rowId, width, height, contentStartPosition))
@@ -70,7 +68,7 @@ class TemplateTransformer(layout: LayoutTemplate):
 
       val columnId = columnMap(request.parentRowId).front
       val section = sectionMap(columnId)
-      val width = request.parentWidth
+      val width = sectionWidth(section, request.parentWidth)
       val height = if section.height > 0 then section.height else request.parentHeight
       val contentStartPosition = ElementUtil.contentStartPosition(cursor, section.margin, section.padding, section.border)
       val continuableResults = createContent(ContentCreate(columnId, width, height, contentStartPosition))
@@ -97,7 +95,7 @@ class TemplateTransformer(layout: LayoutTemplate):
 
       val contentId = contentMap(request.parentColumnId).dequeue()
       val section = sectionMap(contentId)
-      val width = request.parentWidth
+      val width = sectionWidth(section, request.parentWidth)
       val height = if section.height > 0 then section.height else request.parentHeight
 
       result += Content(
@@ -133,22 +131,25 @@ class TemplateTransformer(layout: LayoutTemplate):
       .foreach((key, values) => map(key.getOrElse("")) = Queue.from(values.sortBy(_.order).map(_.id)))
     map
 
+  private def sectionWidth(section: SectionTemplate, parentWidth: Point = Point(0F)): Point =
+    section.width.getOrElse(parentWidth)
+
 case class ContentCreate(
   val parentColumnId: String,
-  val parentWidth: Float,
+  val parentWidth: Point,
   val parentHeight: Float,
   val start: Position
 )
 
 case class ColumnCreate(
   val parentRowId: String,
-  val parentWidth: Float,
+  val parentWidth: Point,
   val parentHeight: Float,
   val start: Position
 )
 
 case class RowCreate(
-  val parentWidth: Float,
+  val parentWidth: Point,
   val parentHeight: Float,
   val start: Position
 )

@@ -54,7 +54,7 @@ class PreviewViewImpl(val model: PreviewModel) extends PreviewView:
   private def renderPage(page: Page, gc: GraphicsContext): Unit =
     val debug = true
     gc.setFill(Color.WHITE)
-    gc.fillRect(page.position.x, page.position.x, page.width, page.height)
+    gc.fillRect(page.position.x, page.position.x, page.width.toPx, page.height)
     renderElement(page, debug, gc)
     for row <- page.rows do
       renderElement(row, debug, gc)
@@ -114,7 +114,7 @@ case class BorderBoundingBox(
   element: Element
 ) extends BoundingBox:
   def top(): Float = element.position.y + element.margin.top + (element.border.width / 2F)
-  def right(): Float = element.position.x + element.width - element.margin.right - (element.border.width / 2F)
+  def right(): Float = element.position.x + element.width.toPx - element.margin.right - (element.border.width / 2F)
   def bottom(): Float = element.position.y + element.height - element.margin.bottom - (element.border.width / 2F)
   def left(): Float = element.position.x + element.margin.left + (element.border.width / 2F)
 
@@ -125,13 +125,13 @@ case class MarginBoundingBox(
   def top(): Float = element.position.y
   def left(): Float = element.position.x
   def bottom(): Float = element.position.y + element.height
-  def right(): Float = element.position.x + element.width
+  def right(): Float = element.position.x + element.width.toPx
 
 case class PaddingBoundingBox(
   element: Element
 ) extends BoundingBox:
   def top(): Float = element.position.y + element.margin.top + element.border.width + element.padding.top
-  def right(): Float = element.position.x + element.width - element.margin.right - element.border.width - element.padding.right
+  def right(): Float = element.position.x + element.width.toPx - element.margin.right - element.border.width - element.padding.right
   def bottom(): Float = element.position.y + element.height - element.margin.bottom - element.border.width - element.padding.bottom
   def left(): Float = element.position.x + element.margin.left + element.border.width + element.padding.left
 
@@ -153,13 +153,13 @@ object ElementUtil:
 
 abstract class Element:
   def position: Position
-  def width: Float
+  def width: Point
   def height: Float
   def margin: Margin
   def padding: Padding
   def border: Border
   def background: Background
-  def contentWidth(): Float = width - margin.left - border.width - padding.left - padding.right - border.width - margin.right
+  def contentWidth(): Float = width.toPx - margin.left - border.width - padding.left - padding.right - border.width - margin.right
   def contentHeight(): Float = height - margin.top - border.width - padding.top - padding.bottom - border.width - margin.bottom
   def x: Float = position.x
   def y: Float = position.y
@@ -239,7 +239,7 @@ abstract class RenderElement extends Element:
 
 case class Page(
   val position: Position = Position(0F, 0F),
-  val width: Float = Point(595).toPx,
+  val width: Point = Point(595),
   val height: Float = Point(842).toPx,
   val margin: Margin = Margin(),
   val padding: Padding = Padding(),
@@ -250,7 +250,7 @@ case class Page(
 
 case class Row(
   val position: Position,
-  val width: Float,
+  val width: Point,
   val height: Float,
   val margin: Margin = Margin(),
   val padding: Padding = Padding(),
@@ -261,7 +261,7 @@ case class Row(
 
 case class Column(
   val position: Position,
-  val width: Float,
+  val width: Point,
   val height: Float,
   val margin: Margin = Margin(),
   val padding: Padding = Padding(),
@@ -272,7 +272,7 @@ case class Column(
 
 case class Content(
   val position: Position,
-  val width: Float,
+  val width: Point,
   val height: Float,
   val margin: Margin = Margin(),
   val padding: Padding = Padding(),
@@ -295,7 +295,7 @@ class Data:
   /**
     * Creates a two row page with 3 columns in each row
     */
-  def twoRowSixColumnTemplate(): Page =
+  /*def twoRowSixColumnTemplate(): Page =
     val page = Page(
       padding = Padding(50F, 50F, 100F, 50F),
     )
@@ -375,7 +375,7 @@ class Data:
       background = Background(Color.Gray)
     )
     row2 = row2.copy(columns = List(r2Column1, r2Column2, r2Column3))
-    page.copy(rows = List(row1, row2))
+    page.copy(rows = List(row1, row2))*/
 
   /**
     * Long page, it's a test to push the contents beyond the Page content max height
