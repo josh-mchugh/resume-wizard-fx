@@ -72,6 +72,11 @@ extension (value: Point)
   def toFloat: Float = value
   def toPx: Float = value * (Screen.primary.getDpi().toFloat / 72F)
 
+object PageConstants:
+  object A4:
+    val width: Point = Point(595F)
+    val height: Point = Point(842F)
+
 case class Margin(
   val top: Float = 0F,
   val right: Float = 0F,
@@ -239,8 +244,8 @@ abstract class RenderElement extends Element:
 
 case class Page(
   val position: Position = Position(0F, 0F),
-  val width: Point = Point(595),
-  val height: Float = Point(842).toPx,
+  val width: Point = PageConstants.A4.width,
+  val height: Float = PageConstants.A4.height.toPx,
   val margin: Margin = Margin(),
   val padding: Padding = Padding(),
   val border: Border = Border(),
@@ -399,8 +404,8 @@ case class SectionTemplate(
 )
 
 case class PageTemplate(
-  val width: Float,
-  val height: Float,
+  val width: Point,
+  val height: Point,
   val margin: Margin = Margin(),
   val padding: Padding = Padding(),
   val border: Border = Border(),
@@ -408,8 +413,9 @@ case class PageTemplate(
 )
 
 object PageTemplate:
-  def A4(width: Float = 793.7007874F, height: Float = 1122.519685F, margin: Margin = Margin(), padding: Padding = Padding(), border: Border = Border()): PageTemplate =
-    PageTemplate(width, height, margin, padding, border)
+  object A4:
+    def apply(width: Point = PageConstants.A4.width, height: Point = PageConstants.A4.height, margin: Margin = Margin(), padding: Padding = Padding(), border: Border = Border()): PageTemplate =
+      PageTemplate(width, height, margin, padding, border)
 
 case class Palette()
 
