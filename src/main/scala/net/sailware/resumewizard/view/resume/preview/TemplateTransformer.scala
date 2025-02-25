@@ -24,8 +24,7 @@ class TemplateTransformer(layout: LayoutTemplate):
     val result = ListBuffer[Page]()
 
     while rowIds.nonEmpty do
-                              //TODO Remove this Point conversion
-      val request = RowCreate(Point(page.contentWidth()), page.contentHeight(), ElementUtil.contentStartPosition(page))
+      val request = RowCreate(page.contentWidth(), page.contentHeight(), ElementUtil.contentStartPosition(page))
       result += page.copy(rows = createRows(request))
 
     result.toList
@@ -41,7 +40,7 @@ class TemplateTransformer(layout: LayoutTemplate):
       val rowId = rowIds.front
       val section = sectionMap(rowId)
       val width = sectionWidth(section, request.parentWidth)
-      val height = if section.height > 0 then section.height else request.parentHeight
+      val height = sectionHeight(section, request.parentHeight)
       val contentStartPosition = ElementUtil.contentStartPosition(cursor, section.margin, section.padding, section.border)
       val continuableResults = createColumns(ColumnCreate(rowId, width, height, contentStartPosition))
       continue = continuableResults.continue
@@ -54,7 +53,7 @@ class TemplateTransformer(layout: LayoutTemplate):
         columns = continuableResults.items
       )
 
-      cursor = Position(cursor.x, cursor.y + height)
+      cursor = Position(cursor.x + width, cursor.y + height)
 
     result.toList
 
@@ -69,7 +68,7 @@ class TemplateTransformer(layout: LayoutTemplate):
       val columnId = columnMap(request.parentRowId).front
       val section = sectionMap(columnId)
       val width = sectionWidth(section, request.parentWidth)
-      val height = if section.height > 0 then section.height else request.parentHeight
+      val height = sectionHeight(section, request.parentHeight)
       val contentStartPosition = ElementUtil.contentStartPosition(cursor, section.margin, section.padding, section.border)
       val continuableResults = createContent(ContentCreate(columnId, width, height, contentStartPosition))
       continue = continuableResults.continue
@@ -82,7 +81,7 @@ class TemplateTransformer(layout: LayoutTemplate):
         content = continuableResults.items
       )
 
-      cursor = Position(cursor.x, cursor.y + height)
+      cursor = Position(cursor.x + width, cursor.y + height)
 
     ContinuableResults(result.toList, continue)
 
@@ -96,7 +95,7 @@ class TemplateTransformer(layout: LayoutTemplate):
       val contentId = contentMap(request.parentColumnId).dequeue()
       val section = sectionMap(contentId)
       val width = sectionWidth(section, request.parentWidth)
-      val height = if section.height > 0 then section.height else request.parentHeight
+      val height = sectionHeight(section, request.parentHeight)
 
       result += Content(
         position = cursor,
@@ -106,7 +105,7 @@ class TemplateTransformer(layout: LayoutTemplate):
         background = section.background
       )
 
-      cursor = Position(cursor.x, cursor.y + height)
+      cursor = Position(cursor.x + width, cursor.y + height)
 
     ContinuableResults(result.toList, contentMap(request.parentColumnId).isEmpty)
 
@@ -131,25 +130,28 @@ class TemplateTransformer(layout: LayoutTemplate):
       .foreach((key, values) => map(key.getOrElse("")) = Queue.from(values.sortBy(_.order).map(_.id)))
     map
 
-  private def sectionWidth(section: SectionTemplate, parentWidth: Point = Point(0F)): Point =
+  private def sectionWidth(section: SectionTemplate, parentWidth: Float = 0F): Float =
     section.width.getOrElse(parentWidth)
+
+  private def sectionHeight(section: SectionTemplate, parentHeight: Float = 0F): Float =
+    section.height.getOrElse(parentHeight)
 
 case class ContentCreate(
   val parentColumnId: String,
-  val parentWidth: Point,
+  val parentWidth: Float,
   val parentHeight: Float,
   val start: Position
 )
 
 case class ColumnCreate(
   val parentRowId: String,
-  val parentWidth: Point,
+  val parentWidth: Float,
   val parentHeight: Float,
   val start: Position
 )
 
 case class RowCreate(
-  val parentWidth: Point,
+  val parentWidth: Float,
   val parentHeight: Float,
   val start: Position
 )

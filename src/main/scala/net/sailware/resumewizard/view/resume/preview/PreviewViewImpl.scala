@@ -19,7 +19,7 @@ class PreviewViewImpl(val model: PreviewModel) extends PreviewView:
     model.resume.onInvalidate { resume => logger.info("resume: {}", resume) }
     val pages = Data().longPage()
     val canvases = pages.map(page =>
-      val result = new Canvas(Point(595F).toPx, Point(842F).toPx)
+      val result = new Canvas(595F.toPx, 842F.toPx)
       val gc = result.getGraphicsContext2D()
       renderPage(page, gc)
       result
@@ -49,12 +49,12 @@ class PreviewViewImpl(val model: PreviewModel) extends PreviewView:
 
     gc.setFill(element.background.color)
     val elementContentStartPosition = ElementUtil.contentStartPosition(element)
-    gc.fillRect(elementContentStartPosition.x, elementContentStartPosition.y, element.contentWidth(), element.contentHeight())
+    gc.fillRect(elementContentStartPosition.x.toPx, elementContentStartPosition.y.toPx, element.contentWidth().toPx, element.contentHeight().toPx)
 
   private def renderPage(page: Page, gc: GraphicsContext): Unit =
     val debug = true
     gc.setFill(Color.WHITE)
-    gc.fillRect(page.position.x, page.position.x, page.width.toPx, page.height)
+    gc.fillRect(page.position.x.toPx, page.position.x.toPx, page.width.toPx, page.height.toPx)
     renderElement(page, debug, gc)
     for row <- page.rows do
       renderElement(row, debug, gc)
@@ -63,19 +63,13 @@ class PreviewViewImpl(val model: PreviewModel) extends PreviewView:
         for content <- column.content do
           renderElement(content, debug, gc)
 
-opaque type Point = Float
-
-object Point:
-  def apply(value: Float): Point = value
-
-extension (value: Point)
-  def toFloat: Float = value
+extension (value: Float)
   def toPx: Float = value * (Screen.primary.getDpi().toFloat / 72F)
 
 object PageConstants:
   object A4:
-    val width: Point = Point(595F)
-    val height: Point = Point(842F)
+    val width: Float = 595F
+    val height: Float = 842F
 
 case class Margin(
   val top: Float = 0F,
@@ -119,7 +113,7 @@ case class BorderBoundingBox(
   element: Element
 ) extends BoundingBox:
   def top(): Float = element.position.y + element.margin.top + (element.border.width / 2F)
-  def right(): Float = element.position.x + element.width.toPx - element.margin.right - (element.border.width / 2F)
+  def right(): Float = element.position.x + element.width - element.margin.right - (element.border.width / 2F)
   def bottom(): Float = element.position.y + element.height - element.margin.bottom - (element.border.width / 2F)
   def left(): Float = element.position.x + element.margin.left + (element.border.width / 2F)
 
@@ -130,13 +124,13 @@ case class MarginBoundingBox(
   def top(): Float = element.position.y
   def left(): Float = element.position.x
   def bottom(): Float = element.position.y + element.height
-  def right(): Float = element.position.x + element.width.toPx
+  def right(): Float = element.position.x + element.width
 
 case class PaddingBoundingBox(
   element: Element
 ) extends BoundingBox:
   def top(): Float = element.position.y + element.margin.top + element.border.width + element.padding.top
-  def right(): Float = element.position.x + element.width.toPx - element.margin.right - element.border.width - element.padding.right
+  def right(): Float = element.position.x + element.width - element.margin.right - element.border.width - element.padding.right
   def bottom(): Float = element.position.y + element.height - element.margin.bottom - element.border.width - element.padding.bottom
   def left(): Float = element.position.x + element.margin.left + element.border.width + element.padding.left
 
@@ -158,13 +152,13 @@ object ElementUtil:
 
 abstract class Element:
   def position: Position
-  def width: Point
+  def width: Float
   def height: Float
   def margin: Margin
   def padding: Padding
   def border: Border
   def background: Background
-  def contentWidth(): Float = width.toPx - margin.left - border.width - padding.left - padding.right - border.width - margin.right
+  def contentWidth(): Float = width - margin.left - border.width - padding.left - padding.right - border.width - margin.right
   def contentHeight(): Float = height - margin.top - border.width - padding.top - padding.bottom - border.width - margin.bottom
   def x: Float = position.x
   def y: Float = position.y
@@ -244,8 +238,8 @@ abstract class RenderElement extends Element:
 
 case class Page(
   val position: Position = Position(0F, 0F),
-  val width: Point = PageConstants.A4.width,
-  val height: Float = PageConstants.A4.height.toPx,
+  val width: Float = PageConstants.A4.width,
+  val height: Float = PageConstants.A4.height,
   val margin: Margin = Margin(),
   val padding: Padding = Padding(),
   val border: Border = Border(),
@@ -255,7 +249,7 @@ case class Page(
 
 case class Row(
   val position: Position,
-  val width: Point,
+  val width: Float,
   val height: Float,
   val margin: Margin = Margin(),
   val padding: Padding = Padding(),
@@ -266,7 +260,7 @@ case class Row(
 
 case class Column(
   val position: Position,
-  val width: Point,
+  val width: Float,
   val height: Float,
   val margin: Margin = Margin(),
   val padding: Padding = Padding(),
@@ -277,7 +271,7 @@ case class Column(
 
 case class Content(
   val position: Position,
-  val width: Point,
+  val width: Float,
   val height: Float,
   val margin: Margin = Margin(),
   val padding: Padding = Padding(),
@@ -394,8 +388,8 @@ case class SectionTemplate(
   val id: String,
   val parentId: Option[String],
   val `type`: SectionType,
-  val width: Option[Point] = None,
-  val height: Float,
+  val width: Option[Float] = None,
+  val height: Option[Float] = None,
   val order: Int,
   val margin: Margin = Margin(),
   val padding: Padding = Padding(),
@@ -404,8 +398,8 @@ case class SectionTemplate(
 )
 
 case class PageTemplate(
-  val width: Point,
-  val height: Point,
+  val width: Float,
+  val height: Float,
   val margin: Margin = Margin(),
   val padding: Padding = Padding(),
   val border: Border = Border(),
@@ -414,7 +408,7 @@ case class PageTemplate(
 
 object PageTemplate:
   object A4:
-    def apply(width: Point = PageConstants.A4.width, height: Point = PageConstants.A4.height, margin: Margin = Margin(), padding: Padding = Padding(), border: Border = Border()): PageTemplate =
+    def apply(width: Float = PageConstants.A4.width, height: Float = PageConstants.A4.height, margin: Margin = Margin(), padding: Padding = Padding(), border: Border = Border()): PageTemplate =
       PageTemplate(width, height, margin, padding, border)
 
 case class Palette()
