@@ -4,6 +4,15 @@ import scalafx.scene.paint.Color
 
 object TemplateFactory:
 
+  def simpleBorderedPage(): LayoutTemplate =
+    LayoutTemplate(
+      page = PageTemplate.A4(
+        margin = Margin(40F, 40F, 40F, 40F),
+        padding = Padding(40F, 40F, 40F, 40F),
+        border = Border(width = 2F)
+      )
+    )
+
   def alternatingGreen18(): LayoutTemplate =
     LayoutTemplate(
       page = PageTemplate.A4(padding = Padding(50F, 50F, 50F, 50F)),

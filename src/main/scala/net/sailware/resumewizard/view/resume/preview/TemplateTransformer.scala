@@ -14,7 +14,11 @@ class TemplateTransformer(layout: LayoutTemplate):
 
   // create page from root
   val page: Page = Page(
-    padding = layout.page.padding
+    width = layout.page.width,
+    height = layout.page.height,
+    margin = layout.page.margin,
+    padding = layout.page.padding,
+    border = layout.page.border
   )
 
   // max y
@@ -27,7 +31,7 @@ class TemplateTransformer(layout: LayoutTemplate):
       val request = RowCreate(page.contentWidth(), page.contentHeight(), ElementUtil.contentStartPosition(page))
       result += page.copy(rows = createRows(request))
 
-    result.toList
+    if result.isEmpty then List(page) else result.toList
 
   def createRows(request: RowCreate): List[Row] =
     var cursor: Position = request.start

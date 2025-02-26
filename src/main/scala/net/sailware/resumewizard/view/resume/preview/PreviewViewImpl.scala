@@ -17,7 +17,7 @@ class PreviewViewImpl(val model: PreviewModel) extends PreviewView:
 
   override def view(): Node =
     model.resume.onInvalidate { resume => logger.info("resume: {}", resume) }
-    val pages = Data().longPage()
+    val pages = Data().simpleBorderedPage()
     val canvases = pages.map(page =>
       val result = new Canvas(595F.toPx, 842F.toPx)
       val gc = result.getGraphicsContext2D()
@@ -234,7 +234,7 @@ abstract class RenderElement extends Element:
     gc.setStroke(color)
     gc.setLineWidth(strokeWidth)
     gc.setLineDashes(strokeDashList*)
-    gc.strokeLine(startX, startY, endX, endY)
+    gc.strokeLine(startX.toPx, startY.toPx, endX.toPx, endY.toPx)
 
 case class Page(
   val position: Position = Position(0F, 0F),
@@ -284,12 +284,7 @@ class Data:
     * Simple template with with Margins, Padding, and Border to verify
     * that the lines are drawn correctly
     */
-  def borderTestTemplate(): Page =
-    Page(
-      margin = Margin(100F, 50F, 100F, 50F),
-      padding = Padding(100F, 50F, 100F, 50F),
-      border = Border(width = 5F)
-    )
+  def simpleBorderedPage(): List[Page] = TemplateTransformer(TemplateFactory.simpleBorderedPage()).transform()
 
   /**
     * Creates a two row page with 3 columns in each row
@@ -408,7 +403,13 @@ case class PageTemplate(
 
 object PageTemplate:
   object A4:
-    def apply(width: Float = PageConstants.A4.width, height: Float = PageConstants.A4.height, margin: Margin = Margin(), padding: Padding = Padding(), border: Border = Border()): PageTemplate =
+    def apply(
+      width: Float = PageConstants.A4.width,
+      height: Float = PageConstants.A4.height,
+      margin: Margin = Margin(),
+      padding: Padding = Padding(),
+      border: Border = Border()
+    ): PageTemplate =
       PageTemplate(width, height, margin, padding, border)
 
 case class Palette()
@@ -416,8 +417,8 @@ case class Palette()
 case class TypeFaces()
 
 case class LayoutTemplate(
-  val page: PageTemplate,
-  val sections: List[SectionTemplate],
+  val page: PageTemplate = PageTemplate.A4(),
+  val sections: List[SectionTemplate] = List.empty,
   val typeFaces: TypeFaces = TypeFaces(),
   val palette: Palette = Palette()
 )
