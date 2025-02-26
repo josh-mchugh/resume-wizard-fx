@@ -53,7 +53,7 @@ class TemplateTransformer(layout: LayoutTemplate):
         columns = continuableResults.items
       )
 
-      cursor = Position(cursor.x + width, cursor.y + height)
+      cursor = Position(cursor.x + sectionWidth(section), cursor.y + height)
 
     result.toList
 
@@ -81,7 +81,7 @@ class TemplateTransformer(layout: LayoutTemplate):
         content = continuableResults.items
       )
 
-      cursor = Position(cursor.x + width, cursor.y + height)
+      cursor = Position(cursor.x + sectionWidth(section), cursor.y + height)
 
     ContinuableResults(result.toList, continue)
 
@@ -105,7 +105,7 @@ class TemplateTransformer(layout: LayoutTemplate):
         background = section.background
       )
 
-      cursor = Position(cursor.x + width, cursor.y + height)
+      cursor = Position(cursor.x + sectionWidth(section), cursor.y + height)
 
     ContinuableResults(result.toList, contentMap(request.parentColumnId).isEmpty)
 
