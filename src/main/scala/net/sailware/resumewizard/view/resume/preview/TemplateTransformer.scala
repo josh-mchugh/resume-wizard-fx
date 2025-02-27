@@ -94,7 +94,10 @@ class TemplateTransformer(layout: LayoutTemplate):
 
     val result = ListBuffer[Content]()
 
-    while cursor.y < maxY && contentMap(request.parentColumnId).nonEmpty do
+    while
+      contentMap(request.parentColumnId).nonEmpty
+      && cursor.y + sectionMap(contentMap(request.parentColumnId).front).height.getOrElse(0F) < maxY
+    do
 
       val contentId = contentMap(request.parentColumnId).dequeue()
       val section = sectionMap(contentId)
