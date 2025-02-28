@@ -36,6 +36,7 @@ class TemplateTransformer(layout: LayoutTemplate):
   def createRows(request: RowCreate): List[Row] =
     var cursor: Position = request.start
     var continue: Boolean = true
+    var remainingHeight = request.parentHeight
 
     val result = ListBuffer[Row]()
 
@@ -44,9 +45,15 @@ class TemplateTransformer(layout: LayoutTemplate):
       val rowId = rowIds.front
       val section = sectionMap(rowId)
       val width = sectionWidth(section, request.parentWidth)
-      val height = sectionHeight(section, request.parentHeight)
-      val contentStartPosition = ElementUtil.contentStartPosition(cursor, section.margin, section.padding, section.border)
-      val continuableResults = createColumns(ColumnCreate(rowId, width, height, contentStartPosition))
+      val height = sectionHeight(section, remainingHeight)
+      val continuableResults = createColumns(
+        ColumnCreate(
+          rowId,
+          ElementUtil.contentWidth(width, section.margin, section.padding,section.border),
+          ElementUtil.contentHeight(height, section.margin, section.padding, section.border),
+          ElementUtil.contentStartPosition(cursor, section.margin, section.padding, section.border)
+        )
+      )
       continue = continuableResults.continue
       if continue then rowIds.dequeue()
 
@@ -54,10 +61,15 @@ class TemplateTransformer(layout: LayoutTemplate):
         position = cursor,
         width = width,
         height = height,
+        padding = section.padding,
+        margin = section.margin,
+        border = section.border,
+        background = section.background,
         columns = continuableResults.items
       )
 
       cursor = Position(cursor.x + sectionWidth(section), cursor.y + height)
+      remainingHeight = remainingHeight - height
 
     result.toList
 
@@ -73,8 +85,14 @@ class TemplateTransformer(layout: LayoutTemplate):
       val section = sectionMap(columnId)
       val width = sectionWidth(section, request.parentWidth)
       val height = sectionHeight(section, request.parentHeight)
-      val contentStartPosition = ElementUtil.contentStartPosition(cursor, section.margin, section.padding, section.border)
-      val continuableResults = createContent(ContentCreate(columnId, width, height, contentStartPosition))
+      val continuableResults = createContent(
+        ContentCreate(
+          columnId,
+          ElementUtil.contentWidth(width, section.margin, section.padding,section.border),
+          ElementUtil.contentHeight(height, section.margin, section.padding, section.border),
+          ElementUtil.contentStartPosition(cursor, section.margin, section.padding, section.border)
+        )
+      )
       continue = continuableResults.continue
       if continue then columnMap(request.parentRowId).dequeue()
 
@@ -82,10 +100,14 @@ class TemplateTransformer(layout: LayoutTemplate):
         position = cursor,
         width = width,
         height = height,
+        padding = section.padding,
+        margin = section.margin,
+        border = section.border,
+        background = section.background,
         content = continuableResults.items
       )
 
-      cursor = Position(cursor.x + sectionWidth(section), cursor.y + height)
+      cursor = Position(cursor.x + sectionWidth(section), cursor.y + sectionHeight(section))
 
     ContinuableResults(result.toList, continue)
 
@@ -95,7 +117,8 @@ class TemplateTransformer(layout: LayoutTemplate):
     val result = ListBuffer[Content]()
 
     while
-      contentMap(request.parentColumnId).nonEmpty
+      contentMap.contains(request.parentColumnId)
+      && contentMap(request.parentColumnId).nonEmpty
       && cursor.y + sectionMap(contentMap(request.parentColumnId).front).height.getOrElse(0F) < maxY
     do
 
@@ -108,13 +131,16 @@ class TemplateTransformer(layout: LayoutTemplate):
         position = cursor,
         width = width,
         height = height,
+        padding = section.padding,
         margin = section.margin,
+        border = section.border,
         background = section.background
       )
 
       cursor = Position(cursor.x + sectionWidth(section), cursor.y + height)
 
-    ContinuableResults(result.toList, contentMap(request.parentColumnId).isEmpty)
+    val continue = !contentMap.contains(request.parentColumnId) || contentMap(request.parentColumnId).isEmpty
+    ContinuableResults(result.toList, continue)
 
   def sectionIds(sections: List[SectionTemplate], `type`: SectionType): Queue[String] =
     val rowIds = sections

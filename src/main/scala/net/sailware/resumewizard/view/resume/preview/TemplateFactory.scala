@@ -13,87 +13,98 @@ object TemplateFactory:
       )
     )
 
-  def twoRowSixColumnTemplate(): LayoutTemplate = ???
-    /*val page = Page(
-      padding = Padding(50F, 50F, 100F, 50F),
+  def twoRowSixColumnTemplate(): LayoutTemplate =
+    LayoutTemplate(
+      page = PageTemplate.A4(
+        padding = Padding(40F, 40F, 80F, 40F),
+      ),
+      sections = List(
+        SectionTemplate(
+          id = "ROW1",
+          parentId = None,
+          `type` = SectionType.Row,
+          order = 1,
+          height = Some(40F)
+        ),
+        SectionTemplate(
+          id = "ROW2",
+          parentId = None,
+          `type` = SectionType.Row,
+          order = 2,
+          margin = Margin(8F, 0F, 0F, 0F)
+        ),
+        SectionTemplate(
+          id = "COLUMN1",
+          parentId = Some("ROW1"),
+          `type` = SectionType.Column,
+          order = 1,
+          width = Some(171.666F),
+          margin = Margin(0F, 8F, 0F, 0F),
+          background = Background(Color.Gray)
+        ),
+        SectionTemplate(
+          id = "COLUMN2",
+          parentId = Some("ROW1"),
+          `type` = SectionType.Column,
+          order = 2,
+          width = Some(171.666F),
+          margin = Margin(0F, 8F, 0F, 8F),
+          background = Background(Color.Gray)
+        ),
+        SectionTemplate(
+          id = "COLUMN3",
+          parentId = Some("ROW1"),
+          `type` = SectionType.Column,
+          order = 3,
+          width = Some(171.666F),
+          margin = Margin(0F, 0F, 0F, 8F),
+          background = Background(Color.Gray)
+        ),
+        SectionTemplate(
+          id = "COLUMN4",
+          parentId = Some("ROW2"),
+          `type` = SectionType.Column,
+          order = 1,
+          width = Some(171.666F),
+          margin = Margin(0F, 8F, 0F, 0F),
+        ),
+        SectionTemplate(
+          id = "CONTENT1",
+          parentId = Some("COLUMN4"),
+          `type` = SectionType.Content,
+          order = 1,
+          height = Some(227.333F),
+          margin = Margin(0F, 0F, 8F, 0F),
+          background = Background(Color.Gray)
+        ),
+        SectionTemplate(
+          id = "CONTENT2",
+          parentId = Some("COLUMN4"),
+          `type` = SectionType.Content,
+          order = 2,
+          height = Some(50F),
+          background = Background(Color.Gray)
+        ),
+        SectionTemplate(
+          id = "COLUMN5",
+          parentId = Some("ROW2"),
+          `type` = SectionType.Column,
+          order = 2,
+          width = Some(171.666F),
+          margin = Margin(0F, 8F, 0F, 8F),
+          background = Background(Color.Gray)
+        ),
+        SectionTemplate(
+          id = "COLUMN6",
+          parentId = Some("ROW2"),
+          `type` = SectionType.Column,
+          order = 3,
+          width = Some(171.666F),
+          margin = Margin(0F, 0F, 0F, 8F),
+          background = Background(Color.Gray)
+        ),
+      ),
     )
-    var row1 = Row(
-      position = ElementUtil.contentStartPosition(page),
-      width = page.contentWidth(),
-      height = 50F,
-    )
-    val r1Column1 = Column(
-      position = ElementUtil.contentStartPosition(row1),
-      width = row1.contentWidth() / 3,
-      height = row1.contentHeight(),
-      margin = Margin(0F, 15F, 0F, 0F),
-      background = Background(Color.Gray)
-    )
-    var r1Column2 = Column(
-      position = r1Column1.position.copy(x = r1Column1.x + row1.contentWidth() / 3),
-      width = row1.contentWidth() / 3,
-      height = row1.contentHeight(),
-      margin = Margin(0F, 15F, 0F, 15F),
-      background = Background(Color.Gray)
-    )
-    var r1C2Content = Content(
-      position = ElementUtil.contentStartPosition(r1Column2),
-      width = r1Column2.contentWidth() / 2,
-      height = 35F,
-      margin = Margin(5F, 0F, 0F, 5F),
-      background = Background(Color.WhiteSmoke)
-    )
-    r1Column2 = r1Column2.copy(content = List(r1C2Content))
-    val r1Column3 = Column(
-      position = r1Column1.position.copy(x = r1Column1.position.x + row1.contentWidth() / 3 * 2),
-      width = row1.contentWidth() / 3,
-      height = row1.contentHeight(),
-      margin = Margin(0F, 0F, 0F, 15F),
-      background = Background(Color.Gray)
-    )
-    row1 = row1.copy(columns = List(r1Column1, r1Column2, r1Column3))
-    var row2 = Row(
-      position = row1.position.copy(y = row1.position.y + row1.height),
-      width = page.contentWidth(),
-      height = page.contentHeight() - row1.height,
-      margin = Margin(10F, 0F, 0F, 0F)
-    )
-    var r2Column1 = Column(
-      position = ElementUtil.contentStartPosition(row2),
-      width = row2.contentWidth() / 3,
-      height = row2.contentHeight(),
-      margin = Margin(0F, 15F, 0F, 0F),
-    )
-    val r2C1Content1 = Content(
-      position = ElementUtil.contentStartPosition(r2Column1),
-      width = r2Column1.contentWidth(),
-      height = r2Column1.contentHeight() / 3,
-      margin = Margin(0F, 0F, 10F, 0F),
-      background = Background(Color.Gray)
-    )
-    val r2C1Content2 = Content(
-      position = r2C1Content1.position.copy(y = r2C1Content1.position.y + r2C1Content1.height),
-      width = r2Column1.contentWidth(),
-      height = 50F,
-      background = Background(Color.Gray)
-    )
-    r2Column1 = r2Column1.copy(content = List(r2C1Content1, r2C1Content2))
-    val r2Column2 = Column(
-      position = r2Column1.position.copy(x = r2Column1.position.x + row2.contentWidth() / 3),
-      width = row2.contentWidth() / 3,
-      height = row2.contentHeight(),
-      margin = Margin(0F, 15F, 0F, 15F),
-      background = Background(Color.Gray)
-    )
-    val r2Column3 = Column(
-      position = r2Column1.position.copy(x = r2Column1.position.x + row2.contentWidth() / 3 * 2),
-      width = row2.contentWidth() / 3,
-      height = row2.contentHeight(),
-      margin = Margin(0F, 0F, 0F, 15F),
-      background = Background(Color.Gray)
-    )
-    row2 = row2.copy(columns = List(r2Column1, r2Column2, r2Column3))
-    page.copy(rows = List(row1, row2))*/
 
   def alternatingGreen18(): LayoutTemplate =
     LayoutTemplate(

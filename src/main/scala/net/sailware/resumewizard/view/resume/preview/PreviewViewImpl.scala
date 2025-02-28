@@ -17,7 +17,7 @@ class PreviewViewImpl(val model: PreviewModel) extends PreviewView:
 
   override def view(): Node =
     model.resume.onInvalidate { resume => logger.info("resume: {}", resume) }
-    val pages = Data().longPage()
+    val pages = Data().twoRowSixColumnTemplate()
     val canvases = pages.map(page =>
       val result = new Canvas(595F.toPx, 842F.toPx)
       val gc = result.getGraphicsContext2D()
@@ -150,6 +150,18 @@ object ElementUtil:
   def contentStartPosition(element: Element): Position =
     Position(contentStartX(element.position.x, element.margin, element.padding, element.border), contentStartY(element.position.y, element.margin, element.padding, element.border))
 
+  def contentWidth(element: Element): Float =
+    contentWidth(element.width, element.margin, element.padding, element.border)
+
+  def contentWidth(width: Float, margin: Margin, padding: Padding, border: Border): Float =
+    width - margin.left - border.width - padding.left - padding.right - border.width - margin.right
+
+  def contentHeight(element: Element): Float =
+    contentHeight(element.height, element.margin, element.padding, element.border)
+
+  def contentHeight(height: Float, margin: Margin, padding: Padding, border: Border): Float =
+    height - margin.top - border.width - padding.top - padding.bottom - border.width - margin.bottom
+
 abstract class Element:
   def position: Position
   def width: Float
@@ -158,8 +170,8 @@ abstract class Element:
   def padding: Padding
   def border: Border
   def background: Background
-  def contentWidth(): Float = width - margin.left - border.width - padding.left - padding.right - border.width - margin.right
-  def contentHeight(): Float = height - margin.top - border.width - padding.top - padding.bottom - border.width - margin.bottom
+  def contentWidth(): Float = ElementUtil.contentWidth(this)
+  def contentHeight(): Float = ElementUtil.contentHeight(this)
   def x: Float = position.x
   def y: Float = position.y
   def borderBoundingBox = BorderBoundingBox(this)
@@ -289,8 +301,7 @@ class Data:
   /**
     * Creates a two row page with 3 columns in each row
     */
-  def twoRowSixColumnTemplate(): List[Page] = ???
-
+  def twoRowSixColumnTemplate(): List[Page] = TemplateTransformer(TemplateFactory.twoRowSixColumnTemplate()).transform()
 
   /**
     * Long page, it's a test to push the contents beyond the Page content max height
