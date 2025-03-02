@@ -110,29 +110,51 @@ sealed abstract class BoundingBox:
   def bottomLeft(): Position = Position(left(), bottom())
 
 case class BorderBoundingBox(
-  element: Element
+  position: Position,
+  width: Float,
+  height: Float,
+  margin: Margin,
+  border: Border
 ) extends BoundingBox:
-  def top(): Float = element.position.y + element.margin.top + (element.border.width / 2F)
-  def right(): Float = element.position.x + element.width - element.margin.right - (element.border.width / 2F)
-  def bottom(): Float = element.position.y + element.height - element.margin.bottom - (element.border.width / 2F)
-  def left(): Float = element.position.x + element.margin.left + (element.border.width / 2F)
+  def top(): Float = position.y + margin.top + (border.width / 2F)
+  def right(): Float = position.x + width - margin.right - (border.width / 2F)
+  def bottom(): Float = position.y + height - margin.bottom - (border.width / 2F)
+  def left(): Float = position.x + margin.left + (border.width / 2F)
 
+object BorderBoundingBox:
+  def apply(element: Element): BorderBoundingBox =
+    BorderBoundingBox(element.position, element.width, element.height, element.margin, element.border)
 
 case class MarginBoundingBox(
-  element: Element
+  position: Position,
+  width: Float,
+  height: Float
 ) extends BoundingBox:
-  def top(): Float = element.position.y
-  def left(): Float = element.position.x
-  def bottom(): Float = element.position.y + element.height
-  def right(): Float = element.position.x + element.width
+  def top(): Float = position.y
+  def left(): Float = position.x
+  def bottom(): Float = position.y + height
+  def right(): Float = position.x + width
+
+object MarginBoundingBox:
+  def apply(element: Element): MarginBoundingBox =
+    MarginBoundingBox(element.position, element.width, element.height)
 
 case class PaddingBoundingBox(
-  element: Element
+  position: Position,
+  width: Float,
+  height: Float,
+  margin: Margin,
+  border: Border,
+  padding: Padding
 ) extends BoundingBox:
-  def top(): Float = element.position.y + element.margin.top + element.border.width + element.padding.top
-  def right(): Float = element.position.x + element.width - element.margin.right - element.border.width - element.padding.right
-  def bottom(): Float = element.position.y + element.height - element.margin.bottom - element.border.width - element.padding.bottom
-  def left(): Float = element.position.x + element.margin.left + element.border.width + element.padding.left
+  def top(): Float = position.y + margin.top + border.width + padding.top
+  def right(): Float = position.x + width - margin.right - border.width - padding.right
+  def bottom(): Float = position.y + height - margin.bottom - border.width - padding.bottom
+  def left(): Float = position.x + margin.left + border.width + padding.left
+
+object PaddingBoundingBox:
+  def apply(element: Element): PaddingBoundingBox =
+    PaddingBoundingBox(element.position, element.width, element.height, element.margin, element.border, element.padding)
 
 object ElementUtil:
   def contentStartX(x: Float, margin: Margin, padding: Padding, border: Border): Float =
