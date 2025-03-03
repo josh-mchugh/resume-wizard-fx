@@ -286,3 +286,32 @@ object TemplateFactory:
         ),
       )
     )
+
+  def resumeTemplate(): LayoutTemplate =
+    LayoutTemplate(
+      page = PageTemplate.A4(),
+      sections = List(
+        SectionTemplate(
+          id = "ROW",
+          parentId = Some("PAGE_ROOT"),
+          `type` = SectionType.Row,
+          order = 1,
+        ),
+        SectionTemplate(
+          id = "COLUMN1",
+          parentId = Some("ROW"),
+          `type` = SectionType.Column,
+          order = 1,
+          width = Some(206.465F),
+          padding = Padding(42F, 0F, 0F, 24F),
+          background = Background(Color.rgb(17, 33, 47))
+        ),
+        SectionTemplate(
+          id = "COLUMN2",
+          parentId = Some("ROW"),
+          `type` = SectionType.Column,
+          order = 2,
+          width = Some(388.535F)
+        ),
+      )
+    )

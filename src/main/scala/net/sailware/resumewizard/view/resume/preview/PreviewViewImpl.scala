@@ -17,7 +17,7 @@ class PreviewViewImpl(val model: PreviewModel) extends PreviewView:
 
   override def view(): Node =
     model.resume.onInvalidate { resume => logger.info("resume: {}", resume) }
-    val pages = Data().twoRowSixColumnTemplate()
+    val pages = Data().resumeTemplate()
     val canvases = pages.map(page =>
       val result = new Canvas(595F.toPx, 842F.toPx)
       val gc = result.getGraphicsContext2D()
@@ -31,6 +31,13 @@ class PreviewViewImpl(val model: PreviewModel) extends PreviewView:
 
   private def renderElement(element: RenderElement, debug: Boolean, gc: GraphicsContext): Unit =
     given GraphicsContext = gc
+
+    // set background fill for element
+    gc.setFill(element.background.color)
+    val fillPosition = element.fillPosition()
+    gc.fillRect(fillPosition.x.toPx, fillPosition.y.toPx, element.fillWidth().toPx, element.fillHeight().toPx)
+
+    // set border and debug borders for element
     if element.border.width > 0F then
       element.renderBorderTop()
       element.renderBorderRight()
@@ -46,10 +53,6 @@ class PreviewViewImpl(val model: PreviewModel) extends PreviewView:
       element.renderDebugPaddingBorderRight()
       element.renderDebugPaddingBorderBottom()
       element.renderDebugPaddingBorderLeft()
-
-    gc.setFill(element.background.color)
-    val elementContentStartPosition = ElementUtil.contentStartPosition(element)
-    gc.fillRect(elementContentStartPosition.x.toPx, elementContentStartPosition.y.toPx, element.contentWidth().toPx, element.contentHeight().toPx)
 
   private def renderPage(page: Page, gc: GraphicsContext): Unit =
     val debug = true
@@ -194,6 +197,9 @@ abstract class Element:
   def background: Background
   def contentWidth(): Float = ElementUtil.contentWidth(this)
   def contentHeight(): Float = ElementUtil.contentHeight(this)
+  def fillPosition(): Position = Position(borderBoundingBox.left(), borderBoundingBox.top())
+  def fillWidth(): Float = borderBoundingBox.right() - borderBoundingBox.left()
+  def fillHeight(): Float = borderBoundingBox.bottom() - borderBoundingBox.top()
   def x: Float = position.x
   def y: Float = position.y
   def borderBoundingBox = BorderBoundingBox(this)
@@ -329,6 +335,8 @@ class Data:
     * Long page, it's a test to push the contents beyond the Page content max height
     */
   def longPage(): List[Page] = TemplateTransformer(TemplateFactory.alternatingGreen18()).transform()
+
+  def resumeTemplate(): List[Page] = TemplateTransformer(TemplateFactory.resumeTemplate()).transform()
 
 enum SectionType:
   case Row, Column, Content
