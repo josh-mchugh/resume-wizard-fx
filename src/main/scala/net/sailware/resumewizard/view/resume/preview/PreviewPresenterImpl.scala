@@ -1,5 +1,6 @@
 package net.sailware.resumewizard.view.resume.preview
 
+import net.sailware.resumewizard.resume.Resume
 import net.sailware.resumewizard.view.resume.preview.service.PreviewService
 import org.slf4j.LoggerFactory
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -20,5 +21,5 @@ class PreviewPresenterImpl(
     service
       .generatePreview()
       .onComplete:
-        case Success(response) => Platform.runLater(() => model.resume.value = response.resume)
+        case Success(response) => Platform.runLater(() => model.resume.value = Resume.test())
         case Failure(t)        => logger.error("Error generating PDF", t)

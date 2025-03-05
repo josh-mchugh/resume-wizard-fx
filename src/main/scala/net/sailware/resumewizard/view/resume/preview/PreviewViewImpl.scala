@@ -1,5 +1,7 @@
 package net.sailware.resumewizard.view.resume.preview
 
+import net.sailware.resumewizard.resume.Resume
+import org.slf4j.LoggerFactory
 import scalafx.Includes.*
 import scalafx.geometry.Pos
 import scalafx.scene.Node
@@ -7,27 +9,31 @@ import scalafx.scene.canvas.Canvas
 import scalafx.scene.canvas.GraphicsContext
 import scalafx.scene.layout.VBox
 import scalafx.scene.paint.Color
+import scalafx.scene.text.Font
+import scalafx.scene.text.FontWeight
 import scalafx.stage.Screen
-import org.slf4j.LoggerFactory
-import scala.compiletime.ops.double
+import scalafx.scene.text.TextAlignment
+import scalafx.geometry.VPos
 
 class PreviewViewImpl(val model: PreviewModel) extends PreviewView:
 
   val logger = LoggerFactory.getLogger(classOf[PreviewViewImpl])
 
   override def view(): Node =
-    model.resume.onInvalidate { resume => logger.info("resume: {}", resume) }
-    val pages = Data().resumeTemplate()
-    val canvases = pages.map(page =>
-      val result = new Canvas(595F.toPx, 842F.toPx)
-      val gc = result.getGraphicsContext2D()
-      renderPage(page, gc)
-      result
-    )
     new VBox:
       spacing = 10
       alignment = Pos.CENTER
-      children = canvases
+      children = List.empty
+      model.resume.onInvalidate { resume =>
+        logger.info("resume: {}", resume)
+        val pages = Data().resumeTemplate(model.resume.value)
+        children = pages.map(page =>
+          val result = new Canvas(595F.toPx, 842F.toPx)
+          val gc = result.getGraphicsContext2D()
+          renderPage(page, gc)
+          result
+        )
+      }
 
   private def renderElement(element: RenderElement, debug: Boolean, gc: GraphicsContext): Unit =
     given GraphicsContext = gc
@@ -53,6 +59,22 @@ class PreviewViewImpl(val model: PreviewModel) extends PreviewView:
       element.renderDebugPaddingBorderRight()
       element.renderDebugPaddingBorderBottom()
       element.renderDebugPaddingBorderLeft()
+
+    element match
+      case c: Content =>
+        c.item match
+          case Some(item) =>
+            val contentPosition = ElementUtil.contentStartPosition(element)
+            val font = Font.font("Arial", FontWeight.BOLD, 24)
+
+            gc.setFont(font)
+            gc.setFill(item.color)
+            gc.setTextAlign(TextAlignment.LEFT)
+            gc.setTextBaseline(VPos.TOP)
+            gc.fillText(item.text, contentPosition.x.toPx, contentPosition.y.toPx)
+
+          case None =>
+      case _ =>
 
   private def renderPage(page: Page, gc: GraphicsContext): Unit =
     val debug = true
@@ -317,29 +339,51 @@ case class Content(
   val padding: Padding = Padding(),
   val border: Border = Border(),
   val background: Background = Background(),
+  val item: Option[ContentItem] = None
 ) extends RenderElement
+
+case class ContentItem(
+  val text: String = "",
+  val color: Color = Color.Transparent
+)
 
 class Data:
   /**
     * Simple template with with Margins, Padding, and Border to verify
     * that the lines are drawn correctly
     */
-  def simpleBorderedPage(): List[Page] = TemplateTransformer(TemplateFactory.simpleBorderedPage()).transform()
+  def simpleBorderedPage(resume: Resume): List[Page] =
+    TemplateTransformer(resume, TemplateFactory.simpleBorderedPage()).transform()
 
   /**
     * Creates a two row page with 3 columns in each row
     */
-  def twoRowSixColumnTemplate(): List[Page] = TemplateTransformer(TemplateFactory.twoRowSixColumnTemplate()).transform()
+  def twoRowSixColumnTemplate(resume: Resume): List[Page] =
+    TemplateTransformer(resume, TemplateFactory.twoRowSixColumnTemplate()).transform()
 
   /**
     * Long page, it's a test to push the contents beyond the Page content max height
     */
-  def longPage(): List[Page] = TemplateTransformer(TemplateFactory.alternatingGreen18()).transform()
+  def longPage(resume: Resume): List[Page] =
+    TemplateTransformer(resume, TemplateFactory.alternatingGreen18()).transform()
 
-  def resumeTemplate(): List[Page] = TemplateTransformer(TemplateFactory.resumeTemplate()).transform()
+  def resumeTemplate(resume: Resume): List[Page] =
+    TemplateTransformer(resume, TemplateFactory.resumeTemplate()).transform()
 
 enum SectionType:
   case Row, Column, Content
+
+enum ResumeDataType:
+  case Name
+
+case class FontTemplate(
+  color: Color = Color.Transparent
+)
+
+case class ContentTemplate(
+  val resumeDataType: Option[ResumeDataType] = None,
+  val fontTemplate: Option[FontTemplate] = None
+)
 
 case class SectionTemplate(
   val id: String,
@@ -352,6 +396,7 @@ case class SectionTemplate(
   val padding: Padding = Padding(),
   val border: Border = Border(),
   val background: Background = Background(),
+  val contentTemplate: Option[ContentTemplate] = None
 )
 
 case class PageTemplate(

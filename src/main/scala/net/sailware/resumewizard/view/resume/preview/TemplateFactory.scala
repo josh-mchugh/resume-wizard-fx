@@ -313,5 +313,17 @@ object TemplateFactory:
           order = 2,
           width = Some(388.535F)
         ),
+        SectionTemplate(
+          id = "NAME",
+          parentId = Some("COLUMN1"),
+          `type` = SectionType.Content,
+          order = 1,
+          contentTemplate = Some(ContentTemplate(
+            resumeDataType = Some(ResumeDataType.Name),
+            fontTemplate = Some(FontTemplate(
+              color = Color.White
+            ))
+          ))
+        )
       )
     )

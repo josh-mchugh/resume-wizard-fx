@@ -27,3 +27,7 @@ case class Resume(
 
   def hasCertifications(): Boolean =
     certifications.nonEmpty
+
+object Resume:
+
+  def test(): Resume = Resume(name = "John Doe")

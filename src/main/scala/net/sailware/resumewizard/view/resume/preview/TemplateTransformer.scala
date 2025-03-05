@@ -4,8 +4,10 @@ import collection.mutable.ListBuffer
 import collection.mutable.HashMap
 import collection.mutable.Map
 import collection.mutable.Queue
+import net.sailware.resumewizard.resume.Resume
+import scalafx.scene.paint.Color
 
-class TemplateTransformer(layout: LayoutTemplate):
+class TemplateTransformer(resume: Resume, layout: LayoutTemplate):
 
   val sectionMap: Map[String, SectionTemplate] = sectionsGroupById(layout.sections)
   val rowIds: Queue[String] = sectionIds(layout.sections, SectionType.Row)
@@ -127,6 +129,18 @@ class TemplateTransformer(layout: LayoutTemplate):
       val width = sectionWidth(section, request.parentWidth)
       val height = sectionHeight(section, request.parentHeight)
 
+      val contentItem = section.contentTemplate match
+        case Some(content) =>
+          val text = content.resumeDataType match
+            case Some(resumeDataType) => resumeDataType match
+              case ResumeDataType.Name => resume.name
+            case None => ""
+          val color = content.fontTemplate match
+            case Some(fontTemplate) => fontTemplate.color
+            case None => Color.Transparent
+          Some(ContentItem(text, color))
+        case None => None
+
       result += Content(
         position = cursor,
         width = width,
@@ -134,7 +148,8 @@ class TemplateTransformer(layout: LayoutTemplate):
         padding = section.padding,
         margin = section.margin,
         border = section.border,
-        background = section.background
+        background = section.background,
+        item = contentItem
       )
 
       cursor = Position(cursor.x + sectionWidth(section), cursor.y + height)
