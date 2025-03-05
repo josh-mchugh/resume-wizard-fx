@@ -121,25 +121,19 @@ class TemplateTransformer(resume: Resume, layout: LayoutTemplate):
     while
       contentMap.contains(request.parentColumnId)
       && contentMap(request.parentColumnId).nonEmpty
-      && cursor.y + sectionMap(contentMap(request.parentColumnId).front).height.getOrElse(0F) < maxY
+      && sectionLookAhead(cursor.y, request.parentColumnId)
     do
 
+      // remove template id from queue and get section template
       val contentId = contentMap(request.parentColumnId).dequeue()
       val section = sectionMap(contentId)
+
+      // get the section template's content
+      val contentItem = sectionContent(section)
+
+      // calculate the content element's width and height
       val width = sectionWidth(section, request.parentWidth)
       val height = sectionHeight(section, request.parentHeight)
-
-      val contentItem = section.contentTemplate match
-        case Some(content) =>
-          val text = content.resumeDataType match
-            case Some(resumeDataType) => resumeDataType match
-              case ResumeDataType.Name => resume.name
-            case None => ""
-          val color = content.fontTemplate match
-            case Some(fontTemplate) => fontTemplate.color
-            case None => Color.Transparent
-          Some(ContentItem(text, color))
-        case None => None
 
       result += Content(
         position = cursor,
@@ -178,11 +172,27 @@ class TemplateTransformer(resume: Resume, layout: LayoutTemplate):
       .foreach((key, values) => map(key.getOrElse("")) = Queue.from(values.sortBy(_.order).map(_.id)))
     map
 
+  private def sectionLookAhead(currentY: Float, parentColumnId: String): Boolean =
+    currentY + sectionMap(contentMap(parentColumnId).front).height.getOrElse(0F) < maxY
+
   private def sectionWidth(section: SectionTemplate, parentWidth: Float = 0F): Float =
     section.width.getOrElse(parentWidth)
 
   private def sectionHeight(section: SectionTemplate, parentHeight: Float = 0F): Float =
     section.height.getOrElse(parentHeight)
+
+  private def sectionContent(section: SectionTemplate): Option[ContentItem] =
+    section.contentTemplate match
+      case Some(content) =>
+        val text = content.resumeDataType match
+          case Some(resumeDataType) => resumeDataType match
+            case ResumeDataType.Name => resume.name
+          case None => ""
+        val color = content.fontTemplate match
+          case Some(fontTemplate) => fontTemplate.color
+          case None => Color.Transparent
+        Some(ContentItem(text, color))
+      case None => None
 
 case class ContentCreate(
   val parentColumnId: String,
