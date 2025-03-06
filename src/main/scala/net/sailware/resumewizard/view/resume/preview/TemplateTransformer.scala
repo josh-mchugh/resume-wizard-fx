@@ -182,17 +182,18 @@ class TemplateTransformer(resume: Resume, layout: LayoutTemplate):
     section.height.getOrElse(parentHeight)
 
   private def sectionContent(section: SectionTemplate): Option[ContentItem] =
-    section.contentTemplate match
-      case Some(content) =>
-        val text = content.resumeDataType match
-          case Some(resumeDataType) => resumeDataType match
-            case ResumeDataType.Name => resume.name
-          case None => ""
-        val color = content.fontTemplate match
-          case Some(fontTemplate) => fontTemplate.color
-          case None => Color.Transparent
-        Some(ContentItem(text, color))
-      case None => None
+    val resumeContent = (resumeDataType: ResumeDataType) =>
+      resumeDataType match
+        case ResumeDataType.Name => resume.name
+
+    section.contentTemplate
+      .map(content =>
+        val text = content.resumeDataType
+         .map(resumeContent(_))
+         .getOrElse("")
+        Some(ContentItem(text, content.fontTemplate.color))
+      )
+      .getOrElse(None)
 
 case class ContentCreate(
   val parentColumnId: String,

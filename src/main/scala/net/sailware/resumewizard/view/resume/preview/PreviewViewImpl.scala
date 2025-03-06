@@ -382,7 +382,7 @@ case class FontTemplate(
 
 case class ContentTemplate(
   val resumeDataType: Option[ResumeDataType] = None,
-  val fontTemplate: Option[FontTemplate] = None
+  val fontTemplate: FontTemplate = FontTemplate()
 )
 
 case class SectionTemplate(
@@ -419,9 +419,13 @@ object PageTemplate:
     ): PageTemplate =
       PageTemplate(width, height, margin, padding, border)
 
-case class Palette()
+case class Palette(
+  val colors: Map[String, Color] = Map.empty
+)
 
-case class TypeFaces()
+case class TypeFaces(
+  val fonts: Map[String, Font] = Map.empty
+)
 
 case class LayoutTemplate(
   val page: PageTemplate = PageTemplate.A4(),

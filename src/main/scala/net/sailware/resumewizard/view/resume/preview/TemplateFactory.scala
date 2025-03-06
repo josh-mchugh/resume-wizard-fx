@@ -320,9 +320,7 @@ object TemplateFactory:
           order = 1,
           contentTemplate = Some(ContentTemplate(
             resumeDataType = Some(ResumeDataType.Name),
-            fontTemplate = Some(FontTemplate(
-              color = Color.White
-            ))
+            fontTemplate = FontTemplate(color = Color.White)
           ))
         )
       )
