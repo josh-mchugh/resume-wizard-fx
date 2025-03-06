@@ -318,10 +318,13 @@ object TemplateFactory:
           parentId = Some("COLUMN1"),
           `type` = SectionType.Content,
           order = 1,
-          contentTemplate = Some(ContentTemplate(
-            resumeDataType = Some(ResumeDataType.Name),
-            fontTemplate = FontTemplate(color = Color.White)
-          ))
+          contentTemplate = Some(
+            ContentTemplate(
+              resumeDataType = Some(ResumeDataType.Name),
+              size = 23F,
+              color = Color.White
+            )
+          )
         )
       )
     )

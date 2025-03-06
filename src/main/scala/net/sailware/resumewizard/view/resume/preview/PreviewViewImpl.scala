@@ -65,7 +65,7 @@ class PreviewViewImpl(val model: PreviewModel) extends PreviewView:
         c.item match
           case Some(item) =>
             val contentPosition = ElementUtil.contentStartPosition(element)
-            val font = Font.font("Arial", FontWeight.BOLD, 24)
+            val font = Font.font("Arial", FontWeight.BOLD, item.size)
 
             gc.setFont(font)
             gc.setFill(item.color)
@@ -344,6 +344,7 @@ case class Content(
 
 case class ContentItem(
   val text: String = "",
+  val size: Float = 0F,
   val color: Color = Color.Transparent
 )
 
@@ -376,13 +377,10 @@ enum SectionType:
 enum ResumeDataType:
   case Name
 
-case class FontTemplate(
-  color: Color = Color.Transparent
-)
-
 case class ContentTemplate(
   val resumeDataType: Option[ResumeDataType] = None,
-  val fontTemplate: FontTemplate = FontTemplate()
+  val size: Float = 0F,
+  val color: Color = Color.Transparent
 )
 
 case class SectionTemplate(

@@ -191,7 +191,7 @@ class TemplateTransformer(resume: Resume, layout: LayoutTemplate):
         val text = content.resumeDataType
          .map(resumeContent(_))
          .getOrElse("")
-        Some(ContentItem(text, content.fontTemplate.color))
+        Some(ContentItem(text, content.size, content.color))
       )
       .getOrElse(None)
 
