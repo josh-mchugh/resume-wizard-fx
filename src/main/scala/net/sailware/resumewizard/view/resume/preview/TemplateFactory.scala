@@ -325,6 +325,19 @@ object TemplateFactory:
               color = Color.White
             )
           )
+        ),
+        SectionTemplate(
+          id = "TITLE",
+          parentId = Some("COLUMN1"),
+          `type` = SectionType.Content,
+          order = 1,
+          contentTemplate = Some(
+            ContentTemplate(
+              resumeDataType = Some(ResumeDataType.Title),
+              size = 11F,
+              color = Color.White
+            )
+          )
         )
       )
     )

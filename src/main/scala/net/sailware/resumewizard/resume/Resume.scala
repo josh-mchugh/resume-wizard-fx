@@ -30,4 +30,11 @@ case class Resume(
 
 object Resume:
 
-  def test(): Resume = Resume(name = "John Doe")
+  def test(): Resume = Resume(
+    name = "John Doe's Resume",
+    personalDetails = PersonalDetails(
+      name = "John Doe",
+      title = "Senior Web Designer",
+      summary = ""
+    )
+  )

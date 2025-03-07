@@ -375,7 +375,7 @@ enum SectionType:
   case Row, Column, Content
 
 enum ResumeDataType:
-  case Name
+  case Name, Title
 
 case class ContentTemplate(
   val resumeDataType: Option[ResumeDataType] = None,

@@ -129,18 +129,19 @@ class TemplateTransformer(resume: Resume, layout: LayoutTemplate):
         val contentId = contentMap(request.parentColumnId).dequeue()
         val section = sectionMap(contentId)
 
-        result += createContent(section, cursor, request)
+        val content = createContent(section, cursor.x, cursor.y, request)
+        result += content
 
         val nextContentId = contentMap(request.parentColumnId).headOption
         val nextContent = nextContentId.map(id =>
           val nextSection = sectionMap(id)
-          Some(createContent(nextSection, cursor, request))
+          Some(createContent(nextSection, cursor.x, cursor.y + content.height, request))
         ).getOrElse(None)
 
         cursor = Cursor(
-          state = if nextContent.isDefined then CursorState.Progress else CursorState.Complete,
+          state = if nextContent.isDefined then CursorState.Process else CursorState.Complete,
           x = cursor.x + sectionWidth(section),
-          y = cursor.y + sectionHeight(section),
+          y = cursor.y + nextContent.map(_.height).getOrElse(0F),
           next = nextContent
         )
 
@@ -155,13 +156,13 @@ class TemplateTransformer(resume: Resume, layout: LayoutTemplate):
         val nextContentId = contentMap(request.parentColumnId).headOption
         val nextContent = nextContentId.map(id =>
           val nextSection = sectionMap(id)
-          Some(createContent(nextSection, cursor, request))
+          Some(createContent(nextSection, cursor.x, cursor.y + content.height, request))
         ).getOrElse(None)
 
         cursor = Cursor(
-          state = if nextContent.isDefined then CursorState.Progress else CursorState.Complete,
+          state = if nextContent.isDefined then CursorState.Process else CursorState.Complete,
           x = cursor.x + sectionWidth(section),
-          y = cursor.y + sectionHeight(section),
+          y = cursor.y + nextContent.map(_.height).getOrElse(0F),
           next = nextContent
         )
 
@@ -189,17 +190,27 @@ class TemplateTransformer(resume: Resume, layout: LayoutTemplate):
       .foreach((key, values) => map(key.getOrElse("")) = Queue.from(values.sortBy(_.order).map(_.id)))
     map
 
-  private def createContent(section: SectionTemplate, cursor: Cursor[Content], request: ContentCreate): Content =
+  private def sectionWidth(section: SectionTemplate, parentWidth: Float = 0F): Float =
+    section.width.getOrElse(parentWidth)
+
+  private def sectionHeight(section: SectionTemplate, parentHeight: Float = 0F): Float =
+    section.height.getOrElse(parentHeight)
+
+  private def sectionLookAhead(cursor: Cursor[Content]): Boolean =
+    CursorState.Complete != cursor.state && cursor.y + cursor.next.map(_.height).getOrElse(0F) < maxY
+
+  private def createContent(section: SectionTemplate, x: Float, y: Float, request: ContentCreate): Content =
 
     // get the section template's content
     val contentItem = sectionContent(section)
 
     // calculate the content element's width and height
     val width = sectionWidth(section, request.parentWidth)
-    val height = sectionHeight(section, request.parentHeight)
+    val height = contentItem.map(content => content.size)
+      .getOrElse(sectionHeight(section))
 
     Content(
-      position = Position(cursor.x, cursor.y),
+      position = Position(x, y),
       width = width,
       height = height,
       padding = section.padding,
@@ -209,19 +220,11 @@ class TemplateTransformer(resume: Resume, layout: LayoutTemplate):
       item = contentItem
     )
 
-  private def sectionLookAhead(cursor: Cursor[Content]): Boolean =
-    CursorState.Complete != cursor.state && cursor.y + cursor.next.map(_.height).getOrElse(0F) < maxY
-
-  private def sectionWidth(section: SectionTemplate, parentWidth: Float = 0F): Float =
-    section.width.getOrElse(parentWidth)
-
-  private def sectionHeight(section: SectionTemplate, parentHeight: Float = 0F): Float =
-    section.height.getOrElse(parentHeight)
-
   private def sectionContent(section: SectionTemplate): Option[ContentItem] =
     val resumeContent = (resumeDataType: ResumeDataType) =>
       resumeDataType match
-        case ResumeDataType.Name => resume.name
+        case ResumeDataType.Name => resume.personalDetails.name
+        case ResumeDataType.Title => resume.personalDetails.title
 
     section.contentTemplate
       .map(content =>
@@ -258,7 +261,7 @@ case class ContinuableResults[T](
 )
 
 enum CursorState:
-  case Progress, Complete
+  case Process, Complete
 
 case class Cursor[T](
   state: CursorState = CursorState.Process,
