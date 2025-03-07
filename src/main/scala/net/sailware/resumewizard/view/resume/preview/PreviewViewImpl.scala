@@ -4,6 +4,7 @@ import net.sailware.resumewizard.resume.Resume
 import org.slf4j.LoggerFactory
 import scalafx.Includes.*
 import scalafx.geometry.Pos
+import scalafx.geometry.VPos
 import scalafx.scene.Node
 import scalafx.scene.canvas.Canvas
 import scalafx.scene.canvas.GraphicsContext
@@ -11,9 +12,8 @@ import scalafx.scene.layout.VBox
 import scalafx.scene.paint.Color
 import scalafx.scene.text.Font
 import scalafx.scene.text.FontWeight
-import scalafx.stage.Screen
 import scalafx.scene.text.TextAlignment
-import scalafx.geometry.VPos
+import scalafx.stage.Screen
 
 class PreviewViewImpl(val model: PreviewModel) extends PreviewView:
 
