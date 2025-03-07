@@ -114,39 +114,56 @@ class TemplateTransformer(resume: Resume, layout: LayoutTemplate):
     ContinuableResults(result.toList, continue)
 
   def createContent(request: ContentCreate): ContinuableResults[Content] =
-    var cursor: Position = request.start
-
+    var cursor: Cursor[Content] = Cursor(x = request.start.x, y = request.start.y)
     val result = ListBuffer[Content]()
 
     while
       contentMap.contains(request.parentColumnId)
       && contentMap(request.parentColumnId).nonEmpty
-      && sectionLookAhead(cursor.y, request.parentColumnId)
+      && sectionLookAhead(cursor)
     do
 
-      // remove template id from queue and get section template
-      val contentId = contentMap(request.parentColumnId).dequeue()
-      val section = sectionMap(contentId)
+      if cursor.next.isEmpty then
 
-      // get the section template's content
-      val contentItem = sectionContent(section)
+        // remove template id from queue and get section template
+        val contentId = contentMap(request.parentColumnId).dequeue()
+        val section = sectionMap(contentId)
 
-      // calculate the content element's width and height
-      val width = sectionWidth(section, request.parentWidth)
-      val height = sectionHeight(section, request.parentHeight)
+        result += createContent(section, cursor, request)
 
-      result += Content(
-        position = cursor,
-        width = width,
-        height = height,
-        padding = section.padding,
-        margin = section.margin,
-        border = section.border,
-        background = section.background,
-        item = contentItem
-      )
+        val nextContentId = contentMap(request.parentColumnId).headOption
+        val nextContent = nextContentId.map(id =>
+          val nextSection = sectionMap(id)
+          Some(createContent(nextSection, cursor, request))
+        ).getOrElse(None)
 
-      cursor = Position(cursor.x + sectionWidth(section), cursor.y + height)
+        cursor = Cursor(
+          state = if nextContent.isDefined then CursorState.Progress else CursorState.Complete,
+          x = cursor.x + sectionWidth(section),
+          y = cursor.y + sectionHeight(section),
+          next = nextContent
+        )
+
+      else
+
+        val content = cursor.next.get
+        result += content
+
+        val contentId = contentMap(request.parentColumnId).dequeue()
+        val section = sectionMap(contentId)
+
+        val nextContentId = contentMap(request.parentColumnId).headOption
+        val nextContent = nextContentId.map(id =>
+          val nextSection = sectionMap(id)
+          Some(createContent(nextSection, cursor, request))
+        ).getOrElse(None)
+
+        cursor = Cursor(
+          state = if nextContent.isDefined then CursorState.Progress else CursorState.Complete,
+          x = cursor.x + sectionWidth(section),
+          y = cursor.y + sectionHeight(section),
+          next = nextContent
+        )
 
     val continue = !contentMap.contains(request.parentColumnId) || contentMap(request.parentColumnId).isEmpty
     ContinuableResults(result.toList, continue)
@@ -172,8 +189,28 @@ class TemplateTransformer(resume: Resume, layout: LayoutTemplate):
       .foreach((key, values) => map(key.getOrElse("")) = Queue.from(values.sortBy(_.order).map(_.id)))
     map
 
-  private def sectionLookAhead(currentY: Float, parentColumnId: String): Boolean =
-    currentY + sectionMap(contentMap(parentColumnId).front).height.getOrElse(0F) < maxY
+  private def createContent(section: SectionTemplate, cursor: Cursor[Content], request: ContentCreate): Content =
+
+    // get the section template's content
+    val contentItem = sectionContent(section)
+
+    // calculate the content element's width and height
+    val width = sectionWidth(section, request.parentWidth)
+    val height = sectionHeight(section, request.parentHeight)
+
+    Content(
+      position = Position(cursor.x, cursor.y),
+      width = width,
+      height = height,
+      padding = section.padding,
+      margin = section.margin,
+      border = section.border,
+      background = section.background,
+      item = contentItem
+    )
+
+  private def sectionLookAhead(cursor: Cursor[Content]): Boolean =
+    CursorState.Complete != cursor.state && cursor.y + cursor.next.map(_.height).getOrElse(0F) < maxY
 
   private def sectionWidth(section: SectionTemplate, parentWidth: Float = 0F): Float =
     section.width.getOrElse(parentWidth)
@@ -218,4 +255,14 @@ case class RowCreate(
 case class ContinuableResults[T](
   val items: List[T],
   val continue: Boolean
+)
+
+enum CursorState:
+  case Progress, Complete
+
+case class Cursor[T](
+  state: CursorState = CursorState.Process,
+  x: Float = 0F,
+  y: Float = 0F,
+  next: Option[T] = None
 )
