@@ -123,48 +123,24 @@ class TemplateTransformer(resume: Resume, layout: LayoutTemplate):
       && sectionLookAhead(cursor)
     do
 
-      if cursor.next.isEmpty then
+      val contentId = contentMap(request.parentColumnId).dequeue()
+      val section = sectionMap(contentId)
 
-        // remove template id from queue and get section template
-        val contentId = contentMap(request.parentColumnId).dequeue()
-        val section = sectionMap(contentId)
+      val content = cursor.next.getOrElse(createContent(section, cursor.x, cursor.y, request))
+      result += content
 
-        val content = createContent(section, cursor.x, cursor.y, request)
-        result += content
+      val nextContentId = contentMap(request.parentColumnId).headOption
+      val nextContent = nextContentId.map(id =>
+        val nextSection = sectionMap(id)
+        Some(createContent(nextSection, cursor.x, cursor.y + content.height, request))
+      ).getOrElse(None)
 
-        val nextContentId = contentMap(request.parentColumnId).headOption
-        val nextContent = nextContentId.map(id =>
-          val nextSection = sectionMap(id)
-          Some(createContent(nextSection, cursor.x, cursor.y + content.height, request))
-        ).getOrElse(None)
-
-        cursor = Cursor(
-          state = if nextContent.isDefined then CursorState.Process else CursorState.Complete,
-          x = cursor.x + sectionWidth(section),
-          y = cursor.y + nextContent.map(_.height).getOrElse(0F),
-          next = nextContent
-        )
-
-      else
-
-        val content = cursor.next.get
-        result += content
-
-        val contentId = contentMap(request.parentColumnId).dequeue()
-        val section = sectionMap(contentId)
-
-        val nextContentId = contentMap(request.parentColumnId).headOption
-        val nextContent = nextContentId.map(id =>
-          val nextSection = sectionMap(id)
-          Some(createContent(nextSection, cursor.x, cursor.y + content.height, request))
-        ).getOrElse(None)
-
-        cursor = Cursor(
-          state = if nextContent.isDefined then CursorState.Process else CursorState.Complete,
-          x = cursor.x + sectionWidth(section),
-          y = cursor.y + nextContent.map(_.height).getOrElse(0F),
-          next = nextContent
-        )
+      cursor = Cursor(
+        state = if nextContent.isDefined then CursorState.Process else CursorState.Complete,
+        x = cursor.x + sectionWidth(section),
+        y = cursor.y + nextContent.map(_.height).getOrElse(0F),
+        next = nextContent
+      )
 
     val continue = !contentMap.contains(request.parentColumnId) || contentMap(request.parentColumnId).isEmpty
     ContinuableResults(result.toList, continue)
