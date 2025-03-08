@@ -1,7 +1,5 @@
 package net.sailware.resumewizard.view.resume.preview
 
-import scalafx.scene.paint.Color
-
 object TemplateFactory:
 
   def simpleBorderedPage(): LayoutTemplate =
@@ -40,7 +38,7 @@ object TemplateFactory:
           order = 1,
           width = Some(171.666F),
           margin = Margin(0F, 8F, 0F, 0F),
-          background = Background(Color.Gray)
+          background = Background(Palette.color(Palette.GRAY_300))
         ),
         SectionTemplate(
           id = "COLUMN2",
@@ -49,7 +47,7 @@ object TemplateFactory:
           order = 2,
           width = Some(171.666F),
           margin = Margin(0F, 8F, 0F, 8F),
-          background = Background(Color.Gray)
+          background = Background(Palette.color(Palette.GRAY_300))
         ),
         SectionTemplate(
           id = "COLUMN3",
@@ -58,7 +56,7 @@ object TemplateFactory:
           order = 3,
           width = Some(171.666F),
           margin = Margin(0F, 0F, 0F, 8F),
-          background = Background(Color.Gray)
+          background = Background(Palette.color(Palette.GRAY_300))
         ),
         SectionTemplate(
           id = "COLUMN4",
@@ -75,7 +73,7 @@ object TemplateFactory:
           order = 1,
           height = Some(227.333F),
           margin = Margin(0F, 0F, 8F, 0F),
-          background = Background(Color.Gray)
+          background = Background(Palette.color(Palette.GRAY_300))
         ),
         SectionTemplate(
           id = "CONTENT2",
@@ -83,7 +81,7 @@ object TemplateFactory:
           `type` = SectionType.Content,
           order = 2,
           height = Some(50F),
-          background = Background(Color.Gray)
+          background = Background(Palette.color(Palette.GRAY_300))
         ),
         SectionTemplate(
           id = "COLUMN5",
@@ -92,7 +90,7 @@ object TemplateFactory:
           order = 2,
           width = Some(171.666F),
           margin = Margin(0F, 8F, 0F, 8F),
-          background = Background(Color.Gray)
+          background = Background(Palette.color(Palette.GRAY_300))
         ),
         SectionTemplate(
           id = "COLUMN6",
@@ -101,7 +99,7 @@ object TemplateFactory:
           order = 3,
           width = Some(171.666F),
           margin = Margin(0F, 0F, 0F, 8F),
-          background = Background(Color.Gray)
+          background = Background(Palette.color(Palette.GRAY_300))
         ),
       ),
     )
@@ -129,7 +127,7 @@ object TemplateFactory:
           height = Some(60F),
           order = 1,
           margin = Margin(0F, 0F, 8F, 0),
-          background = Background(color = Color.rgb(61, 141, 122))
+          background = Background(Palette.color(Palette.GREEN_DARK))
         ),
         SectionTemplate(
           id ="CONTENT_2",
@@ -138,7 +136,7 @@ object TemplateFactory:
           height = Some(60F),
           order = 2,
           margin = Margin(0F, 0F, 8F, 0),
-          background = Background(color = Color.rgb(163, 209, 198))
+          background = Background(Palette.color(Palette.GREEN_LIGHT))
         ),
         SectionTemplate(
           id ="CONTENT_3",
@@ -147,7 +145,7 @@ object TemplateFactory:
           height = Some(60F),
           order = 3,
           margin = Margin(0F, 0F, 8F, 0),
-          background = Background(color = Color.rgb(61, 141, 122))
+          background = Background(Palette.color(Palette.GREEN_DARK))
         ),
         SectionTemplate(
           id ="CONTENT_4",
@@ -156,7 +154,7 @@ object TemplateFactory:
           height = Some(60F),
           order = 4,
           margin = Margin(0F, 0F, 8F, 0),
-          background = Background(color = Color.rgb(163, 209, 198))
+          background = Background(Palette.color(Palette.GREEN_LIGHT))
         ),
         SectionTemplate(
           id ="CONTENT_5",
@@ -165,7 +163,7 @@ object TemplateFactory:
           height = Some(60F),
           order = 5,
           margin = Margin(0F, 0F, 8F, 0),
-          background = Background(color = Color.rgb(61, 141, 122))
+          background = Background(Palette.color(Palette.GREEN_DARK))
         ),
         SectionTemplate(
           id ="CONTENT_6",
@@ -174,7 +172,7 @@ object TemplateFactory:
           height = Some(60F),
           order = 6,
           margin = Margin(0F, 0F, 8F, 0),
-          background = Background(color = Color.rgb(163, 209, 198))
+          background = Background(Palette.color(Palette.GREEN_LIGHT))
         ),
         SectionTemplate(
           id ="CONTENT_7",
@@ -183,7 +181,7 @@ object TemplateFactory:
           height = Some(60F),
           order = 7,
           margin = Margin(0F, 0F, 8F, 0),
-          background = Background(color = Color.rgb(61, 141, 122))
+          background = Background(Palette.color(Palette.GREEN_DARK))
         ),
         SectionTemplate(
           id ="CONTENT_8",
@@ -192,7 +190,7 @@ object TemplateFactory:
           height = Some(60F),
           order = 8,
           margin = Margin(0F, 0F, 8F, 0),
-          background = Background(color = Color.rgb(163, 209, 198))
+          background = Background(Palette.color(Palette.GREEN_LIGHT))
         ),
         SectionTemplate(
           id ="CONTENT_9",
@@ -201,7 +199,7 @@ object TemplateFactory:
           height = Some(60F),
           order = 9,
           margin = Margin(0F, 0F, 8F, 0),
-          background = Background(color = Color.rgb(61, 141, 122))
+          background = Background(Palette.color(Palette.GREEN_DARK))
         ),
         SectionTemplate(
           id ="CONTENT_10",
@@ -210,7 +208,7 @@ object TemplateFactory:
           height = Some(60F),
           order = 10,
           margin = Margin(0F, 0F, 8F, 0),
-          background = Background(color = Color.rgb(163, 209, 198))
+          background = Background(Palette.color(Palette.GREEN_LIGHT))
         ),
         SectionTemplate(
           id ="CONTENT_11",
@@ -219,7 +217,7 @@ object TemplateFactory:
           height = Some(60F),
           order = 11,
           margin = Margin(0F, 0F, 8F, 0),
-          background = Background(color = Color.rgb(61, 141, 122))
+          background = Background(Palette.color(Palette.GREEN_DARK))
         ),
         SectionTemplate(
           id ="CONTENT_12",
@@ -228,7 +226,7 @@ object TemplateFactory:
           height = Some(60F),
           order = 12,
           margin = Margin(0F, 0F, 8F, 0),
-          background = Background(color = Color.rgb(163, 209, 198))
+          background = Background(Palette.color(Palette.GREEN_LIGHT))
         ),
         SectionTemplate(
           id ="CONTENT_13",
@@ -237,7 +235,7 @@ object TemplateFactory:
           height = Some(60F),
           order = 13,
           margin = Margin(0F, 0F, 8F, 0),
-          background = Background(color = Color.rgb(61, 141, 122))
+          background = Background(Palette.color(Palette.GREEN_DARK))
         ),
         SectionTemplate(
           id ="CONTENT_14",
@@ -246,7 +244,7 @@ object TemplateFactory:
           height = Some(60F),
           order = 14,
           margin = Margin(0F, 0F, 8F, 0),
-          background = Background(color = Color.rgb(163, 209, 198))
+          background = Background(Palette.color(Palette.GREEN_LIGHT))
         ),
         SectionTemplate(
           id ="CONTENT_15",
@@ -255,7 +253,7 @@ object TemplateFactory:
           height = Some(60F),
           order = 15,
           margin = Margin(0F, 0F, 8F, 0),
-          background = Background(color = Color.rgb(61, 141, 122))
+          background = Background(Palette.color(Palette.GREEN_DARK))
         ),
         SectionTemplate(
           id ="CONTENT_16",
@@ -264,7 +262,7 @@ object TemplateFactory:
           height = Some(60F),
           order = 16,
           margin = Margin(0F, 0F, 8F, 0),
-          background = Background(color = Color.rgb(163, 209, 198))
+          background = Background(Palette.color(Palette.GREEN_LIGHT))
         ),
         SectionTemplate(
           id ="CONTENT_17",
@@ -273,7 +271,7 @@ object TemplateFactory:
           height = Some(60F),
           order = 17,
           margin = Margin(0F, 0F, 8F, 0),
-          background = Background(color = Color.rgb(61, 141, 122))
+          background = Background(Palette.color(Palette.GREEN_DARK))
         ),
         SectionTemplate(
           id ="CONTENT_18",
@@ -282,7 +280,7 @@ object TemplateFactory:
           height = Some(60F),
           order = 18,
           margin = Margin(0F, 0F, 8F, 0),
-          background = Background(color = Color.rgb(163, 209, 198))
+          background = Background(Palette.color(Palette.GREEN_LIGHT))
         ),
       )
     )
@@ -304,7 +302,7 @@ object TemplateFactory:
           order = 1,
           width = Some(206.465F),
           padding = Padding(42F, 0F, 0F, 24F),
-          background = Background(Color.rgb(17, 33, 47))
+          background = Background(Palette.color(Palette.PRIMARY))
         ),
         SectionTemplate(
           id = "COLUMN2",
@@ -322,7 +320,7 @@ object TemplateFactory:
             ContentTemplate(
               resumeDataType = Some(ResumeDataType.Name),
               size = 23F,
-              color = Color.White
+              color = Palette.color(Palette.WHITE)
             )
           )
         ),
@@ -335,7 +333,7 @@ object TemplateFactory:
             ContentTemplate(
               resumeDataType = Some(ResumeDataType.Title),
               size = 11F,
-              color = Color.White
+              color = Palette.color(Palette.WHITE)
             )
           )
         )

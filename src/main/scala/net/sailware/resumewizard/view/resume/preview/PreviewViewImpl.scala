@@ -417,9 +417,30 @@ object PageTemplate:
     ): PageTemplate =
       PageTemplate(width, height, margin, padding, border)
 
-case class Palette(
-  val colors: Map[String, Color] = Map.empty
-)
+object Palette:
+  // generic colors
+  val WHITE  = "WHITE"
+
+  // test colors for alternating blocks
+  val GREEN_DARK = "GREEN_DARK"
+  val GREEN_LIGHT = "GREEN_LIGHT"
+
+  // resume theme colors
+  val PRIMARY = "PRIMARY"
+  val GRAY_300 = "GRAY_300"
+
+  def color(key: String): Color = colors(key)
+
+  private val colors: Map[String, Color] = Map(
+    // generic colors
+    WHITE -> Color.rgb(255, 255, 255, 1F),
+    // test colors for alternating blocks
+    GREEN_DARK -> Color.rgb(61, 141, 122),
+    GREEN_LIGHT -> Color.rgb(163, 209, 198),
+    // resume theme colors
+    PRIMARY -> Color.rgb(17, 33, 47, 1F),
+    GRAY_300 -> Color.rgb(209, 213, 219, 1F)
+  )
 
 case class TypeFaces(
   val fonts: Map[String, Font] = Map.empty
@@ -429,5 +450,4 @@ case class LayoutTemplate(
   val page: PageTemplate = PageTemplate.A4(),
   val sections: List[SectionTemplate] = List.empty,
   val typeFaces: TypeFaces = TypeFaces(),
-  val palette: Palette = Palette()
 )
