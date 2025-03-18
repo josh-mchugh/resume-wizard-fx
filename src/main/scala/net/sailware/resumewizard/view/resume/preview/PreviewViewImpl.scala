@@ -65,7 +65,7 @@ class PreviewViewImpl(val model: PreviewModel) extends PreviewView:
         c.item match
           case Some(item) =>
             val contentPosition = ElementUtil.contentStartPosition(element)
-            val font = Font.font("Arial", FontWeight.BOLD, item.size)
+            val font = ResumeFonts.loadFont(item.family.getOrElse("Arial"), item.weight.getOrElse(ResumeFontWeight.Normal), item.size)
 
             gc.setFont(font)
             gc.setFill(item.color)
@@ -345,7 +345,9 @@ case class Content(
 case class ContentItem(
   val text: String = "",
   val size: Float = 0F,
-  val color: Color = Color.Transparent
+  val color: Color = Color.Transparent,
+  val family: Option[String] = None,
+  val weight: Option[ResumeFontWeight] = None
 )
 
 class Data:
@@ -380,7 +382,9 @@ enum ResumeDataType:
 case class ContentTemplate(
   val resumeDataType: Option[ResumeDataType] = None,
   val size: Float = 0F,
-  val color: Color = Color.Transparent
+  val color: Color = Color.Transparent,
+  val family: Option[String] = None,
+  val weight: Option[ResumeFontWeight] = None
 )
 
 case class SectionTemplate(
@@ -442,9 +446,52 @@ object Palette:
     GRAY_300 -> Color.rgb(209, 213, 219, 1F)
   )
 
-case class TypeFaces(
+class TypeFaces(
   val fonts: Map[String, Font] = Map.empty
 )
+
+object ResumeFontFamily:
+  val ROBOTO: String = "Roboto"
+
+enum ResumeFontWeight:
+  case Normal, Medium, Bold
+
+case class ResumeFont (
+  val family: String,
+  val weight: ResumeFontWeight,
+  val path: String,
+)
+
+object ResumeFonts:
+  private val configs = Map[String, ResumeFont](
+    s"${ResumeFontFamily.ROBOTO}_${ResumeFontWeight.Bold}" -> ResumeFont(
+      ResumeFontFamily.ROBOTO,
+      ResumeFontWeight.Bold,
+      "/font/Roboto-Bold.ttf"
+    ),
+    s"${ResumeFontFamily.ROBOTO}_${ResumeFontWeight.Medium}" -> ResumeFont(
+      ResumeFontFamily.ROBOTO,
+      ResumeFontWeight.Medium,
+      "/font/Roboto-Medium.ttf"
+    ),
+    s"${ResumeFontFamily.ROBOTO}_${ResumeFontWeight.Normal}" -> ResumeFont(
+      ResumeFontFamily.ROBOTO,
+      ResumeFontWeight.Normal,
+      "/font/Roboto-Regular.ttf"
+    )
+  )
+
+  private val fonts = collection.mutable.Map[String, Font]()
+
+  def loadFont(family: String, weight: ResumeFontWeight, size: Float): Font =
+    val key = s"${family}_${weight}_${size}"
+    if fonts.get(key).isDefined then
+      fonts(key)
+    else
+      val resumeFont = configs(s"${family}_${weight}")
+      val font = Font.loadFont(getClass().getResource(resumeFont.path).openStream(), size)
+      fonts.put(key, font)
+      font
 
 case class LayoutTemplate(
   val page: PageTemplate = PageTemplate.A4(),

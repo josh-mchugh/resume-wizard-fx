@@ -320,7 +320,9 @@ object TemplateFactory:
             ContentTemplate(
               resumeDataType = Some(ResumeDataType.Name),
               size = 23F,
-              color = Palette.color(Palette.WHITE)
+              color = Palette.color(Palette.WHITE),
+              family = Some(ResumeFontFamily.ROBOTO),
+              weight = Some(ResumeFontWeight.Bold)
             )
           )
         ),
@@ -333,7 +335,9 @@ object TemplateFactory:
             ContentTemplate(
               resumeDataType = Some(ResumeDataType.Title),
               size = 11F,
-              color = Palette.color(Palette.WHITE)
+              color = Palette.color(Palette.WHITE),
+              family = Some(ResumeFontFamily.ROBOTO),
+              weight = Some(ResumeFontWeight.Normal)
             )
           )
         )
