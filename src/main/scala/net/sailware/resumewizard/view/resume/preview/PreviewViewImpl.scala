@@ -377,7 +377,7 @@ enum SectionType:
   case Row, Column, Content
 
 enum ResumeDataType:
-  case Name, Title
+  case Name, Title, Summary
 
 case class ContentTemplate(
   val resumeDataType: Option[ResumeDataType] = None,
@@ -485,6 +485,7 @@ object ResumeFonts:
 
   def loadFont(family: String, weight: ResumeFontWeight, size: Float): Font =
     val key = s"${family}_${weight}_${size}"
+
     if fonts.get(key).isDefined then
       fonts(key)
     else

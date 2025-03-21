@@ -5,9 +5,12 @@ import collection.mutable.HashMap
 import collection.mutable.Map
 import collection.mutable.Queue
 import net.sailware.resumewizard.resume.Resume
+import org.slf4j.LoggerFactory
 import scalafx.scene.paint.Color
 
 class TemplateTransformer(resume: Resume, layout: LayoutTemplate):
+
+  private val logger = LoggerFactory.getLogger(classOf[TemplateTransformer])
 
   val sectionMap: Map[String, SectionTemplate] = sectionsGroupById(layout.sections)
   val rowIds: Queue[String] = sectionIds(layout.sections, SectionType.Row)
@@ -114,6 +117,7 @@ class TemplateTransformer(resume: Resume, layout: LayoutTemplate):
     ContinuableResults(result.toList, continue)
 
   def createContent(request: ContentCreate): ContinuableResults[Content] =
+    logger.info("creating content for: {}", request)
     var cursor: Cursor[Content] = Cursor(x = request.start.x, y = request.start.y)
     val result = ListBuffer[Content]()
 
@@ -127,6 +131,7 @@ class TemplateTransformer(resume: Resume, layout: LayoutTemplate):
       val section = sectionMap(contentId)
 
       val content = cursor.next.getOrElse(createContent(section, cursor.x, cursor.y, request))
+      logger.info("content: {}", content)
       result += content
 
       val nextContentId = contentMap(request.parentColumnId).headOption
@@ -138,7 +143,7 @@ class TemplateTransformer(resume: Resume, layout: LayoutTemplate):
       cursor = Cursor(
         state = if nextContent.isDefined then CursorState.Process else CursorState.Complete,
         x = cursor.x + sectionWidth(section),
-        y = cursor.y + nextContent.map(_.height).getOrElse(0F),
+        y = cursor.y + content.height,
         next = nextContent
       )
 
@@ -201,6 +206,7 @@ class TemplateTransformer(resume: Resume, layout: LayoutTemplate):
       resumeDataType match
         case ResumeDataType.Name => resume.personalDetails.name
         case ResumeDataType.Title => resume.personalDetails.title
+        case ResumeDataType.Summary => resume.personalDetails.summary
 
     section.contentTemplate
       .map(content =>

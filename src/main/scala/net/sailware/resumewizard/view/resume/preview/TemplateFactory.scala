@@ -330,11 +330,27 @@ object TemplateFactory:
           id = "TITLE",
           parentId = Some("COLUMN1"),
           `type` = SectionType.Content,
-          order = 1,
+          order = 2,
+          margin = Margin(0F, 0F, 30F, 0F),
           contentTemplate = Some(
             ContentTemplate(
               resumeDataType = Some(ResumeDataType.Title),
               size = 11F,
+              color = Palette.color(Palette.WHITE),
+              family = Some(ResumeFontFamily.ROBOTO),
+              weight = Some(ResumeFontWeight.Normal)
+            )
+          )
+        ),
+        SectionTemplate(
+          id = "SUMMARY",
+          parentId = Some("COLUMN1"),
+          `type` = SectionType.Content,
+          order = 3,
+          contentTemplate = Some(
+            ContentTemplate(
+              resumeDataType = Some(ResumeDataType.Summary),
+              size = 9F,
               color = Palette.color(Palette.WHITE),
               family = Some(ResumeFontFamily.ROBOTO),
               weight = Some(ResumeFontWeight.Normal)
