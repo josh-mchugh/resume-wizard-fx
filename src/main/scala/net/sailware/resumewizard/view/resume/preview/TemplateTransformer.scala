@@ -117,6 +117,7 @@ class TemplateTransformer(resume: Resume, layout: LayoutTemplate):
     ContinuableResults(result.toList, continue)
 
   def createContent(request: ContentCreate): ContinuableResults[Content] =
+    logBreak("*")
     logger.info("creating content for: {}", request)
     var cursor: Cursor[Content] = Cursor(x = request.start.x, y = request.start.y)
     val result = ListBuffer[Content]()
@@ -126,13 +127,26 @@ class TemplateTransformer(resume: Resume, layout: LayoutTemplate):
       && contentMap(request.parentColumnId).nonEmpty
       && sectionLookAhead(cursor)
     do
+      logBreak("-")
 
+      // Retrieves or creates Content and adds it to the result list
       val contentId = contentMap(request.parentColumnId).dequeue()
       val section = sectionMap(contentId)
+      val content = cursor.next. match
+        case Some(content) =>
+          logger.info("Content provided by Cursor")
+          content
+        case None =>
+          logger.info("Content not provided, creating content")
+          createContent(section, cursor.x, cursor.y, request)
 
-      val content = cursor.next.getOrElse(createContent(section, cursor.x, cursor.y, request))
-      logger.info("content: {}", content)
+      logger.info("content id: {}", contentId)
+      logger.info("content x: {}, y: {}, width: {}, height: {}", content.x, content.y, content.width, content.height)
+
       result += content
+
+      // Generates the next Content to determine if the 'While' loop should continue
+      logBreak("+")
 
       val nextContentId = contentMap(request.parentColumnId).headOption
       val nextContent = nextContentId.map(id =>
@@ -140,12 +154,11 @@ class TemplateTransformer(resume: Resume, layout: LayoutTemplate):
         Some(createContent(nextSection, cursor.x, cursor.y + content.height, request))
       ).getOrElse(None)
 
-      cursor = Cursor(
-        state = if nextContent.isDefined then CursorState.Process else CursorState.Complete,
-        x = cursor.x + sectionWidth(section),
-        y = cursor.y + content.height,
-        next = nextContent
-      )
+      val nextCursorState = if nextContent.isDefined then CursorState.Process else CursorState.Complete
+      val nextCursorX = cursor.x + sectionWidth(section)
+      val nextCursorY = cursor.y + content.height
+
+      cursor = Cursor(nextCursorState, nextCursorX, nextCursorY, nextContent)
 
     val continue = !contentMap.contains(request.parentColumnId) || contentMap(request.parentColumnId).isEmpty
     ContinuableResults(result.toList, continue)
@@ -216,6 +229,9 @@ class TemplateTransformer(resume: Resume, layout: LayoutTemplate):
         Some(ContentItem(text, content.size, content.color, content.family, content.weight))
       )
       .getOrElse(None)
+
+  private def logBreak(pattern: String): Unit =
+    logger.info(pattern * 50)
 
 case class ContentCreate(
   val parentColumnId: String,
