@@ -77,7 +77,7 @@ class PreviewViewImpl(val model: PreviewModel) extends PreviewView:
       case _ =>
 
   private def renderPage(page: Page, gc: GraphicsContext): Unit =
-    val debug = true
+    val debug = false
     gc.setFill(Color.WHITE)
     gc.fillRect(page.position.x.toPx, page.position.x.toPx, page.width.toPx, page.height.toPx)
     renderElement(page, debug, gc)
@@ -392,14 +392,27 @@ case class SectionTemplate(
   val parentId: Option[String],
   val `type`: SectionType,
   val width: Option[Float] = None,
-  val height: Option[Float] = None,
+  val minHeight: Option[Float] = None,
   val order: Int,
   val margin: Margin = Margin(),
   val padding: Padding = Padding(),
   val border: Border = Border(),
   val background: Background = Background(),
   val contentTemplate: Option[ContentTemplate] = None
-)
+):
+
+  def height(): Float =
+    val calculated = margin.top
+      + border.width
+      + padding.top
+      + contentTemplate.map(_.size).getOrElse(0F)
+      + padding.bottom
+      + border.width
+      + margin.bottom
+
+    minHeight
+      .map(height => if calculated < height then height else calculated)
+      .getOrElse(calculated)
 
 case class PageTemplate(
   val width: Float,

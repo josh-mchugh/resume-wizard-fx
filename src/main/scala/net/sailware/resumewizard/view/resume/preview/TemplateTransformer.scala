@@ -50,7 +50,7 @@ class TemplateTransformer(resume: Resume, layout: LayoutTemplate):
       val rowId = rowIds.front
       val section = sectionMap(rowId)
       val width = sectionWidth(section, request.parentWidth)
-      val height = sectionHeight(section, remainingHeight)
+      val height = sectionHeight(section)
       val continuableResults = createColumns(
         ColumnCreate(
           rowId,
@@ -89,7 +89,7 @@ class TemplateTransformer(resume: Resume, layout: LayoutTemplate):
       val columnId = columnMap(request.parentRowId).front
       val section = sectionMap(columnId)
       val width = sectionWidth(section, request.parentWidth)
-      val height = sectionHeight(section, request.parentHeight)
+      val height = sectionHeight(section)
       val continuableResults = createContent(
         ContentCreate(
           columnId,
@@ -187,8 +187,8 @@ class TemplateTransformer(resume: Resume, layout: LayoutTemplate):
   private def sectionWidth(section: SectionTemplate, parentWidth: Float = 0F): Float =
     section.width.getOrElse(parentWidth)
 
-  private def sectionHeight(section: SectionTemplate, parentHeight: Float = 0F): Float =
-    section.height.getOrElse(parentHeight)
+  private def sectionHeight(section: SectionTemplate): Float =
+    section.height()
 
   private def sectionLookAhead(cursor: Cursor[Content]): Boolean =
     CursorState.Complete != cursor.state && cursor.y + cursor.next.map(_.height).getOrElse(0F) < maxY
@@ -200,8 +200,7 @@ class TemplateTransformer(resume: Resume, layout: LayoutTemplate):
 
     // calculate the content element's width and height
     val width = sectionWidth(section, request.parentWidth)
-    val height = contentItem.map(content => content.size)
-      .getOrElse(sectionHeight(section))
+    val height = section.height()
 
     Content(
       position = Position(x, y),
