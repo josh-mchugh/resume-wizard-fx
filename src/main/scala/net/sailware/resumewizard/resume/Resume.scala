@@ -34,7 +34,7 @@ object Resume:
     name = "John Doe's Resume",
     personalDetails = PersonalDetails(
       name = "John Doe",
-      title = "Senior Web Designer",
+      title = "Web and Graphic Designer",
       summary = "Rock Star/Ninja can you ballpark the cost per unit for me, for touch base disband the squad but rehydrate as needed sacred cow."
     )
   )

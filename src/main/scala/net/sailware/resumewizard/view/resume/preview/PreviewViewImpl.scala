@@ -65,7 +65,7 @@ class PreviewViewImpl(val model: PreviewModel) extends PreviewView:
         c.item match
           case Some(item) =>
             val contentPosition = ElementUtil.contentStartPosition(element)
-            val font = ResumeFonts.loadFont(item.family.getOrElse("Arial"), item.weight.getOrElse(ResumeFontWeight.Normal), item.size)
+            val font = ResumeFonts.loadFont(item.family.getOrElse("Arial"), item.weight.getOrElse(ResumeFontWeight.Normal), item.size.toPx)
 
             gc.setFont(font)
             gc.setFill(item.color)
