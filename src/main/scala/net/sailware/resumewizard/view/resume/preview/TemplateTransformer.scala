@@ -135,18 +135,23 @@ class TemplateTransformer(resume: Resume, layout: LayoutTemplate):
       val content = cursor.next. match
         case Some(content) =>
           logger.info("Content provided by Cursor")
+          logger.info("content id: {}", contentId)
           content
         case None =>
+          val content = createContent(section, cursor.x, cursor.y, request)
           logger.info("Content not provided, creating content")
-          createContent(section, cursor.x, cursor.y, request)
-
-      logger.info("content id: {}", contentId)
-      logger.info("content x: {}, y: {}, width: {}, height: {}", content.x, content.y, content.width, content.height)
+          logger.info("content id: {}", contentId)
+          logger.info("content x: {}", content.x)
+          logger.info("content y: {}", content.y)
+          logger.info("content width: {}", content.width)
+          logger.info("content.height: {}", content.height)
+          content
 
       result += content
 
       // Generates the next Content to determine if the 'While' loop should continue
       logBreak("+")
+      logger.info("Preparing next content")
 
       val nextContentId = contentMap(request.parentColumnId).headOption
       val nextContent = nextContentId.map(id =>
@@ -157,6 +162,17 @@ class TemplateTransformer(resume: Resume, layout: LayoutTemplate):
       val nextCursorState = if nextContent.isDefined then CursorState.Process else CursorState.Complete
       val nextCursorX = cursor.x + sectionWidth(section)
       val nextCursorY = cursor.y + content.height
+
+      logger.info("Next content generated? {}", nextContent.isDefined)
+      nextContent.foreach(nextContent =>
+        logger.info("next content id: {}", nextContentId.get)
+        logger.info("next content x: {}", nextContent.x)
+        logger.info("next content y: {}", nextContent.y)
+        logger.info("next content width: {}", nextContent.width)
+        logger.info("next content height: {}", nextContent.height)
+      )
+
+      logger.info("next cursor ( x: {}, y: {} )", nextCursorX, nextCursorY)
 
       cursor = Cursor(nextCursorState, nextCursorX, nextCursorY, nextContent)
 
