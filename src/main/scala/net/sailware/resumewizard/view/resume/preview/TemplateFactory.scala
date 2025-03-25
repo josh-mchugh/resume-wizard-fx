@@ -349,6 +349,8 @@ object TemplateFactory:
           parentId = Some("COLUMN1"),
           `type` = SectionType.Content,
           order = 3,
+          margin = Margin(0F, 0F, 0F, 18F),
+          padding = Padding(0F, 12F, 0F, 0F),
           contentTemplate = Some(
             ContentTemplate(
               resumeDataType = Some(ResumeDataType.Summary),
