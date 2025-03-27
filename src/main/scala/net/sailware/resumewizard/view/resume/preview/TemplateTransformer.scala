@@ -7,6 +7,9 @@ import collection.mutable.Queue
 import net.sailware.resumewizard.resume.Resume
 import org.slf4j.LoggerFactory
 import scalafx.scene.paint.Color
+import java.awt.Font
+import java.awt.font.FontRenderContext
+import java.awt.geom.AffineTransform
 
 class TemplateTransformer(resume: Resume, layout: LayoutTemplate):
 
@@ -211,12 +214,18 @@ class TemplateTransformer(resume: Resume, layout: LayoutTemplate):
 
   private def createContent(section: SectionTemplate, x: Float, y: Float, request: ContentCreate): Content =
 
-    // get the section template's content
-    val contentItem = sectionContent(section)
-
     // calculate the content element's width and height
     val width = sectionWidth(section, request.parentWidth)
+      - section.margin.left
+      - section.border.width
+      - section.padding.left
+      - section.padding.right
+      - section.border.width
+      - section.margin.right
     val height = section.height()
+
+    // get the section template's content
+    val contentItem = sectionContent(section, width)
 
     Content(
       position = Position(x, y),
@@ -229,7 +238,7 @@ class TemplateTransformer(resume: Resume, layout: LayoutTemplate):
       item = contentItem
     )
 
-  private def sectionContent(section: SectionTemplate): Option[ContentItem] =
+  private def sectionContent(section: SectionTemplate, width: Float): Option[ContentItem] =
     val resumeContent = (resumeDataType: ResumeDataType) =>
       resumeDataType match
         case ResumeDataType.Name => resume.personalDetails.name
@@ -241,7 +250,27 @@ class TemplateTransformer(resume: Resume, layout: LayoutTemplate):
         val text = content.resumeDataType
          .map(resumeContent(_))
          .getOrElse("")
-        Some(ContentItem(text, content.size, content.color, content.family, content.weight))
+
+        val font = content.weight match
+          case Some(weight) =>
+            weight match
+              case ResumeFontWeight.Normal => Font.createFont(Font.TRUETYPE_FONT, getClass().getResourceAsStream("/font/Roboto-Regular.ttf"))
+              case ResumeFontWeight.Bold => Font.createFont(Font.TRUETYPE_FONT, getClass().getResourceAsStream("/font/Roboto-Bold.ttf"))
+              case ResumeFontWeight.Medium => Font.createFont(Font.TRUETYPE_FONT, getClass().getResourceAsStream("/font/Roboto-Medium.ttf"))
+          case None => new Font("Arial", Font.PLAIN, content.size.toInt)
+        val sizedFont= font.deriveFont(content.size)
+        val fontRC = new FontRenderContext(new AffineTransform(), true, true)
+        var calcWidth = 0D
+        val characters = text.takeWhile(c =>
+          logger.info("processing text character: {}", c)
+          val stringBounds = sizedFont.getStringBounds(c.toString(), fontRC)
+          calcWidth += stringBounds.getWidth()
+          calcWidth < width
+        )
+
+        logger.info("Width of text '{}': {}", characters, sizedFont.getStringBounds(characters, fontRC).getWidth())
+
+        Some(ContentItem(characters, content.size, content.color, content.family, content.weight))
       )
       .getOrElse(None)
 
