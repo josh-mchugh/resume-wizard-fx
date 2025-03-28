@@ -207,7 +207,20 @@ class TemplateTransformer(resume: Resume, layout: LayoutTemplate):
     section.width.getOrElse(parentWidth)
 
   private def sectionHeight(section: SectionTemplate): Float =
-    section.height()
+    sectionHeight(section, section.contentTemplate.map(_.size).getOrElse(0F))
+
+  private def sectionHeight(section: SectionTemplate, contentHeight: Float): Float =
+    val calculated = section.margin.top
+      + section.border.width
+      + section.padding.top
+      + contentHeight
+      + section.padding.bottom
+      + section.border.width
+      + section.margin.bottom
+
+    section.minHeight
+      .map(height => if calculated < height then height else calculated)
+      .getOrElse(calculated)
 
   private def sectionLookAhead(cursor: Cursor[Content]): Boolean =
     CursorState.Complete != cursor.state && cursor.y + cursor.next.map(_.height).getOrElse(0F) < maxY
@@ -222,10 +235,11 @@ class TemplateTransformer(resume: Resume, layout: LayoutTemplate):
       - section.padding.right
       - section.border.width
       - section.margin.right
-    val height = section.height()
 
     // get the section template's content
     val contentItem = sectionContent(section, width)
+
+    val height = sectionHeight(section, contentItem.map(content => content.text.length * content.size).getOrElse(0F))
 
     Content(
       position = Position(x, y),
@@ -261,16 +275,29 @@ class TemplateTransformer(resume: Resume, layout: LayoutTemplate):
         val sizedFont= font.deriveFont(content.size)
         val fontRC = new FontRenderContext(new AffineTransform(), true, true)
         var calcWidth = 0D
-        val characters = text.takeWhile(c =>
-          logger.info("processing text character: {}", c)
-          val stringBounds = sizedFont.getStringBounds(c.toString(), fontRC)
-          calcWidth += stringBounds.getWidth()
-          calcWidth < width
-        )
+        val trimmedText = text.trim()
+        val splitWords = trimmedText.split("((?=\\s+)|(?<=\\s+))")
+        val linesBuffer = ListBuffer[String]()
+        val wordsBuffer = ListBuffer[String]()
+        for word <- splitWords do
+          val bounds = sizedFont.getStringBounds(word.toString(), fontRC)
+          val testWidth = calcWidth + bounds.getWidth()
+          if testWidth < width then
+            wordsBuffer += word
+            calcWidth += bounds.getWidth()
+          else
+            linesBuffer += wordsBuffer.toList.mkString
+            wordsBuffer.clear()
+            wordsBuffer += word
+            calcWidth = bounds.getWidth()
+        linesBuffer += wordsBuffer.toList.mkString
 
-        logger.info("Width of text '{}': {}", characters, sizedFont.getStringBounds(characters, fontRC).getWidth())
+        val lines = linesBuffer.toList
+        val line = lines.head
 
-        Some(ContentItem(characters, content.size, content.color, content.family, content.weight))
+        logger.info("Width of text '{}': {}", line, sizedFont.getStringBounds(line, fontRC).getWidth())
+
+        Some(ContentItem(lines, content.size, content.color, content.family, content.weight))
       )
       .getOrElse(None)
 
